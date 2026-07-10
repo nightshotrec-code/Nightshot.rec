@@ -64,7 +64,7 @@ body{
 
 /* ── NAV ──────────────────────────── */
 
-nav{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;justify-content:space-between;align-items:center;padding:1.6rem 3rem}
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;justify-content:space-between;align-items:center;padding:1.6rem 3rem;background:rgba(6,6,6,.55);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid rgba(255,255,255,.04)}
 .nav-logo{font-family:var(--head);font-size:1.3rem;letter-spacing:.3em;color:#fff;text-decoration:none;opacity:.9}
 .nav-links{display:flex;gap:2.2rem;list-style:none}
 .nav-links a{font-size:.58rem;letter-spacing:.4em;color:rgba(255,255,255,.75);text-decoration:none;text-transform:uppercase;position:relative;transition:color .25s}
@@ -83,12 +83,17 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;justify-conten
 .ham.open span:nth-child(1){transform:rotate(45deg) translate(4px,4px)}
 .ham.open span:nth-child(2){opacity:0}
 .ham.open span:nth-child(3){transform:rotate(-45deg) translate(4px,-4px)}
+/* nav close button */
+.nav-close-wrap{list-style:none}
+.nav-close{display:none;background:none;border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.55);font-size:.8rem;width:2.4rem;height:2.4rem;cursor:pointer;letter-spacing:0;transition:color .2s,border-color .2s;line-height:1}
+.nav-close:hover{color:#fff;border-color:rgba(255,255,255,.55)}
+@media(max-width:760px){.nav-close{display:inline-flex;align-items:center;justify-content:center}}
 
 @media(max-width:760px){
   .ham{display:flex}
-  .nav-links{display:none;position:fixed;inset:0;background:rgba(8,8,8,.97);flex-direction:column;align-items:center;justify-content:center;gap:2.8rem;z-index:1050}
+  .nav-links{display:none;position:fixed;top:0;left:0;width:100%;height:100dvh;background:rgba(4,4,4,.97);backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);flex-direction:column;align-items:center;justify-content:center;gap:2.2rem;z-index:9999;overflow-y:auto}
   .nav-links.open{display:flex}
-  .nav-links a{font-size:1.1rem;letter-spacing:.35em}
+  .nav-links a{font-size:.88rem;letter-spacing:.3em}
   nav{padding:1.4rem 1.5rem}
 }
 
@@ -178,6 +183,32 @@ nav{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;justify-conten
 
 @media(max-width:640px){#hero{padding:0 1.5rem}.hero-bottom{left:1.5rem;right:1.5rem}}
 
+/* ── HERO MOBILE: texto izquierda / video derecha ──────────────────────────── */
+@media(max-width:760px){
+  #hero{padding-left:1.5rem;padding-top:6rem;padding-bottom:4.5rem}
+  .hero-eye{font-size:.42rem;max-width:52vw;margin-bottom:1rem}
+  .hero-titles{max-width:52vw}
+  .h-title,.h-rec{font-size:clamp(2.3rem,9.5vw,3.5rem)}
+  .hero-want-rec{position:relative;z-index:2;margin-top:1.6rem;font-size:.5rem;letter-spacing:.28em;padding:.8rem 1.2rem;white-space:nowrap}
+  /* Video: tira derecha, altura completa, visible */
+  .hero-zone{left:auto!important;right:0!important;top:0!important;bottom:0!important;width:48vw!important;-webkit-mask-image:none!important;mask-image:none!important}
+  .hero-zone video{opacity:.88!important;filter:grayscale(.4) contrast(1.1) brightness(.82)!important}
+  /* Fade del borde izquierdo del video hacia el fondo */
+  .hero-zone::after{content:'';position:absolute;inset:0;background:linear-gradient(to right,rgba(8,8,8,.96) 0%,rgba(8,8,8,.5) 38%,transparent 80%);z-index:1;pointer-events:none}
+  /* Ocultar decoraciones desktop */
+  .hero-snav{display:none!important}
+  .hero-floats{display:none!important}
+  .hero-bottom{display:none!important}
+  #net{display:none!important}
+  .meta-corner{display:none!important}
+}
+
+/* ── HERO DOWN ARROW (solo mobile) ──────────────────────────── */
+.hero-down-arrow{display:none;position:absolute;bottom:1.8rem;left:0;right:0;text-align:center;text-decoration:none;z-index:10}
+.hero-down-arrow svg{width:2.6rem;height:2.6rem;color:rgba(255,255,255,.4);display:inline-block;animation:hero-arrow-bob 2s ease-in-out infinite}
+@keyframes hero-arrow-bob{0%,100%{opacity:.4;transform:translateY(0)}50%{opacity:.76;transform:translateY(7px)}}
+@media(max-width:760px){.hero-down-arrow{display:block}}
+
 /* ── MARQUEE ──────────────────────────── */
 
 .marquee{border-top:1px solid rgba(255,255,255,.06);border-bottom:1px solid rgba(255,255,255,.06);overflow:hidden;padding:1.4rem 0;white-space:nowrap}
@@ -211,10 +242,10 @@ section{padding:8rem 3rem;position:relative}
 .env-photo{position:absolute;overflow:hidden;z-index:3}
 .env-photo img{width:100%;height:100%;object-fit:cover;filter:grayscale(1) contrast(1.1) brightness(.85);display:block}
 .env-photo-a{top:14%;left:7%;width:22%;aspect-ratio:2/3;z-index:1}
-.env-photo-b{top:24%;right:8%;width:19%;aspect-ratio:3/4}
+.env-photo-b{top:8%;right:8%;width:19%;aspect-ratio:3/4}
 .env-photo .cam-lbl{position:absolute;bottom:.5rem;left:.6rem;font-family:var(--mono);font-size:.38rem;letter-spacing:.4em;color:rgba(255,255,255,.5);text-transform:uppercase}
-.env-mid-txt{position:absolute;top:30%;left:34%;max-width:260px;z-index:4}
-.env-mid-txt p{font-family:var(--mono);font-size:.5rem;letter-spacing:.12em;line-height:2.1;color:rgba(228,224,216,.44);text-transform:uppercase;margin-bottom:1.6rem}
+.env-mid-txt{position:absolute;top:17%;left:34%;max-width:340px;z-index:4}
+.env-mid-txt p{font-family:var(--mono);font-size:.72rem;letter-spacing:.1em;line-height:2;color:rgba(228,224,216,.6);text-transform:uppercase;margin-bottom:1.6rem}
 .env-word{position:absolute;bottom:0;left:-0.4%;font-family:var(--head);font-size:15vw;color:#fff;line-height:.88;letter-spacing:-.015em;z-index:2;pointer-events:none;white-space:nowrap;transform:scaleX(1.07) skewX(-.8deg);transform-origin:bottom left;text-transform:uppercase;opacity:.96}
 .inst-cta{display:inline-flex;font-family:var(--mono);font-size:.52rem;letter-spacing:.35em;text-transform:uppercase;text-decoration:none;color:var(--red);border-bottom:1px solid currentColor;padding-bottom:.2rem;transition:opacity .25s}
 .inst-cta:hover{opacity:.65}
@@ -231,8 +262,8 @@ section{padding:8rem 3rem;position:relative}
 .inst-loading-fill{height:100%;background:rgba(200,160,255,.6);width:0%;transition:width .3s}
 .inst-hud{position:absolute;inset:0;pointer-events:none;font-family:var(--mono);text-transform:uppercase;letter-spacing:.3em;z-index:2}
 .inst-hud-tl{position:absolute;top:2.4rem;left:2.4rem;display:flex;flex-direction:column;gap:.4rem}
-.inst-hud-num{font-size:.42rem;letter-spacing:.5em;color:var(--red);opacity:.8}
-.inst-hud-sec{font-size:.44rem;letter-spacing:.45em;color:rgba(255,255,255,.3)}
+.inst-hud-num{font-size:.56rem;letter-spacing:.5em;color:var(--red);opacity:.9}
+.inst-hud-sec{font-size:.54rem;letter-spacing:.45em;color:rgba(255,255,255,.3)}
 .inst-hud-tr{position:absolute;top:2.4rem;right:2.4rem;text-align:right;display:flex;flex-direction:column;gap:.4rem;align-items:flex-end}
 .inst-hud-meta{font-size:.4rem;letter-spacing:.35em;color:rgba(255,255,255,.28)}
 #inst-tc{font-size:.42rem;letter-spacing:.35em;color:rgba(200,160,255,.35)}
@@ -244,15 +275,15 @@ section{padding:8rem 3rem;position:relative}
 .inst-swatch{width:16px;height:16px;border-radius:50%;opacity:.75;border:1px solid rgba(255,255,255,.15)}
 .inst-hud-cta{display:inline-flex;align-items:center;font-size:.4rem;letter-spacing:.4em;color:rgba(255,255,255,.5);text-decoration:none;border:1px solid rgba(255,255,255,.16);padding:.5rem 1.1rem;transition:color .2s,border-color .2s}
 .inst-hud-cta:hover{color:#fff;border-color:rgba(255,255,255,.45)}
-.inst-hud-r{position:absolute;right:2.4rem;top:50%;transform:translateY(-50%);max-width:230px;text-align:right}
-.inst-hud-desc{font-size:.42rem;letter-spacing:.15em;line-height:2.2;color:rgba(255,255,255,.32)}
-.inst-hud-desc strong{color:rgba(255,255,255,.6)}
-.inst-vbtn{font-family:var(--mono);font-size:.4rem;letter-spacing:.4em;text-transform:uppercase;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.5);padding:.5rem 1.1rem;cursor:pointer;transition:background .2s,color .2s,border-color .2s}
+.inst-hud-r{position:absolute;right:2.4rem;top:50%;transform:translateY(-50%);max-width:280px;text-align:right}
+.inst-hud-desc{font-size:.62rem;letter-spacing:.1em;line-height:2;color:rgba(255,255,255,.38)}
+.inst-hud-desc strong{color:rgba(255,255,255,.72)}
+.inst-vbtn{font-family:var(--mono);font-size:.56rem;letter-spacing:.4em;text-transform:uppercase;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.5);padding:.75rem 1.6rem;cursor:pointer;transition:background .2s,color .2s,border-color .2s}
 .inst-vbtn:hover,.inst-vbtn.active{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.35);color:#fff}
-.inst-hud-bottom{position:absolute;bottom:0;left:0;right:0;display:grid;grid-template-columns:auto 1fr;align-items:end;gap:3rem;padding:4rem 2.4rem 2rem;background:linear-gradient(to top,rgba(4,4,4,.92) 0%,rgba(4,4,4,.55) 55%,transparent 100%);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.inst-hud-bottom{position:absolute;bottom:0;left:0;right:0;display:grid;grid-template-columns:auto 1fr;align-items:last baseline;gap:3rem;padding:4rem 2.4rem 2rem;background:linear-gradient(to top,rgba(4,4,4,.92) 0%,rgba(4,4,4,.55) 55%,transparent 100%);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
 .inst-hud-bottom::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(to right,transparent 0%,rgba(200,176,224,.6) 10%,rgba(200,176,224,.6) 90%,transparent 100%);pointer-events:none}
 .inst-bottom-title{font-family:var(--head);font-size:clamp(5rem,11vw,13rem);letter-spacing:.04em;line-height:.88;color:#fff;white-space:nowrap}
-.inst-bottom-desc{font-family:var(--mono);font-size:.52rem;letter-spacing:.15em;line-height:2;color:rgba(255,255,255,.42);text-transform:uppercase;max-width:420px;padding-bottom:.3rem}
+.inst-bottom-desc{font-family:var(--mono);font-size:.74rem;letter-spacing:.1em;line-height:1.8;color:rgba(255,255,255,.52);text-transform:uppercase;max-width:540px;margin:0;padding-bottom:0}
 .inst-hud-br{position:absolute;bottom:2.4rem;right:2.4rem;font-size:.38rem;letter-spacing:.35em;color:rgba(255,255,255,.18)}
 .inst-hint{position:absolute;bottom:5.5rem;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:.38rem;letter-spacing:.4em;color:rgba(255,255,255,.28);text-transform:uppercase;opacity:0;transition:opacity .5s;pointer-events:none;white-space:nowrap}
 @media(max-width:900px){.inst-hud-l,.inst-hud-r{display:none}.inst-hud-br{display:none}.inst-bottom-desc{display:none}}
@@ -282,8 +313,9 @@ section{padding:8rem 3rem;position:relative}
   position:sticky;
   top:0;
   height:100vh;
-  background:#1a38ff;
+  background:var(--bg);
   overflow:hidden;
+  border-right:1px solid rgba(255,255,255,.06);
 }
 .cam-sticky-top{
   position:absolute;top:1.8rem;left:2.4rem;right:2.4rem;
@@ -319,7 +351,7 @@ section{padding:8rem 3rem;position:relative}
   border-bottom:1px solid rgba(255,255,255,.06);
 }
 .cam-desc{
-  font-family:var(--mono);font-size:.62rem;
+  font-family:var(--mono);font-size:.74rem;
   letter-spacing:.12em;line-height:2;
   color:rgba(255,255,255,.65);text-transform:uppercase;
   max-width:380px;
@@ -387,9 +419,9 @@ section{padding:8rem 3rem;position:relative}
 .cam-panel-stack{display:flex;flex-direction:column;gap:2px}
 
 @media(max-width:900px){
-  .cam-split{grid-template-columns:1fr;min-height:auto;}
+  .cam-split{grid-template-columns:1fr;height:auto;overflow:visible;}
   .cam-sticky{position:relative;height:60vw;min-height:320px;}
-  .cam-right{grid-template-columns:1fr;}
+  .cam-right{height:auto;overflow-y:visible;grid-template-columns:1fr;}
   .cam-grid{grid-template-columns:1fr;}
   .cam-panel.wide{grid-column:span 1;aspect-ratio:4/3;}
 }
@@ -472,7 +504,7 @@ section{padding:8rem 3rem;position:relative}
   margin-bottom:2rem;
 }
 .vis-txt p{
-  font-family:var(--mono);font-size:.58rem;
+  font-family:var(--mono);font-size:.66rem;
   letter-spacing:.14em;line-height:2.1;
   color:rgba(228,224,216,.48);text-transform:uppercase;
 }
@@ -516,6 +548,9 @@ section{padding:8rem 3rem;position:relative}
   filter:grayscale(0) contrast(1.15) brightness(1);
   transform:scale(1.03);
 }
+.vi-sm img{
+  object-position:center center;
+}
 .vi-lbl{
   position:absolute;bottom:.65rem;left:.8rem;
   font-family:var(--mono);font-size:.4rem;
@@ -541,8 +576,8 @@ section{padding:8rem 3rem;position:relative}
   flex:0 0 26%;
   aspect-ratio:4/3;
 }
-.vis-end-txt{font-family:var(--mono);font-size:.58rem;letter-spacing:.14em;line-height:2.1;color:rgba(228,224,216,.48);text-transform:uppercase;margin-top:2.5rem;max-width:480px}
-.vis-end-txt strong{color:rgba(255,255,255,.82)}
+.vis-end-txt{font-family:var(--mono);font-size:.72rem;letter-spacing:.12em;line-height:2;color:rgba(228,224,216,.62);text-transform:uppercase;margin-top:2.5rem;max-width:560px}
+.vis-end-txt strong{color:rgba(255,255,255,.92)}
 
 @media(max-width:900px){
   #visuals{grid-template-columns:1fr}
@@ -624,10 +659,9 @@ section{padding:8rem 3rem;position:relative}
 @media(max-width:900px){.art-ol{display:none}.art-rect{display:none}}
 
 /* ── CAMERA REVEAL ──────────────────────────── */
-.cam-line{position:absolute;top:0;bottom:0;width:1px;background:rgba(255,255,255,.45);z-index:10;pointer-events:none;left:38%;opacity:0;transition:opacity .15s}
-.cam-line.visible{opacity:1}
-.cam-ol{position:absolute;inset:0;clip-path:inset(0 0 0 38%);z-index:9;pointer-events:none;display:grid;grid-template-columns:1fr 1fr;opacity:0;transition:opacity .7s}
-#camera.cam-active .cam-ol{opacity:1}
+.cam-line{display:none}
+.cam-ol{display:none}
+#camera.cam-active .cam-ol{display:none}
 @media(max-width:900px){.cam-ol{display:none}.cam-line{display:none}}
 .cam-sticky-ghost{background:var(--bg);border-right:1px solid rgba(255,255,255,.06);position:sticky;top:0;height:100vh;overflow:hidden;display:flex;align-items:center}
 .cam-reveal-hint-wrap{display:none}
@@ -650,11 +684,11 @@ section{padding:8rem 3rem;position:relative}
 .about-links{margin-top:3rem;display:flex;flex-direction:column;gap:1rem}
 .about-link{display:inline-flex;align-items:center;gap:.9rem;font-family:var(--mono);font-size:.52rem;letter-spacing:.38em;text-transform:uppercase;text-decoration:none;color:rgba(255,255,255,.55);transition:color .25s}
 .about-link:hover{color:#fff}
-.about-yt-list{margin-top:2rem;display:flex;flex-direction:column;gap:.7rem}
-.about-yt-item{font-size:.5rem;letter-spacing:.35em;text-transform:uppercase;color:rgba(255,255,255,.35);text-decoration:none;display:flex;align-items:center;gap:.7rem;transition:color .25s}
-.about-yt-item::before{content:'▶';font-size:.45rem;color:var(--red);flex-shrink:0}
+.about-yt-list{margin-top:2rem;display:flex;flex-direction:column;gap:1rem}
+.about-yt-item{font-size:.66rem;letter-spacing:.35em;text-transform:uppercase;color:rgba(255,255,255,.55);text-decoration:none;display:flex;align-items:center;gap:.7rem;transition:color .25s}
+.about-yt-item::before{content:'▶';font-size:.52rem;color:var(--red);flex-shrink:0}
 .about-yt-item:hover{color:rgba(255,255,255,.8)}
-.about-yt-label{font-size:.48rem;letter-spacing:.4em;color:var(--dim);text-transform:uppercase;opacity:.5;margin-bottom:.4rem}
+.about-yt-label{font-size:.58rem;letter-spacing:.4em;color:var(--dim);text-transform:uppercase;opacity:.6;margin-bottom:.4rem}
 
 .about-vis{position:sticky;top:8rem}
 .hud-frame{width:100%;aspect-ratio:4/3;background:linear-gradient(160deg,#101010,#181818);position:relative;overflow:hidden}
@@ -685,20 +719,95 @@ section{padding:8rem 3rem;position:relative}
 #contact .cta-pre{color:rgba(0,0,0,.4)}
 #contact .cta-link{color:rgba(0,0,0,.55);border-color:rgba(0,0,0,.18)}
 #contact .cta-link:hover{background:#0a0a0a;color:#fff;border-color:#0a0a0a}
-#contact .cta-contact-sub{color:rgba(0,0,0,.35)}
-.cta-pre{font-size:.62rem;letter-spacing:.5em;color:var(--dim);text-transform:uppercase;margin-bottom:2rem;display:flex;align-items:center;justify-content:center;gap:.6rem}
+#contact .cta-contact-sub{color:rgba(0,0,0,.72)}
+.cta-pre{font-size:.62rem;letter-spacing:.5em;color:var(--dim);text-transform:uppercase;margin-bottom:2rem;display:flex;align-items:center;justify-content:center;gap:.6rem;font-weight:700}
 .cta-title{font-family:var(--head);font-size:clamp(3.5rem,11vw,11rem);letter-spacing:.04em;line-height:.9;margin-bottom:3.5rem;position:relative;display:inline-block;color:#0a0a0a;text-shadow:0 0 55px rgba(255,255,255,.95),0 0 110px rgba(255,255,255,.65),0 0 220px rgba(255,255,255,.35)}
 .cta-title[data-text]::before,.cta-title[data-text]::after{display:none}
-.cta-link{font-size:.62rem;letter-spacing:.45em;color:var(--dim);text-decoration:none;text-transform:uppercase;display:inline-flex;align-items:center;gap:1rem;padding:1.1rem 2.8rem;border:1px solid rgba(255,255,255,.15);transition:background .3s,color .3s,border-color .3s}
+.cta-link{font-size:.62rem;letter-spacing:.45em;color:var(--dim);text-decoration:none;text-transform:uppercase;display:inline-flex;align-items:center;gap:1rem;padding:1.1rem 2.8rem;border:1px solid rgba(255,255,255,.15);transition:background .3s,color .3s,border-color .3s;font-weight:700}
 .cta-link:hover{background:#fff;color:#000;border-color:#fff}
-.cta-contact-sub{font-size:.52rem;letter-spacing:.3em;color:var(--dim);text-transform:uppercase;margin-top:2rem;opacity:.5}
+.cta-contact-sub{font-size:.76rem;letter-spacing:.3em;font-weight:700;color:var(--dim);text-transform:uppercase;margin-top:2rem;opacity:1}
 
 /* ── FOOTER ──────────────────────────── */
 
 footer{border-top:1px solid rgba(255,255,255,.06);padding:2rem 3rem;display:flex;justify-content:space-between;align-items:center}
-.ft-logo{font-family:var(--head);font-size:.95rem;letter-spacing:.3em;color:var(--dim);opacity:.35}
-.ft-copy{font-size:.52rem;letter-spacing:.3em;color:var(--dim);opacity:.25}
+.ft-logo{font-family:var(--head);font-size:.95rem;letter-spacing:.3em;color:#fff;opacity:.82}
+.ft-copy{font-size:.52rem;letter-spacing:.3em;color:rgba(255,255,255,.6);opacity:1}
 @media(max-width:640px){footer{flex-direction:column;gap:1rem;text-align:center}}
+
+/* ── MOBILE RESPONSIVE ──────────────────────────── */
+@media(max-width:640px){
+  /* Loader text */
+  .ldr-logo{font-size:clamp(1.4rem,6vw,2.4rem)}
+  .ldr-meta{font-size:.65rem;letter-spacing:.3em}
+  .ldr-pct{font-size:.6rem}
+  /* Section text */
+  .sec-intro{font-size:.76rem}
+  .sec-sub{font-size:.72rem}
+
+  /* ── Hero — centered, bigger, snav horizontal carousel at bottom ── */
+  #hero{height:100dvh;min-height:unset;align-items:center;text-align:center;padding:5.5rem 2rem 2rem}
+  .hero-eye{max-width:100%;text-align:center;justify-content:center;font-size:.57rem;margin-bottom:2rem}
+  .hero-titles{max-width:100%;text-align:center}
+  .h-title,.h-rec{font-size:clamp(4.55rem,16.9vw,6.5rem)}
+  .hero-want-rec{font-size:.72rem;padding:.9rem 1.8rem;letter-spacing:.3em;align-self:center;margin-top:2rem}
+  /* Video full-width behind centered text */
+  .hero-zone{width:100%!important;left:0!important;right:0!important}
+  .hero-zone::after{background:rgba(8,8,8,.52)!important}
+  /* Shortcut cards — horizontal swipe carousel, 2 visible at a time */
+  .hero-snav{position:absolute!important;bottom:5rem!important;left:0!important;right:0!important;display:flex!important;flex-direction:row!important;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;gap:.5rem;padding:0 1rem;box-sizing:border-box;scrollbar-width:none}
+  .hero-snav::-webkit-scrollbar{display:none}
+  .hero-snav-item{flex:0 0 calc(50% - .5rem)!important;scroll-snap-align:start;min-width:0}
+
+  /* ── Environments — flow layout on mobile ── */
+  #environments{min-height:auto;overflow:visible}
+  .env-layout{min-height:auto;display:flex;flex-direction:column;padding:5rem 1.6rem 2.5rem;gap:1.5rem}
+  .env-tag{position:relative;top:auto;left:auto;order:1}
+  .env-word{position:relative;bottom:auto;left:auto;order:2;font-size:clamp(3rem,16vw,5rem);line-height:.9;white-space:normal;transform:none;width:100%;margin-bottom:.5rem}
+  .env-photo{position:relative;top:auto;left:auto;right:auto;width:100%}
+  .env-photo-a{order:3;width:100%;aspect-ratio:3/2}
+  .env-photo-b{display:none}
+  .env-mid-txt{position:relative;top:auto;left:auto;max-width:100%;order:4}
+  .env-mid-txt p{font-size:.64rem;margin-bottom:1.4rem}
+  .env-cta{font-size:.54rem;padding:.9rem 2rem;width:100%;justify-content:center}
+
+  /* ── Installations (#visuals) ── */
+  #visuals .vis-title-col{display:none}
+  .vis-txt{display:none}
+  .vis-comp{padding:2rem 1.5rem}
+  .vis-txt p,.vis-txt-b p,.vis-end-txt{font-size:.74rem}
+  .vi-lbl{font-size:.58rem}
+  .vis-main-row{flex-direction:column;gap:1.5rem}
+  .vis-main-row .vi-main{width:100%;flex:none}
+  .vis-txt-b{width:100%;flex:none}
+  .vi-sm{flex:0 0 calc(50% - .5rem)}
+
+  /* ── Camera section ── */
+  .cam-split{height:auto;overflow:visible}
+  .cam-sticky{position:relative;height:52vw;min-height:180px}
+  .cam-right{height:auto;overflow-y:visible}
+  .cam-info-block{min-height:unset;justify-content:flex-start;padding:2rem 1.5rem}
+  .cam-desc{font-size:.76rem}
+  .cam-scroll-hint{display:none}
+
+  /* ── Artworks / Técnica ── */
+  .tec-desc{font-size:.76rem}
+  .tec-card-name{font-size:clamp(1.4rem,5.5vw,2rem)}
+  .tec-card-num{font-size:.46rem}
+  .art-text p{font-size:.76rem}
+
+  /* About */
+  #about{gap:3rem}
+}
+/* ── ENV → INST BRIDGE ARROW ────────────────────── */
+.env-bridge{display:flex;justify-content:center;align-items:center;padding:1.6rem 0;background:var(--bg)}
+.env-bridge-arrow{font-family:var(--head);font-size:2.2rem;color:rgba(255,255,255,.22);text-decoration:none;display:block;transform:rotate(90deg);line-height:1;transition:color .3s,transform .3s}
+.env-bridge-arrow:hover{color:rgba(255,255,255,.55);transform:rotate(90deg) translateY(4px)}
+
+/* ── ABOUT CAROUSEL ─────────────────────────────── */
+.about-carousel{position:absolute;inset:0;z-index:0}
+.about-carousel-slide{position:absolute;inset:0;opacity:0;transition:opacity 1.4s ease}
+.about-carousel-slide.active{opacity:1}
+.about-carousel-slide img{width:100%;height:100%;object-fit:cover;filter:grayscale(.2) brightness(.55) contrast(1.1)}
 </style>
 <script type="importmap">
 {"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.158.0/examples/jsm/"}}
@@ -729,9 +838,9 @@ footer{border-top:1px solid rgba(255,255,255,.06);padding:2rem 3rem;display:flex
 <nav>
   <a href="#hero" class="nav-logo"><span class="rec-dot"></span>NIGHTSHOT.REC</a>
   <ul class="nav-links" id="navLinks">
+    <li class="nav-close-wrap"><button class="nav-close" id="navClose" aria-label="Cerrar menú">✕</button></li>
     <li><a href="#environments" data-es="ENTORNOS" data-en="ENVIRONMENTS">ENTORNOS</a></li>
-    <li><a href="#installations" data-es="INST." data-en="INSTALLATIONS">INST.</a></li>
-    <li><a href="#visuals" data-es="VISUALES" data-en="VISUALS">VISUALES</a></li>
+    <li><a href="#installations" data-es="INSTALACIONES" data-en="INSTALLATIONS">INSTALACIONES</a></li>
     <li><a href="#artworks" data-es="ARTWORKS" data-en="ARTWORKS">ARTWORKS</a></li>
     <li><a href="#camera" data-es="CÁMARA" data-en="CAMERA">CÁMARA</a></li>
     <li><a href="#about" data-es="SOBRE MÍ" data-en="ABOUT">SOBRE MÍ</a></li>
@@ -781,7 +890,7 @@ footer{border-top:1px solid rgba(255,255,255,.06);padding:2rem 3rem;display:flex
   <div class="meta-corner meta-tr" aria-hidden="true"><span class="rec-dot"></span>REC<br><span id="coords">34°36'S</span></div>
 
   <p class="hero-eye">
-    <span data-es="Ecosistemas visuales para espacios y momentos específicos" data-en="Visual ecosystems for specific spaces and moments">Ecosistemas visuales para espacios y momentos específicos</span>
+    <span data-es="Ecosistemas visuales para espacios<br>y momentos específicos" data-en="Visual ecosystems for specific spaces<br>and moments">Ecosistemas visuales para espacios<br>y momentos específicos</span>
   </p>
   <div class="hero-titles">
     <span class="h-title">NIGHTSHOT</span><br>
@@ -806,7 +915,7 @@ footer{border-top:1px solid rgba(255,255,255,.06);padding:2rem 3rem;display:flex
       </svg>
       <span data-es="ENTORNOS" data-en="ENVIRONMENTS">ENTORNOS</span>
     </a>
-    <a href="#installations" class="hero-snav-item" data-es="INST." data-en="INSTALLATIONS">
+    <a href="#installations" class="hero-snav-item" data-es="INSTALACIONES" data-en="INSTALLATIONS">
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <path d="M6.5 9.5 Q5 12 6.5 14.5"/>
         <path d="M4.5 7 Q1.5 12 4.5 17"/>
@@ -814,7 +923,7 @@ footer{border-top:1px solid rgba(255,255,255,.06);padding:2rem 3rem;display:flex
         <polyline points="18,9 22,12 18,15 18,9"/>
         <circle cx="22.5" cy="12" r="1"/>
       </svg>
-      <span data-es="INST." data-en="INSTALLATIONS">INST.</span>
+      <span data-es="INSTALACIONES" data-en="INSTALLATIONS">INSTALACIONES</span>
     </a>
     <a href="#visuals" class="hero-snav-item" data-es="VISUALES" data-en="VISUALS">
       <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -839,6 +948,10 @@ footer{border-top:1px solid rgba(255,255,255,.06);padding:2rem 3rem;display:flex
       <span data-es="CÁMARA" data-en="CAMERA">CÁMARA</span>
     </a>
   </div>
+
+  <a href="#environments" class="hero-down-arrow" aria-label="Ir a Entornos">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 8 12 16 20 8"/></svg>
+  </a>
 
   <span id="camtc" style="display:none">00:00:00:00</span>
 </section>
@@ -866,9 +979,10 @@ footer{border-top:1px solid rgba(255,255,255,.06);padding:2rem 3rem;display:flex
     </div>
 
     <div class="env-mid-txt reveal">
-      <p data-es="La transformación de un espacio en una identidad visual temporal. Arquitectura, luz, color e imagen en movimiento como un único sistema."
-         data-en="The transformation of a space into a temporary visual identity. Architecture, light, color and moving image as a single system.">
-        La transformación de un espacio en una identidad visual temporal. Arquitectura, luz, color e imagen en movimiento como un único sistema.
+      <p data-es="Identidades visuales temporales para espacios, eventos y entornos.<br><br>NIGHTSHOT diseña entornos visuales a través de la luz, la imagen en movimiento, el color y la composición espacial, creando atmósferas propias de cada lugar y cada momento."
+         data-en="Temporary visual identities for spaces, events and installations.<br><br>NIGHTSHOT designs visual environments through light, moving image, color and spatial composition, creating atmospheres that belong specifically to each place and moment.">
+        Identidades visuales temporales para espacios, eventos y entornos.<br><br>
+        NIGHTSHOT diseña entornos visuales a través de la luz, la imagen en movimiento, el color y la composición espacial, creando atmósferas propias de cada lugar y cada momento.
       </p>
       <a href="#about" class="env-cta" data-es="INICIAR PROYECTO →" data-en="START A PROJECT →">INICIAR PROYECTO →</a>
     </div>
@@ -876,6 +990,11 @@ footer{border-top:1px solid rgba(255,255,255,.06);padding:2rem 3rem;display:flex
     <div class="env-word" data-es="ENTORNOS" data-en="ENVIRONMENTS">ENVIRONMENTS</div>
   </div>
 </section>
+
+<!-- ENV → INST bridge arrow -->
+<div class="env-bridge">
+  <a href="#installations" class="env-bridge-arrow" aria-label="Ver instalaciones">›</a>
+</div>
 
 <!-- 02 — INSTALLATIONS -->
 <section id="installations">
@@ -886,7 +1005,7 @@ footer{border-top:1px solid rgba(255,255,255,.06);padding:2rem 3rem;display:flex
   </div>
   <div class="inst-hud">
     <div class="inst-hud-tl">
-      <div class="inst-hud-num">02 — INSTALLATIONS</div>
+      <div class="inst-hud-num">01 — ENVIRONMENTS</div>
       <div class="inst-hud-sec" data-es="Arquitectura Audiovisual" data-en="Audiovisual Architecture">Arquitectura Audiovisual</div>
     </div>
     <div class="inst-hud-tr">
@@ -911,20 +1030,20 @@ footer{border-top:1px solid rgba(255,255,255,.06);padding:2rem 3rem;display:flex
     </div>
     <div class="inst-hud-r">
       <p class="inst-hud-desc"
-         data-es="<strong>Menos color.</strong><br>Más atmósfera.<br><br>La luz deja de decorar<br>el espacio para<br>convertirse en él."
-         data-en="<strong>Less color.</strong><br>More atmosphere.<br><br>Light stops decorating<br>the space and<br>becomes it.">
-        <strong>Menos color.</strong><br>
-        Más atmósfera.<br><br>
-        La luz deja de decorar<br>
-        el espacio para<br>
-        convertirse en él.
+         data-es="Obras audiovisuales<br><strong>específicas para cada lugar</strong>,<br>creadas para espacios<br>culturales, eventos y<br>entornos inmersivos."
+         data-en="Site-specific<br><strong>audiovisual works</strong><br>developed for cultural<br>spaces, events and<br>immersive contexts.">
+        Obras audiovisuales<br>
+        <strong>específicas para cada lugar</strong>,<br>
+        creadas para espacios<br>
+        culturales, eventos y<br>
+        entornos inmersivos.
       </p>
     </div>
     <div class="inst-hud-bottom">
       <div class="inst-bottom-title">INSTALLATIONS</div>
       <p class="inst-bottom-desc"
-         data-es="Proyectos audiovisuales desarrollados para contextos específicos. La tecnología como material escultórico: pantallas que dejan de ser pantallas, luz que deja de ser decoración, arquitectura que comienza a comportarse como imagen en movimiento."
-         data-en="Audiovisual projects developed for specific contexts. Technology as sculptural material: screens that stop being screens, light that stops being decoration, architecture that starts behaving like moving image.">Proyectos audiovisuales desarrollados para contextos específicos. La tecnología como material escultórico: pantallas que dejan de ser pantallas, luz que deja de ser decoración, arquitectura que comienza a comportarse como imagen en movimiento.</p>
+         data-es="NIGHTSHOT crea instalaciones en las que la imagen en movimiento, la luz, los sistemas analógicos y la composición espacial se funden en una única experiencia audiovisual."
+         data-en="NIGHTSHOT creates installations where moving image, light, analog systems and spatial composition become part of a single audiovisual experience.">NIGHTSHOT crea instalaciones en las que la imagen en movimiento, la luz, los sistemas analógicos y la composición espacial se funden en una única experiencia audiovisual.</p>
     </div>
     <div class="inst-hud-br" data-es="DRAG · SCROLL · ROTAR" data-en="DRAG · SCROLL · ROTATE">DRAG · SCROLL · ROTAR</div>
   </div>
@@ -936,8 +1055,8 @@ footer{border-top:1px solid rgba(255,255,255,.06);padding:2rem 3rem;display:flex
 
   <!-- LEFT: wide title column — huge wrapping text -->
   <div class="vis-title-col">
-    <span class="vis-num-sm" data-es="03 — VISUALES" data-en="03 — VISUALS">03 — VISUALES</span>
-    <h2 class="sec-title" data-es="VISUALES EN VIVO" data-en="LIVE VISUALS">LIVE VISUALS</h2>
+    <span class="vis-num-sm" data-es="03 — INSTALACIONES" data-en="03 — INSTALLATIONS">03 — INSTALACIONES</span>
+    <h2 class="sec-title" data-es="INSTALACIONES" data-en="INSTALLATIONS">INSTALACIONES</h2>
   </div>
 
   <!-- RIGHT: stacked content -->
@@ -945,9 +1064,9 @@ footer{border-top:1px solid rgba(255,255,255,.06);padding:2rem 3rem;display:flex
 
     <!-- Text block top-right -->
     <div class="vis-txt">
-      <p data-es="La imagen en movimiento como parte del evento, no como fondo.<br><br>Cada sesión es única — el visual <strong>no es un loop pregrabado</strong>: responde al espacio, al sonido, al momento. Existe una vez." data-en="Moving image as part of the event, not as background.<br><br>Every session is unique — the visual is <strong>not a pre-recorded loop</strong>: it responds to the space, the sound, the moment. It exists once.">
-        La imagen en movimiento como parte del evento, no como fondo.<br><br>
-        Cada sesión es única — el visual <strong>no es un loop pregrabado</strong>: responde al espacio, al sonido, al momento. Existe una vez.
+      <p data-es="Visuales funcionando en entornos reales.<br><br>Clips en discotecas, festivales, conciertos y actuaciones en directo, donde el sonido, la arquitectura y el público forman parte de <strong>una misma experiencia</strong>." data-en="Visuals working in real environments.<br><br>Clips in clubs, festivals, concerts and live performances, where sound, architecture and the audience are part of <strong>the same experience</strong>.">
+        Visuales funcionando en entornos reales.<br><br>
+        Clips en discotecas, festivales, conciertos y actuaciones en directo, donde el sonido, la arquitectura y el público forman parte de <strong>una misma experiencia</strong>.
       </p>
     </div>
 
@@ -958,9 +1077,9 @@ footer{border-top:1px solid rgba(255,255,255,.06);padding:2rem 3rem;display:flex
         <span class="vi-lbl">CRT STACK · LIVE EVENT</span>
       </div>
       <div class="vis-txt-b reveal">
-        <p data-es="El visual no decora el sonido. Lo interpreta.<br><br>Cada set es una conversación en tiempo real entre imagen y espacio — <strong>sin reprise, sin red.</strong>" data-en="The visual doesn't decorate the sound. It interprets it.<br><br>Every set is a real-time conversation between image and space — <strong>no encore, no safety net.</strong>">
-          El visual no decora el sonido. Lo interpreta.<br><br>
-          Cada set es una conversación en tiempo real entre imagen y espacio — <strong>sin reprise, sin red.</strong>
+        <p data-es="Las imágenes no existen solamente como contenido digital, sino como parte de <strong>una experiencia colectiva y temporal</strong>.<br><br>Registros de eventos, documentación de directos, festivales y clubes donde el material visual se activa en tiempo real." data-en="Images do not exist only as digital content, but as part of <strong>a collective and temporary experience</strong>.<br><br>Event recordings, live show documentation, festivals and clubs where visual material is activated in real time.">
+          Las imágenes no existen solamente como contenido digital, sino como parte de <strong>una experiencia colectiva y temporal</strong>.<br><br>
+          Registros de eventos, documentación de directos, festivales y clubes donde el material visual se activa en tiempo real.
         </p>
       </div>
     </div>
@@ -968,11 +1087,11 @@ footer{border-top:1px solid rgba(255,255,255,.06);padding:2rem 3rem;display:flex
     <!-- Smaller images row below -->
     <div class="vis-sm-row">
       <div class="vi vi-sm reveal">
-        <img loading="lazy" src="refes%20imagenes%20y%20video/Captura%20de%20pantalla%202026-06-11%20194437.png" alt="DJ set">
-        <span class="vi-lbl">DJ SET · FESTIVAL</span>
+        <img loading="lazy" src="imagenes%20web/1-final.JPEG" alt="Live Visual">
+        <span class="vi-lbl">LIVE · FESTIVAL</span>
       </div>
       <div class="vi vi-sm reveal">
-        <img loading="lazy" src="refes%20imagenes%20y%20video/SaveClip.App_651157168_18319161793264589_3241779776188127705_n.jpg" alt="Session">
+        <img loading="lazy" src="imagenes%20web/2-final.PNG" alt="Live Visual">
         <span class="vi-lbl">SESSION · LIVE</span>
       </div>
     </div>
@@ -1001,9 +1120,7 @@ footer{border-top:1px solid rgba(255,255,255,.06);padding:2rem 3rem;display:flex
     <p class="art-intro">El laboratorio. De aquí nace el lenguaje.</p>
     <div class="art-layout">
       <div class="art-text">
-        <p>No son piezas digitales aisladas. Son los procesos de investigación visual que alimentan cada proyecto.<br><br>
-        ARTWORKS es el laboratorio: donde se prueba cómo reacciona la imagen a <strong>la degradación, el ruido, la temperatura de color, la saturación extrema o la negación del color</strong>.<br><br>
-        Aquí se desarrolla el vocabulario visual que luego aparece en instalaciones, visuales en vivo y dirección estética. El resultado no se guarda en un cajón. <strong>Se convierte en el idioma con el que hablan los proyectos.</strong></p>
+        <p>Esta sección reúne piezas visuales, composiciones digitales, procesos experimentales y trabajos audiovisuales desarrollados como parte de la investigación en mis procesos creativos.</p>
       </div>
       <div class="art-proc-ghost">
         <div class="art-panel-ghost"><span class="art-panel-lbl">_ORIGINAL</span></div>
@@ -1041,10 +1158,8 @@ footer{border-top:1px solid rgba(255,255,255,.06);padding:2rem 3rem;display:flex
 
   <div class="art-layout">
     <div class="art-text reveal">
-      <p data-es="No son piezas digitales aisladas. Son los procesos de investigación visual que alimentan cada proyecto.<br><br>ARTWORKS es el laboratorio: donde se prueba cómo reacciona la imagen a <strong>la degradación, el ruido, la temperatura de color, la saturación extrema o la negación del color</strong>.<br><br>Aquí se desarrolla el vocabulario visual que luego aparece en instalaciones, visuales en vivo y dirección estética. El resultado no se guarda en un cajón. <strong>Se convierte en el idioma con el que hablan los proyectos.</strong>" data-en="Not isolated digital pieces. They are the visual research processes that feed every project.<br><br>ARTWORKS is the laboratory: where you test how image reacts to <strong>degradation, noise, color temperature, extreme saturation or color negation</strong>.<br><br>This is where the visual vocabulary is developed that then appears in installations, live visuals and aesthetic direction. The result doesn't get filed away. <strong>It becomes the language that projects speak.</strong>">
-        No son piezas digitales aisladas. Son los procesos de investigación visual que alimentan cada proyecto.<br><br>
-        ARTWORKS es el laboratorio: donde se prueba cómo reacciona la imagen a <strong>la degradación, el ruido, la temperatura de color, la saturación extrema o la negación del color</strong>.<br><br>
-        Aquí se desarrolla el vocabulario visual que luego aparece en instalaciones, visuales en vivo y dirección estética. El resultado no se guarda en un cajón. <strong>Se convierte en el idioma con el que hablan los proyectos.</strong>
+      <p data-es="Esta sección reúne piezas visuales, composiciones digitales, procesos experimentales y trabajos audiovisuales desarrollados como parte de la investigación en mis procesos creativos." data-en="This section brings together visual pieces, digital compositions, experimental processes and audiovisual works developed as part of the research in my creative processes.">
+        Esta sección reúne piezas visuales, composiciones digitales, procesos experimentales y trabajos audiovisuales desarrollados como parte de la investigación en mis procesos creativos.
       </p>
       <div class="tec-cards">
         <div class="tec-card"><span class="tec-card-num">01</span><span class="tec-card-name">RESCAN VHS</span></div>
@@ -1099,13 +1214,13 @@ footer{border-top:1px solid rgba(255,255,255,.06);padding:2rem 3rem;display:flex
       <img loading="lazy" src="refes%20imagenes%20y%20video/Captura%20de%20pantalla%202026-06-11%20194401.png" alt="Visual">
       <div class="ag-overlay"><span class="ag-lbl">_BLOOM</span></div>
     </div>
-    <div class="ag reveal">
-      <img loading="lazy" src="refes%20imagenes%20y%20video/Captura%20de%20pantalla%202026-06-11%20201117.png" alt="Visual">
-      <div class="ag-overlay"><span class="ag-lbl">_FILM LOOK</span></div>
-    </div>
     <div class="ag span2 reveal">
-      <img loading="lazy" src="refes%20imagenes%20y%20video/EJEMPLOS%20FILM%20LOOK%20COLOR%20GRANDING.png" alt="Film look">
-      <div class="ag-overlay"><span class="ag-lbl">_COLOR GRADIENT</span></div>
+      <img loading="lazy" src="imagenes%20web/galeria/1.JPEG" alt="Visual">
+      <div class="ag-overlay"><span class="ag-lbl">_VISUAL 05</span></div>
+    </div>
+    <div class="ag reveal">
+      <img loading="lazy" src="imagenes%20web/galeria/installatiosn.JPEG" alt="Instalación">
+      <div class="ag-overlay"><span class="ag-lbl">_INSTALACIÓN</span></div>
     </div>
   </div>
 </section>
@@ -1128,8 +1243,14 @@ footer{border-top:1px solid rgba(255,255,255,.06);padding:2rem 3rem;display:flex
       </div>
     </div>
 
-    <!-- LEFT: sticky blue panel -->
+    <!-- LEFT: sticky panel -->
     <div class="cam-sticky">
+      <div class="hud-grid"></div>
+      <div class="hud-scan"></div>
+      <div class="hud-corner tl"></div>
+      <div class="hud-corner tr"></div>
+      <div class="hud-corner bl"></div>
+      <div class="hud-corner br"></div>
       <div class="cam-sticky-top">
         <span class="cam-eyebrow">05 — Camera Works</span>
         <span class="cam-date">2022 — 2025</span>
@@ -1142,8 +1263,8 @@ footer{border-top:1px solid rgba(255,255,255,.06);padding:2rem 3rem;display:flex
     <div class="cam-right">
       <div class="cam-info-block">
         <p class="cam-desc"
-           data-es="La cámara no es un apéndice del proceso.<br>Es otra herramienta dentro del mismo lenguaje.<br><br>Digital y analógico como extensiones complementarias."
-           data-en="The camera is not an appendage of the process.<br>It's another tool within the same language.<br><br>Digital and analog as complementary extensions.">La cámara no es un apéndice del proceso.<br>Es otra herramienta dentro del mismo lenguaje.<br><br>Digital y analógico como extensiones complementarias.</p>
+           data-es="No se trata únicamente de registrar un evento o capturar una escena, sino de <strong>construir una mirada</strong>.<br><br>Switch · Streaming · Drone"
+           data-en="It's not only about recording an event or capturing a scene, but about <strong>building a gaze</strong>.<br><br>Switch · Streaming · Drone">No se trata únicamente de registrar un evento o capturar una escena, sino de <strong>construir una mirada</strong>.<br><br>Switch · Streaming · Drone</p>
         <a href="#" target="_blank" class="yt-btn">▶ YOUTUBE</a>
       </div>
       <div class="cam-panel-stack">
@@ -1197,15 +1318,11 @@ footer{border-top:1px solid rgba(255,255,255,.06);padding:2rem 3rem;display:flex
     <div class="sec-label"><span>06</span><span data-es="About Nightshot" data-en="About Nightshot">About Nightshot</span></div>
     <h2 class="about-title reveal" data-es="NIGHT<br>SHOT" data-en="NIGHT<br>SHOT">NIGHT<br>SHOT</h2>
     <div class="about-text reveal">
-      <p data-es="<strong>NIGHTSHOT</strong> es el nombre que nuclea el trabajo de un artista visual, técnico y camarógrafo. Nació de la fascinación por la imagen que existe entre la luz y la oscuridad." data-en="<strong>NIGHTSHOT</strong> is the name that brings together the work of a visual artist, technician and camera operator. Born from a fascination with the image that exists between light and darkness.">
-        <strong>NIGHTSHOT</strong> es el nombre que nuclea el trabajo de un artista visual, técnico y camarógrafo. Nació de la fascinación por la imagen que existe entre la luz y la oscuridad.
+      <p data-es="<strong>NIGHTSHOT.REC</strong> es un proyecto visual de Isidro Knudsen, diseñador multimedia argentino. Enfocado en proyectos temporales, visuales y atmósferas espaciales." data-en="<strong>NIGHTSHOT.REC</strong> is a visual project by Isidro Knudsen, Argentine multimedia designer. Focused on temporary projects, visuals and spatial atmospheres.">
+        <strong>NIGHTSHOT.REC</strong> es un proyecto visual de Isidro Knudsen, diseñador multimedia argentino. Enfocado en proyectos temporales, visuales y atmósferas espaciales.
       </p>
-      <p data-es="Con formación en producción audiovisual y años de trabajo en eventos, instalaciones y producciones, desarrollo un lenguaje visual que <strong>fusiona lo digital con lo analógico</strong>: procesos físicos captados por cámara, intervenidos digitalmente, devueltos al espacio." data-en="With a background in audiovisual production and years of work in events, installations and productions, I develop a visual language that <strong>fuses the digital with the analog</strong>: physical processes captured by camera, digitally intervened, returned to space.">
-        Con formación en producción audiovisual y años de trabajo en eventos, instalaciones y producciones, desarrollo un lenguaje visual que <strong>fusiona lo digital con lo analógico</strong>: procesos físicos captados por cámara, intervenidos digitalmente, devueltos al espacio.
-      </p>
-      <p data-es="Mi proceso parte siempre del material bruto. De la <strong>imperfección como estética</strong>, del ruido como textura. Cada proyecto es una traducción: de una idea a un espacio, de un espacio a una experiencia.<br><br>Los proyectos cambian. El lenguaje permanece." data-en="My process always starts from raw material. From <strong>imperfection as aesthetic</strong>, from noise as texture. Each project is a translation: from an idea to a space, from a space to an experience.<br><br>Projects change. The language remains.">
-        Mi proceso parte siempre del material bruto. De la <strong>imperfección como estética</strong>, del ruido como textura. Cada proyecto es una traducción: de una idea a un espacio, de un espacio a una experiencia.<br><br>
-        Los proyectos cambian. El lenguaje permanece.
+      <p data-es="Trabajando entre sistemas digitales y procesos analógicos, NIGHTSHOT desarrolla entornos visuales, instalaciones y obras audiovisuales donde <strong>la luz, la señal, la textura y el espacio</strong> forman parte de un mismo lenguaje." data-en="Working between digital systems and analog processes, NIGHTSHOT develops visual environments, installations and audiovisual works where <strong>light, signal, texture and space</strong> are part of the same language.">
+        Trabajando entre sistemas digitales y procesos analógicos, NIGHTSHOT desarrolla entornos visuales, instalaciones y obras audiovisuales donde <strong>la luz, la señal, la textura y el espacio</strong> forman parte de un mismo lenguaje.
       </p>
     </div>
 
@@ -1228,9 +1345,14 @@ footer{border-top:1px solid rgba(255,255,255,.06);padding:2rem 3rem;display:flex
 
   <div class="about-vis reveal">
     <div class="hud-frame">
-      <video class="hud-video" autoplay muted loop playsinline>
-        <source src="Contenido/4%20File%20In%20Flash%20%20.mp4" type="video/mp4">
-      </video>
+      <div class="about-carousel">
+        <div class="about-carousel-slide active">
+          <img src="imagenes%20web/About%20me/aboutme.JPEG" alt="Nightshot">
+        </div>
+        <div class="about-carousel-slide">
+          <img src="imagenes%20web/About%20me/aboutme2.JPEG" alt="Nightshot">
+        </div>
+      </div>
       <div class="hud-grid"></div>
       <div class="hud-scan"></div>
       <div class="hud-corner tl"></div>
@@ -1306,6 +1428,8 @@ ham.addEventListener('click',()=>{ham.classList.toggle('open');navLinks.classLis
 navLinks.querySelectorAll('a').forEach(a=>{
   a.addEventListener('click',()=>{ham.classList.remove('open');navLinks.classList.remove('open')});
 });
+const navClose=document.getElementById('navClose');
+if(navClose) navClose.addEventListener('click',()=>{ham.classList.remove('open');navLinks.classList.remove('open')});
 
 // ── LANGUAGE TOGGLE ───────────────────────────
 let lang='es';
@@ -1317,13 +1441,13 @@ function applyLang(l){
   langBtn.textContent=l==='es'?'EN':'ES';
   document.querySelectorAll('[data-es]').forEach(el=>{
     if(el===langBtn) return;
-    if(el.classList.contains('inst-title')||el.classList.contains('sec-title')||el.classList.contains('cam-big')) return;
+    if(el.classList.contains('inst-title')||el.classList.contains('sec-title')||el.classList.contains('cam-big')||el.classList.contains('env-word')) return;
     const val=el.dataset[l];
     if(!val) return;
     el.innerHTML=val;
   });
   // cipher decode on section titles
-  document.querySelectorAll('.inst-title[data-es],.sec-title[data-es],.cam-big[data-es]').forEach(el=>{
+  document.querySelectorAll('.inst-title[data-es],.sec-title[data-es],.cam-big[data-es],.env-word[data-es]').forEach(el=>{
     const val=el.dataset[l];
     if(val) cipherDecode(el,val);
   });
@@ -1353,6 +1477,18 @@ const obs=new IntersectionObserver(entries=>{
   entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('in')});
 },{threshold:.1});
 document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+
+// ── ABOUT CAROUSEL ────────────────────────────
+(function(){
+  const slides=document.querySelectorAll('.about-carousel-slide');
+  if(!slides.length) return;
+  let cur=0;
+  setInterval(function(){
+    slides[cur].classList.remove('active');
+    cur=(cur+1)%slides.length;
+    slides[cur].classList.add('active');
+  },8000);
+})();
 
 // ── VISUALS PARALLAX TITLE ─────────────────────
 (function(){
@@ -1740,6 +1876,30 @@ glitchTear();
   },{threshold:0.05}).observe(sec);
 })();
 
+// ── VISUALS TITLE SCROLL PARALLAX ─────────────────────────────
+(function(){
+  const sec = document.getElementById('visuals');
+  const titleEl = sec && sec.querySelector('#visuals .sec-title');
+  if(!sec || !titleEl) return;
+  function update(){
+    if(window.innerWidth <= 900){ titleEl.style.transform=''; return; }
+    const rect = sec.getBoundingClientRect();
+    const secH = sec.offsetHeight;
+    const vH = window.innerHeight;
+    const scrollRange = secH - vH;
+    if(scrollRange <= 0) return;
+    const scrolled = Math.max(0, -rect.top);
+    const progress = Math.min(1, scrolled / scrollRange);
+    const titleH = titleEl.offsetHeight;
+    const excess = Math.max(0, titleH - vH);
+    const offset = (progress * excess).toFixed(1);
+    titleEl.style.transform = 'translateX(-50%) translateY(-'+offset+'px)';
+  }
+  window.addEventListener('scroll', update, {passive:true});
+  window.addEventListener('resize', update);
+  update();
+})();
+
 // ── PAGE LOADER ──────────────────────────────────────────────
 (function(){
   const ldr  = document.getElementById('page-loader');
@@ -1759,7 +1919,7 @@ glitchTear();
       if(!lgActive) return;
       const sw=lgw>>1, sh=lgh>>1;
       const img=lgx.createImageData(sw,sh), d=img.data;
-      for(let i=0;i<d.length;i+=4){const v=Math.random()*255|0;d[i]=d[i+1]=d[i+2]=v;d[i+3]=42}
+      for(let i=0;i<d.length;i+=4){const v=Math.random()*255|0;d[i]=d[i+1]=d[i+2]=v;d[i+3]=28}
       const tmp=document.createElement('canvas');tmp.width=sw;tmp.height=sh;
       tmp.getContext('2d').putImageData(img,0,0);
       lgx.clearRect(0,0,lgw,lgh);lgx.imageSmoothingEnabled=false;lgx.drawImage(tmp,0,0,lgw,lgh);
@@ -1775,7 +1935,7 @@ glitchTear();
     p = Math.min(100, v);
     fill.style.width = p.toFixed(1)+'%';
     if(pct) pct.textContent = Math.round(p)+'%';
-    if(lgc) lgc.style.opacity = (p / 100 * 0.82).toFixed(3);
+    if(lgc) lgc.style.opacity = (p / 100 * 0.32).toFixed(3);
   }
 
   // ease to 88% while waiting for real load
@@ -1826,7 +1986,7 @@ const scene = new THREE.Scene();
 scene.fog   = new THREE.FogExp2(0x040404, .008);
 
 const cam = new THREE.PerspectiveCamera(42, 1, .1, 2000);
-cam.position.set(0, 12, 40);
+cam.position.set(0, 18, 40);
 
 const controls = new OrbitControls(cam, canvas);
 controls.enableDamping   = true;
