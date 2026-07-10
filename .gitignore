@@ -1,0 +1,30 @@
+# Raw footage — demasiado grandes para GitHub
+*.mov
+*.obj
+*.zip
+
+# Videos originales sin comprimir (usar versiones webm/comprimidas)
+Contenido/EJEMPLO general con visaules LOOK COLOR GRANDING.mp4
+Contenido/EJEMPLOS con mi contenido FILM LOOK COLOR GRANDING.mp4
+
+# Drive downloads (material fuente, no usado en el sitio)
+Contenido/drive-download-20260612T003119Z-3-001/
+Contenido/drive-download-20260612T003119Z-3-001.zip
+
+# Video comprimido que igual supera 100MB
+Videos comprimidos/EJEMPLO general con visaules LOOK COLOR GRANDING.webm
+
+# Videos de referencia grandes (no usados en el sitio)
+refes imagenes y video/Realtime Audioreactive.mp4
+refes imagenes y video/4 light.mp4
+
+# Carpeta V2 experimental
+V2/
+
+# Claude Code internal
+.claude/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
