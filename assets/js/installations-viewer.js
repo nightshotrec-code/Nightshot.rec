@@ -10,6 +10,7 @@ export function initInstallationsViewer(){
 const section = document.getElementById('installations');
 const canvas  = document.getElementById('inst-canvas');
 const scrollSafePanel = document.querySelector('.inst-hud-bottom');
+const DEBUG_3D = new URLSearchParams(window.location.search).get('debug3d') === '1';
 if(initialized||!section||!canvas) return;
 initialized=true;
 
@@ -28,6 +29,15 @@ const INTERACTION_RENDER_FPS=45;
 let currentPixelRatio=0,interactionRestoreTimer=0,interactionActive=false,interactionRenderActive=false;
 let lastRenderWidth=0,lastRenderHeight=0;
 let lastRenderTime=0,renderRequested=true;
+const diagnostics=DEBUG_3D?{
+  model:null,
+  network:null,
+  renderSnapshots:new Map(),
+  latestSnapshot:null,
+  initialReportPrinted:false,
+  forceFullReport:false,
+  forceRenderReport:false
+}:null;
 
 function updateTC(){
   if(!tc) return;
@@ -58,6 +68,7 @@ function animate(timestamp){
   lastRenderTime=lastRenderTime?timestamp-(elapsed%interval):timestamp;
   renderRequested=false;
   renderer.render(scene,cam);
+  if(DEBUG_3D)captureDiagnosticRenderSnapshot();
 }
 function startRenderLoop(){
   if(!initialized||!sectionVisible||document.hidden||rafId) return;
@@ -68,6 +79,210 @@ function startRenderLoop(){
 function stopRenderLoop(){
   if(rafId) cancelAnimationFrame(rafId);
   rafId=0;
+}
+
+function formatDiagnosticNumber(value){
+  return Number(value||0).toLocaleString('en-US');
+}
+function formatDiagnosticBytes(value){
+  if(!Number.isFinite(value)||value<=0)return 'Unavailable';
+  const units=['B','KB','MB','GB'];
+  let size=value,unit=0;
+  while(size>=1024&&unit<units.length-1){size/=1024;unit++;}
+  return `${size.toFixed(unit?1:0)} ${units[unit]}`;
+}
+function collectSourceMaterialResources(root){
+  const materials=new Set();
+  const textures=new Set();
+  const textureProperties=[
+    'map','normalMap','roughnessMap','metalnessMap','emissiveMap',
+    'alphaMap','aoMap','lightMap','bumpMap','displacementMap'
+  ];
+  root.traverse(object=>{
+    if(!object.isMesh)return;
+    const objectMaterials=Array.isArray(object.material)?object.material:[object.material];
+    objectMaterials.forEach(material=>{if(material)materials.add(material);});
+  });
+  materials.forEach(material=>{
+    textureProperties.forEach(property=>{
+      const texture=material[property];
+      if(texture&&texture.isTexture)textures.add(texture);
+    });
+  });
+  return {materials,textures};
+}
+function getTextureDiagnostic(texture,index){
+  const image=texture.image||texture.source?.data;
+  const width=Number(image?.naturalWidth||image?.videoWidth||image?.width)||0;
+  const height=Number(image?.naturalHeight||image?.videoHeight||image?.height)||0;
+  return {
+    name:texture.name||`Texture ${index+1}`,
+    width,
+    height,
+    megapixels:width&&height?(width*height)/1000000:0
+  };
+}
+function collectModelDiagnostics(root,gltf,sourceResources){
+  const geometries=new Set();
+  let meshCount=0,skinnedMeshCount=0,shadowCasters=0,shadowReceivers=0;
+  root.traverse(object=>{
+    if(!object.isMesh)return;
+    meshCount++;
+    if(object.isSkinnedMesh)skinnedMeshCount++;
+    if(object.castShadow)shadowCasters++;
+    if(object.receiveShadow)shadowReceivers++;
+    if(object.geometry)geometries.add(object.geometry);
+  });
+  let vertexCount=0,triangleCount=0;
+  geometries.forEach(geometry=>{
+    const position=geometry.getAttribute?.('position');
+    if(!position)return;
+    vertexCount+=position.count;
+    triangleCount+=(geometry.index?geometry.index.count:position.count)/3;
+  });
+  const textureDetails=Array.from(sourceResources.textures,getTextureDiagnostic);
+  const largestTexture=textureDetails.reduce((largest,texture)=>{
+    return texture.megapixels>(largest?.megapixels||0)?texture:largest;
+  },null);
+  return {
+    meshCount,
+    skinnedMeshCount,
+    uniqueGeometryCount:geometries.size,
+    uniqueMaterialCount:sourceResources.materials.size,
+    uniqueTextureCount:sourceResources.textures.size,
+    vertexCount,
+    triangleCount,
+    transparentMaterialCount:Array.from(sourceResources.materials).filter(material=>material.transparent).length,
+    shadowCasters,
+    shadowReceivers,
+    animationClipCount:gltf.animations?.length||0,
+    textureDetails,
+    largestTexture
+  };
+}
+function collectGLBTiming(){
+  const entries=performance.getEntriesByType('resource');
+  const entry=entries.find(resource=>{
+    try{return decodeURIComponent(resource.name).endsWith('/SPOOK/SPOOK feli.glb');}
+    catch{return resource.name.includes('SPOOK%20feli.glb');}
+  });
+  if(!entry)return {
+    'Resource URL':'Unavailable',
+    'Transfer size':'Unavailable',
+    'Encoded body size':'Unavailable',
+    'Decoded body size':'Unavailable',
+    'Duration':'Unavailable'
+  };
+  return {
+    'Resource URL':entry.name,
+    'Transfer size':formatDiagnosticBytes(entry.transferSize),
+    'Encoded body size':formatDiagnosticBytes(entry.encodedBodySize),
+    'Decoded body size':formatDiagnosticBytes(entry.decodedBodySize),
+    'Duration':Number.isFinite(entry.duration)?`${entry.duration.toFixed(1)} ms`:'Unavailable'
+  };
+}
+function getShadowMapTypeName(type){
+  const names={
+    [THREE.BasicShadowMap]:'BasicShadowMap',
+    [THREE.PCFShadowMap]:'PCFShadowMap',
+    [THREE.PCFSoftShadowMap]:'PCFSoftShadowMap',
+    [THREE.VSMShadowMap]:'VSMShadowMap'
+  };
+  return names[type]||String(type);
+}
+function getRendererDiagnostics(){
+  let antialias='Unavailable';
+  try{antialias=renderer.getContext().getContextAttributes()?.antialias??'Unavailable';}catch{}
+  return {
+    'Device pixel ratio':window.devicePixelRatio||1,
+    'Renderer pixel ratio':renderer.getPixelRatio(),
+    'Canvas CSS size':`${canvas.clientWidth} × ${canvas.clientHeight}`,
+    'Drawing-buffer size':`${renderer.domElement.width} × ${renderer.domElement.height}`,
+    'Antialias enabled':antialias,
+    'Shadow map enabled':renderer.shadowMap.enabled,
+    'Shadow map type':getShadowMapTypeName(renderer.shadowMap.type),
+    'Shadow map autoUpdate':renderer.shadowMap.autoUpdate,
+    'Current X-RAY state':xray?'Enabled':'Disabled',
+    'Normal FPS cap':NORMAL_RENDER_FPS,
+    'Interaction FPS cap':INTERACTION_RENDER_FPS,
+    'Normal DPR cap':NORMAL_DPR_CAP,
+    'Interaction DPR cap':INTERACTION_DPR_CAP
+  };
+}
+function printDiagnosticRenderSnapshot(snapshot){
+  console.groupCollapsed(`[NIGHTSHOT 3D] ${snapshot.mode} render snapshot`);
+  console.table([snapshot]);
+  console.groupEnd();
+}
+function printFullDiagnostics(snapshot){
+  const model=diagnostics.model;
+  console.groupCollapsed('[NIGHTSHOT 3D] Model diagnostics');
+  console.groupCollapsed('Model structure');
+  console.table([{
+    'Meshes':formatDiagnosticNumber(model.meshCount),
+    'Skinned meshes':formatDiagnosticNumber(model.skinnedMeshCount),
+    'Animation clips':formatDiagnosticNumber(model.animationClipCount),
+    'Shadow casters':formatDiagnosticNumber(model.shadowCasters),
+    'Shadow receivers':formatDiagnosticNumber(model.shadowReceivers)
+  }]);
+  console.groupEnd();
+  console.groupCollapsed('Geometry complexity');
+  console.table([{
+    'Unique geometries':formatDiagnosticNumber(model.uniqueGeometryCount),
+    'Vertices':formatDiagnosticNumber(model.vertexCount),
+    'Triangles':formatDiagnosticNumber(model.triangleCount)
+  }]);
+  console.groupEnd();
+  console.groupCollapsed('Materials and textures');
+  console.table([{
+    'Unique materials':formatDiagnosticNumber(model.uniqueMaterialCount),
+    'Transparent materials':formatDiagnosticNumber(model.transparentMaterialCount),
+    'Unique textures':formatDiagnosticNumber(model.uniqueTextureCount),
+    'Largest texture':model.largestTexture?`${model.largestTexture.name} — ${model.largestTexture.width} × ${model.largestTexture.height} (${model.largestTexture.megapixels.toFixed(2)} MP)`:'Unavailable'
+  }]);
+  if(model.textureDetails.length)console.table(model.textureDetails.map(texture=>({
+    'Texture':texture.name,
+    'Dimensions':texture.width&&texture.height?`${texture.width} × ${texture.height}`:'Unavailable',
+    'Megapixels':texture.megapixels?texture.megapixels.toFixed(2):'Unavailable'
+  })));
+  console.groupEnd();
+  console.groupCollapsed('Renderer configuration');
+  console.table([getRendererDiagnostics()]);
+  console.groupEnd();
+  console.groupCollapsed('GLB network timing');
+  console.table([diagnostics.network]);
+  console.groupEnd();
+  console.groupCollapsed('Current render snapshot');
+  console.table([snapshot]);
+  console.groupEnd();
+  console.groupEnd();
+}
+function captureDiagnosticRenderSnapshot(){
+  if(!diagnostics.model)return;
+  const mode=xray?'X-RAY':'Solid';
+  const size=`${renderer.domElement.width}x${renderer.domElement.height}`;
+  const key=`${mode}:${size}`;
+  if(diagnostics.renderSnapshots.has(key)&&!diagnostics.forceRenderReport&&!diagnostics.forceFullReport)return;
+  const snapshot={
+    mode,
+    'Drawing-buffer size':size.replace('x',' × '),
+    'Draw calls':formatDiagnosticNumber(renderer.info.render.calls),
+    'Triangles':formatDiagnosticNumber(renderer.info.render.triangles),
+    'Lines':formatDiagnosticNumber(renderer.info.render.lines),
+    'Points':formatDiagnosticNumber(renderer.info.render.points),
+    'GPU geometries':formatDiagnosticNumber(renderer.info.memory.geometries),
+    'GPU textures':formatDiagnosticNumber(renderer.info.memory.textures)
+  };
+  diagnostics.renderSnapshots.set(key,snapshot);
+  diagnostics.latestSnapshot=snapshot;
+  if(!diagnostics.initialReportPrinted||diagnostics.forceFullReport){
+    printFullDiagnostics(snapshot);
+    diagnostics.initialReportPrinted=true;
+  }else{
+    printDiagnosticRenderSnapshot(snapshot);
+  }
+  diagnostics.forceFullReport=false;
+  diagnostics.forceRenderReport=false;
 }
 
   renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:false });
@@ -171,6 +386,7 @@ function stopRenderLoop(){
       solidRoot.scale.setScalar(s);
       solidRoot.position.copy(center.multiplyScalar(-s));
 
+      const sourceResources=DEBUG_3D?collectSourceMaterialResources(solidRoot):null;
       wireRoot = solidRoot.clone();
       solidRoot.traverse(c=>{ if(c.isMesh){ c.material=matSolid; c.castShadow=true; c.receiveShadow=true; }});
       wireRoot.traverse(c=>{ if(c.isMesh){ c.material=matWire; c.castShadow=false; c.receiveShadow=false; }});
@@ -179,6 +395,10 @@ function stopRenderLoop(){
       scene.add(wireRoot);
       freezeStaticTransforms(solidRoot);
       freezeStaticTransforms(wireRoot);
+      if(DEBUG_3D){
+        diagnostics.model=collectModelDiagnostics(solidRoot,gltf,sourceResources);
+        diagnostics.network=collectGLBTiming();
+      }
       applyXrayState();
 
       cam.position.set(maxDim*s*.18, maxDim*s*.42, maxDim*s*.62);
@@ -252,6 +472,23 @@ function stopRenderLoop(){
   applyPixelRatio(NORMAL_DPR_CAP);
   new ResizeObserver(()=>resizeRenderer()).observe(canvas);
   window.addEventListener('resize',handleViewerResize);
+
+  if(DEBUG_3D){
+    window.nightshot3dDiagnostics={
+      report(){
+        if(diagnostics.model&&diagnostics.latestSnapshot){
+          printFullDiagnostics(diagnostics.latestSnapshot);
+          return;
+        }
+        diagnostics.forceFullReport=true;
+        requestViewerRender();
+      },
+      reportRender(){
+        diagnostics.forceRenderReport=true;
+        requestViewerRender();
+      }
+    };
+  }
 
   btnXray && btnXray.addEventListener('click', ()=>{
     xray = !xray;
