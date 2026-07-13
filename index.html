@@ -1396,21 +1396,47 @@ footer{border-top:1px solid rgba(255,255,255,.06);padding:2rem 3rem;display:flex
 <script>
 // ── FILM GRAIN ────────────────────────────────
 const gc=document.getElementById('grain'),gx=gc.getContext('2d');
-let gw,gh,gframe=0;
-function resizeGrain(){gw=gc.width=window.innerWidth;gh=gc.height=window.innerHeight}
-function drawGrain(){
-  gframe++;
-  if(gframe%2===0){
-    const scale=1.0,sw=gw/scale|0,sh=gh/scale|0;
-    const img=gx.createImageData(sw,sh),d=img.data;
-    for(let i=0;i<d.length;i+=4){const v=Math.random()*255|0;d[i]=d[i+1]=d[i+2]=v;d[i+3]=38}
-    const tmp=document.createElement('canvas');tmp.width=sw;tmp.height=sh;
-    tmp.getContext('2d').putImageData(img,0,0);
-    gx.clearRect(0,0,gw,gh);gx.imageSmoothingEnabled=false;gx.drawImage(tmp,0,0,gw,gh);
+const grainMotion=window.matchMedia('(prefers-reduced-motion: reduce)');
+const grainTileSize=window.innerWidth<=768?384:512;
+const grainTiles=[],grainPatterns=[];
+let gw,gh,grainRaf=0,lastGrainUpdate=0,grainVariant=0;
+for(let tileIndex=0;tileIndex<3;tileIndex++){
+  const tile=document.createElement('canvas'),tileCtx=tile.getContext('2d');
+  tile.width=tile.height=grainTileSize;
+  const img=tileCtx.createImageData(grainTileSize,grainTileSize),d=img.data;
+  for(let i=0;i<d.length;i+=4){
+    const v=128+(Math.random()-.5)*90|0;
+    d[i]=d[i+1]=d[i+2]=v;d[i+3]=22;
   }
-  requestAnimationFrame(drawGrain);
+  tileCtx.putImageData(img,0,0);
+  grainTiles.push(tile);grainPatterns.push(gx.createPattern(tile,'repeat'));
 }
-resizeGrain();drawGrain();window.addEventListener('resize',resizeGrain);
+function resizeGrain(){
+  gw=gc.width=window.innerWidth;gh=gc.height=window.innerHeight;
+  drawGrainFrame();
+}
+function drawGrainFrame(){
+  const shiftX=Math.random()*25-12|0,shiftY=Math.random()*25-12|0;
+  gx.clearRect(0,0,gw,gh);gx.imageSmoothingEnabled=false;
+  gx.save();gx.translate(shiftX,shiftY);gx.fillStyle=grainPatterns[grainVariant];
+  gx.fillRect(-grainTileSize,-grainTileSize,gw+grainTileSize*2,gh+grainTileSize*2);gx.restore();
+  grainVariant=(grainVariant+1)%grainPatterns.length;
+}
+function drawGrain(time){
+  if(document.hidden||grainMotion.matches){grainRaf=0;return}
+  if(time-lastGrainUpdate>=50){drawGrainFrame();lastGrainUpdate=time}
+  grainRaf=requestAnimationFrame(drawGrain);
+}
+function setGrainMotion(){
+  cancelAnimationFrame(grainRaf);grainRaf=0;lastGrainUpdate=0;
+  drawGrainFrame();
+  if(!grainMotion.matches&&!document.hidden)grainRaf=requestAnimationFrame(drawGrain);
+}
+function setGrainVisibility(){
+  cancelAnimationFrame(grainRaf);grainRaf=0;lastGrainUpdate=0;
+  if(!document.hidden&&!grainMotion.matches)grainRaf=requestAnimationFrame(drawGrain);
+}
+resizeGrain();setGrainMotion();window.addEventListener('resize',resizeGrain);grainMotion.addEventListener('change',setGrainMotion);document.addEventListener('visibilitychange',setGrainVisibility);
 
 // ── CURSOR ────────────────────────────────────
 const cur=document.getElementById('cur'),curDot=document.getElementById('curDot');
@@ -1909,27 +1935,42 @@ glitchTear();
 
   // Grain canvas inside loader
   const lgc = document.getElementById('ldrGrain');
-  let lgx, lgw, lgh, lgActive = true;
+  const LG_SCALE = 0.5, LG_FRAME_MS = 1000/18;
+  let lgx, lgw, lgh, lgBuffer, lgBufferCtx, lgImageData, lgRaf = 0, lgLastUpdate = 0, lgActive = true;
   if(lgc){
     lgx = lgc.getContext('2d');
-    function resizeLg(){lgw=lgc.width=window.innerWidth;lgh=lgc.height=window.innerHeight}
+    lgBuffer = document.createElement('canvas');
+    lgBufferCtx = lgBuffer.getContext('2d');
+    function resizeLg(){
+      lgw=lgc.width=window.innerWidth;lgh=lgc.height=window.innerHeight;
+      lgBuffer.width=Math.max(1,Math.round(lgw*LG_SCALE));
+      lgBuffer.height=Math.max(1,Math.round(lgh*LG_SCALE));
+      lgImageData=lgBufferCtx.createImageData(lgBuffer.width,lgBuffer.height);
+      if(lgActive) drawLgFrame();
+    }
+    function drawLgFrame(){
+      const d=lgImageData.data;
+      for(let i=0;i<d.length;i+=4){const v=128+(Math.random()-.5)*90|0;d[i]=d[i+1]=d[i+2]=v;d[i+3]=24}
+      lgBufferCtx.putImageData(lgImageData,0,0);
+      lgx.clearRect(0,0,lgw,lgh);lgx.imageSmoothingEnabled=false;lgx.drawImage(lgBuffer,0,0,lgw,lgh);
+    }
+    function drawLg(time){
+      if(!lgActive){lgRaf=0;return}
+      if(time-lgLastUpdate>=LG_FRAME_MS){drawLgFrame();lgLastUpdate=time}
+      lgRaf=requestAnimationFrame(drawLg);
+    }
     resizeLg();
     window.addEventListener('resize',resizeLg);
-    (function drawLg(){
-      if(!lgActive) return;
-      const sw=lgw>>1, sh=lgh>>1;
-      const img=lgx.createImageData(sw,sh), d=img.data;
-      for(let i=0;i<d.length;i+=4){const v=Math.random()*255|0;d[i]=d[i+1]=d[i+2]=v;d[i+3]=28}
-      const tmp=document.createElement('canvas');tmp.width=sw;tmp.height=sh;
-      tmp.getContext('2d').putImageData(img,0,0);
-      lgx.clearRect(0,0,lgw,lgh);lgx.imageSmoothingEnabled=false;lgx.drawImage(tmp,0,0,lgw,lgh);
-      requestAnimationFrame(drawLg);
-    })();
+    lgRaf=requestAnimationFrame(drawLg);
   }
 
   let p = 0;
   const startTime = Date.now();
-  const MIN_MS = 2800;
+  const MIN_MS = 700;
+  const SAFETY_MS = 5000;
+  const COMPLETE_PAUSE_MS = 320;
+  const FADE_MS = 850;
+  let finished = false;
 
   function setP(v){
     p = Math.min(100, v);
@@ -1945,20 +1986,25 @@ glitchTear();
   }, 40);
 
   function finish(){
+    if(finished) return;
+    finished = true;
     clearInterval(fakeInterval);
+    clearTimeout(safetyTimer);
     const wait = Math.max(0, MIN_MS - (Date.now()-startTime));
     setTimeout(function(){
       setP(100);
       setTimeout(function(){
         ldr.classList.add('ldr-out');
-        ldr.style.display='none';
         lgActive = false;
-      }, 900);
+        cancelAnimationFrame(lgRaf);lgRaf = 0;
+        setTimeout(function(){ldr.style.display='none'}, FADE_MS);
+      }, COMPLETE_PAUSE_MS);
     }, wait);
   }
 
-  window.addEventListener('load', finish);
-  setTimeout(finish, 9000); // hard cap
+  requestAnimationFrame(function(){requestAnimationFrame(finish)});
+  window.addEventListener('load', finish, {once:true});
+  const safetyTimer = setTimeout(finish, SAFETY_MS-COMPLETE_PAUSE_MS-FADE_MS);
 })();
 </script>
 
