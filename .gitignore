@@ -28,3 +28,6 @@ V2/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Local Netlify folder
+.netlify

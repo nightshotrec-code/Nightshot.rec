@@ -22,16 +22,13 @@
     <div class="ldr-fill" id="ldrFill"></div>
     <span class="ldr-pct" id="ldrPct">0%</span>
   </div>
-  <div class="ldr-meta">ARQUITECTURA AUDIOVISUAL &nbsp;·&nbsp; V1.0</div>
 </div>
 
 <div class="cur" id="cur"></div>
 <div class="cur-dot" id="curDot"></div>
 
 <canvas id="grain" aria-hidden="true"></canvas>
-<div id="scanlines" aria-hidden="true"></div>
-<div id="vignette" aria-hidden="true"></div>
-<div id="burn" aria-hidden="true"></div>
+<div id="screen-fx" aria-hidden="true"></div>
 
 <!-- NAV -->
 <nav>
@@ -57,7 +54,7 @@
   <canvas id="net" aria-hidden="true"></canvas>
 
   <div class="hero-zone">
-    <video autoplay muted loop playsinline>
+    <video data-video-priority="hero" autoplay muted loop playsinline preload="auto">
       <source src="assets/media/video/hero/video%20inicio%20editado.webm" type="video/webm">
       <source src="assets/media/video/hero/video%20inicio%20editado.mp4" type="video/mp4">
     </video>
@@ -66,19 +63,19 @@
   <div class="hero-vids" aria-hidden="true">
     <div class="vid-panel">
       <div class="vid-pi">
-        <video autoplay muted loop playsinline><source src="assets/media/video/shared/Mult-Overlay%20Screen%20Burn%20.webm" type="video/webm"><source src="assets/media/video/shared/Mult-Overlay%20Screen%20Burn%20.mp4" type="video/mp4"></video>
+        <video muted loop playsinline preload="none"><source data-src="assets/media/video/shared/Mult-Overlay%20Screen%20Burn%20.webm" type="video/webm"><source data-src="assets/media/video/shared/Mult-Overlay%20Screen%20Burn%20.mp4" type="video/mp4"></video>
         <span class="vid-lbl">_SCREEN BURN</span>
       </div>
     </div>
     <div class="vid-panel">
       <div class="vid-pi">
-        <video autoplay muted loop playsinline><source src="assets/media/video/shared/overlay%20fantasia%20.webm" type="video/webm"><source src="assets/media/video/shared/overlay%20fantasia%20.mp4" type="video/mp4"></video>
+        <video muted loop playsinline preload="none"><source data-src="assets/media/video/shared/overlay%20fantasia%20.webm" type="video/webm"><source data-src="assets/media/video/shared/overlay%20fantasia%20.mp4" type="video/mp4"></video>
         <span class="vid-lbl">_OVERLAY</span>
       </div>
     </div>
     <div class="vid-panel">
       <div class="vid-pi">
-        <video autoplay muted loop playsinline><source src="assets/media/video/overlays/4%20File%20In%20Flash%20%20.webm" type="video/webm"><source src="assets/media/video/overlays/4%20File%20In%20Flash%20%20.mp4" type="video/mp4"></video>
+        <video muted loop playsinline preload="none"><source data-src="assets/media/video/overlays/4%20File%20In%20Flash%20%20.webm" type="video/webm"><source data-src="assets/media/video/overlays/4%20File%20In%20Flash%20%20.mp4" type="video/mp4"></video>
         <span class="vid-lbl">_FLASH</span>
       </div>
     </div>
@@ -183,7 +180,6 @@
         Identidades visuales temporales para espacios, eventos y entornos.<br><br>
         NIGHTSHOT diseña entornos visuales a través de la luz, la imagen en movimiento, el color y la composición espacial, creando atmósferas propias de cada lugar y cada momento.
       </p>
-      <a href="#about" class="env-cta" data-es="INICIAR PROYECTO →" data-en="START A PROJECT →">INICIAR PROYECTO →</a>
     </div>
 
     <div class="env-word" data-es="ENTORNOS" data-en="ENVIRONMENTS">ENVIRONMENTS</div>
@@ -196,8 +192,11 @@
 </div>
 
 <!-- 02 — INSTALLATIONS -->
-<section id="installations">
+<section id="installations" class="is-locked">
   <canvas id="inst-canvas"></canvas>
+  <div class="inst-viewer-lock" id="inst-viewer-lock">
+    <button type="button" class="inst-viewer-lock-btn" id="inst-viewer-unlock" aria-controls="inst-canvas" aria-pressed="false" aria-label="Ver e interactuar con el modelo 3D" disabled>VER</button>
+  </div>
   <div class="inst-loading" id="inst-loading">
     <p data-es="CARGANDO ESPACIO" data-en="LOADING SPACE">CARGANDO ESPACIO</p>
     <div class="inst-loading-bar"><div class="inst-loading-fill" id="inst-fill"></div></div>
@@ -374,19 +373,19 @@
 
     <div class="art-proc reveal">
       <div class="art-panel">
-        <video autoplay muted loop playsinline><source src="assets/media/video/shared/EJEMPLOS%20con%20mi%20contenido%20FILM%20LOOK%20COLOR%20GRANDING.webm" type="video/webm"><source src="assets/media/video/shared/EJEMPLOS%20con%20mi%20contenido%20FILM%20LOOK%20COLOR%20GRANDING.mp4" type="video/mp4"></video>
+        <video muted loop playsinline preload="none"><source data-src="assets/media/video/shared/EJEMPLOS%20con%20mi%20contenido%20FILM%20LOOK%20COLOR%20GRANDING.webm" type="video/webm"><source data-src="assets/media/video/shared/EJEMPLOS%20con%20mi%20contenido%20FILM%20LOOK%20COLOR%20GRANDING.mp4" type="video/mp4"></video>
         <span class="art-panel-lbl">_ORIGINAL</span>
       </div>
       <div class="art-panel">
-        <video autoplay muted loop playsinline><source src="assets/media/video/shared/Ejemplo%20003.webm" type="video/webm"><source src="assets/media/video/shared/Ejemplo%20003.mp4" type="video/mp4"></video>
+        <video muted loop playsinline preload="none"><source data-src="assets/media/video/shared/Ejemplo%20003.webm" type="video/webm"><source data-src="assets/media/video/shared/Ejemplo%20003.mp4" type="video/mp4"></video>
         <span class="art-panel-lbl">_COLOR</span>
       </div>
       <div class="art-panel">
-        <video autoplay muted loop playsinline><source src="assets/media/video/shared/Mult-Overlay%20Screen%20Burn%20.webm" type="video/webm"><source src="assets/media/video/shared/Mult-Overlay%20Screen%20Burn%20.mp4" type="video/mp4"></video>
+        <video muted loop playsinline preload="none"><source data-src="assets/media/video/shared/Mult-Overlay%20Screen%20Burn%20.webm" type="video/webm"><source data-src="assets/media/video/shared/Mult-Overlay%20Screen%20Burn%20.mp4" type="video/mp4"></video>
         <span class="art-panel-lbl">_BURN</span>
       </div>
       <div class="art-panel">
-        <video autoplay muted loop playsinline><source src="assets/media/video/shared/overlay%20fantasia%20.webm" type="video/webm"><source src="assets/media/video/shared/overlay%20fantasia%20.mp4" type="video/mp4"></video>
+        <video muted loop playsinline preload="none"><source data-src="assets/media/video/shared/overlay%20fantasia%20.webm" type="video/webm"><source data-src="assets/media/video/shared/overlay%20fantasia%20.mp4" type="video/mp4"></video>
         <span class="art-panel-lbl">_SOLARIZE</span>
       </div>
     </div>
@@ -400,9 +399,9 @@
       <div class="ag-overlay"><span class="ag-lbl">_GLITCH RGB</span></div>
     </div>
     <div class="ag span2 reveal">
-      <video autoplay muted loop playsinline>
-        <source src="assets/media/video/artworks/SaveClip.App_AQOvkVLhKlgx__mQsaS10_UBQharAttw3RA-ErVylm5tr1e9ddkVnC3bkavjuGPY7NyR0xF9_HvGkKvzZ866vawE.webm" type="video/webm">
-        <source src="assets/media/video/artworks/SaveClip.App_AQOvkVLhKlgx__mQsaS10_UBQharAttw3RA-ErVylm5tr1e9ddkVnC3bkavjuGPY7NyR0xF9_HvGkKvzZ866vawE.mp4" type="video/mp4">
+      <video muted loop playsinline preload="none">
+        <source data-src="assets/media/video/artworks/SaveClip.App_AQOvkVLhKlgx__mQsaS10_UBQharAttw3RA-ErVylm5tr1e9ddkVnC3bkavjuGPY7NyR0xF9_HvGkKvzZ866vawE.webm" type="video/webm">
+        <source data-src="assets/media/video/artworks/SaveClip.App_AQOvkVLhKlgx__mQsaS10_UBQharAttw3RA-ErVylm5tr1e9ddkVnC3bkavjuGPY7NyR0xF9_HvGkKvzZ866vawE.mp4" type="video/mp4">
       </video>
       <div class="ag-overlay"><span class="ag-lbl">_SCREEN BURN — ARQUITECTURA</span></div>
     </div>
@@ -469,9 +468,9 @@
       </div>
       <div class="cam-panel-stack">
         <div class="cam-panel reveal">
-          <video autoplay muted loop playsinline>
-            <source src="assets/media/video/shared/EJEMPLOS%20con%20mi%20contenido%20FILM%20LOOK%20COLOR%20GRANDING.webm" type="video/webm">
-            <source src="assets/media/video/shared/EJEMPLOS%20con%20mi%20contenido%20FILM%20LOOK%20COLOR%20GRANDING.mp4" type="video/mp4">
+          <video muted loop playsinline preload="none">
+            <source data-src="assets/media/video/shared/EJEMPLOS%20con%20mi%20contenido%20FILM%20LOOK%20COLOR%20GRANDING.webm" type="video/webm">
+            <source data-src="assets/media/video/shared/EJEMPLOS%20con%20mi%20contenido%20FILM%20LOOK%20COLOR%20GRANDING.mp4" type="video/mp4">
           </video>
           <div class="cam-panel-info">
             <div class="cam-panel-title">FILM LOOK</div>
@@ -496,7 +495,7 @@
           <span class="cam-lbl">_SETUP</span>
         </div>
         <div class="cam-panel wide reveal">
-          <video autoplay muted loop playsinline>
+          <video muted loop playsinline preload="none">
           </video>
           <div class="cam-panel-info">
             <div class="cam-panel-title">AUDIOREACTIVO EN VIVO</div>

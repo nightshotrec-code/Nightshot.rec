@@ -10,6 +10,8 @@ export function initInstallationsViewer(){
 const section = document.getElementById('installations');
 const canvas  = document.getElementById('inst-canvas');
 const scrollSafePanel = document.querySelector('.inst-hud-bottom');
+const interactionUnlockButton = document.getElementById('inst-viewer-unlock');
+const projectPanel = section&&section.querySelector('.inst-hud-l');
 const DEBUG_3D = new URLSearchParams(window.location.search).get('debug3d') === '1';
 if(initialized||!section||!canvas) return;
 initialized=true;
@@ -307,8 +309,34 @@ function captureDiagnosticRenderSnapshot(){
   controls.zoomSpeed       = 1.4;
 
   let pointerOverScrollSafePanel=false;
+  let viewerInteractionUnlocked=!section.classList.contains('is-locked');
+  function updateInteractionButtonPosition(){
+    if(!interactionUnlockButton)return;
+    const sectionRect=section.getBoundingClientRect();
+    const buttonHeight=interactionUnlockButton.offsetHeight;
+    const projectRect=projectPanel&&projectPanel.getBoundingClientRect();
+    const projectPanelVisible=projectPanel&&getComputedStyle(projectPanel).display!=='none'&&projectRect.width>0;
+    const left=projectPanelVisible?projectRect.left-sectionRect.left:24;
+    const top=projectPanelVisible
+      ?Math.max(24,projectRect.top-sectionRect.top-buttonHeight-12)
+      :Math.max(24,section.clientHeight*.5-buttonHeight*.5);
+    interactionUnlockButton.style.setProperty('--inst-lock-left',`${left}px`);
+    interactionUnlockButton.style.setProperty('--inst-lock-top',`${top}px`);
+  }
   function updateControlsEnabled(){
-    controls.enabled=!pointerOverScrollSafePanel;
+    controls.enabled=viewerInteractionUnlocked&&!pointerOverScrollSafePanel;
+  }
+  function setViewerInteractionState(unlocked){
+    viewerInteractionUnlocked=unlocked;
+    section.classList.toggle('is-locked',!unlocked);
+    section.classList.toggle('is-interactive',unlocked);
+    if(interactionUnlockButton){
+      interactionUnlockButton.textContent=unlocked?'LOCK':'VER';
+      interactionUnlockButton.setAttribute('aria-pressed',String(unlocked));
+      interactionUnlockButton.setAttribute('aria-label',unlocked?'Bloquear interacción 3D':'Ver e interactuar con el modelo 3D');
+    }
+    updateControlsEnabled();
+    requestViewerRender();
   }
   if(scrollSafePanel){
     scrollSafePanel.addEventListener('pointerenter',()=>{
@@ -320,6 +348,14 @@ function captureDiagnosticRenderSnapshot(){
       updateControlsEnabled();
     });
   }
+  if(interactionUnlockButton){
+    updateInteractionButtonPosition();
+    interactionUnlockButton.disabled=false;
+    interactionUnlockButton.addEventListener('click',()=>{
+      setViewerInteractionState(!viewerInteractionUnlocked);
+    });
+  }
+  setViewerInteractionState(viewerInteractionUnlocked);
 
   scene.add(new THREE.AmbientLight(0x080610, 4));
   const keyLight = new THREE.DirectionalLight(0xc8b0ff, 2.2);
@@ -466,6 +502,7 @@ function captureDiagnosticRenderSnapshot(){
     },QUALITY_RESTORE_DELAY);
   }
   function handleViewerResize(){
+    updateInteractionButtonPosition();
     if(!interactionActive&&!interactionRestoreTimer)applyPixelRatio(NORMAL_DPR_CAP);
     resizeRenderer();
   }
