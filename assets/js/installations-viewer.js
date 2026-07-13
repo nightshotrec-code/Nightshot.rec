@@ -5,6 +5,7 @@ import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 let initialized=false;
+const PERF_MODE=new URLSearchParams(window.location.search).get('perf')==='1';
 
 export function initInstallationsViewer(){
 const section = document.getElementById('installations');
@@ -21,16 +22,21 @@ const loading = document.getElementById('inst-loading');
 const fillEl  = document.getElementById('inst-fill');
 const hint    = document.getElementById('inst-hint');
 const tc      = document.getElementById('inst-tc');
-let sectionVisible=true,rafId=0;
+let sectionVisible=false,rafId=0;
 let renderer,scene,cam,controls;
 const NORMAL_DPR_CAP=1.5;
 const INTERACTION_DPR_CAP=1.0;
+const LOCKED_DPR_CAP=0.6;
 const QUALITY_RESTORE_DELAY=350;
 const NORMAL_RENDER_FPS=30;
 const INTERACTION_RENDER_FPS=45;
+const LOCKED_RENDER_FPS=10;
 let currentPixelRatio=0,interactionRestoreTimer=0,interactionActive=false,interactionRenderActive=false;
 let lastRenderWidth=0,lastRenderHeight=0;
 let lastRenderTime=0,renderRequested=true;
+let viewerInteractionUnlocked=!section.classList.contains('is-locked');
+const renderTimestamps=[];
+const drawingBufferSize=new THREE.Vector2();
 const diagnostics=DEBUG_3D?{
   model:null,
   network:null,
@@ -50,37 +56,78 @@ function updateTC(){
     String(s%60).padStart(2,'0');
 }
 
+function getTargetRenderFps(){
+  if(!sectionVisible||document.hidden)return 0;
+  if(!viewerInteractionUnlocked)return LOCKED_RENDER_FPS;
+  return interactionActive||interactionRenderActive?INTERACTION_RENDER_FPS:NORMAL_RENDER_FPS;
+}
 function getTargetFrameInterval(){
-  return 1000/(interactionActive||interactionRenderActive?INTERACTION_RENDER_FPS:NORMAL_RENDER_FPS);
+  const targetFps=getTargetRenderFps();
+  return targetFps?1000/targetFps:Infinity;
 }
 function requestViewerRender(){
   renderRequested=true;
+  startRenderLoop();
 }
 function animate(timestamp){
   rafId=0;
   if(!initialized||!sectionVisible||document.hidden) return;
-  rafId=requestAnimationFrame(animate);
-  const controlsChanged=controls.update()===true;
-  updateTC();
   const interval=getTargetFrameInterval();
   const elapsed=timestamp-lastRenderTime;
-  if(lastRenderTime&&elapsed<interval)return;
+  if(lastRenderTime&&elapsed<interval){
+    rafId=requestAnimationFrame(animate);
+    return;
+  }
+  const controlsChanged=(controls.enabled||controls.autoRotate)&&controls.update()===true;
   const requiresContinuousRender=controls.autoRotate||interactionActive||interactionRenderActive||controlsChanged;
   if(!requiresContinuousRender&&!renderRequested)return;
+  updateTC();
   lastRenderTime=lastRenderTime?timestamp-(elapsed%interval):timestamp;
   renderRequested=false;
   renderer.render(scene,cam);
+  if(PERF_MODE){
+    renderTimestamps.push(timestamp);
+    while(renderTimestamps.length&&renderTimestamps[0]<timestamp-2000)renderTimestamps.shift();
+  }
   if(DEBUG_3D)captureDiagnosticRenderSnapshot();
+  if(requiresContinuousRender)rafId=requestAnimationFrame(animate);
 }
 function startRenderLoop(){
-  if(!initialized||!sectionVisible||document.hidden||rafId) return;
-  lastRenderTime=0;
-  requestViewerRender();
+  if(!initialized||!sectionVisible||document.hidden||!renderer||!controls||rafId) return;
   rafId=requestAnimationFrame(animate);
 }
 function stopRenderLoop(){
   if(rafId) cancelAnimationFrame(rafId);
   rafId=0;
+  lastRenderTime=0;
+}
+
+if(PERF_MODE){
+  window.NIGHTSHOT_PERF??={};
+  window.NIGHTSHOT_PERF.installations=Object.freeze({
+    getMetrics(){
+      const now=performance.now();
+      while(renderTimestamps.length&&renderTimestamps[0]<now-2000)renderTimestamps.shift();
+      if(renderer)renderer.getDrawingBufferSize(drawingBufferSize);
+      return {
+        initialized,
+        visible:sectionVisible&&!document.hidden,
+        locked:!viewerInteractionUnlocked,
+        interactionActive,
+        targetFps:getTargetRenderFps(),
+        actualRenderFps:sectionVisible&&renderTimestamps.length>1&&renderTimestamps[renderTimestamps.length-1]>renderTimestamps[0]
+          ?(renderTimestamps.length-1)*1000/(renderTimestamps[renderTimestamps.length-1]-renderTimestamps[0])
+          :0,
+        pixelRatio:renderer?renderer.getPixelRatio():0,
+        drawingBufferWidth:renderer?drawingBufferSize.x:0,
+        drawingBufferHeight:renderer?drawingBufferSize.y:0,
+        drawCalls:renderer?renderer.info.render.calls:0,
+        triangles:renderer?renderer.info.render.triangles:0,
+        geometries:renderer?renderer.info.memory.geometries:0,
+        textures:renderer?renderer.info.memory.textures:0
+      };
+    }
+  });
 }
 
 function formatDiagnosticNumber(value){
@@ -309,7 +356,6 @@ function captureDiagnosticRenderSnapshot(){
   controls.zoomSpeed       = 1.4;
 
   let pointerOverScrollSafePanel=false;
-  let viewerInteractionUnlocked=!section.classList.contains('is-locked');
   function updateInteractionButtonPosition(){
     if(!interactionUnlockButton)return;
     const sectionRect=section.getBoundingClientRect();
@@ -324,10 +370,14 @@ function captureDiagnosticRenderSnapshot(){
     interactionUnlockButton.style.setProperty('--inst-lock-top',`${top}px`);
   }
   function updateControlsEnabled(){
-    controls.enabled=viewerInteractionUnlocked&&!pointerOverScrollSafePanel;
+    controls.enabled=viewerInteractionUnlocked&&sectionVisible&&!document.hidden&&!pointerOverScrollSafePanel;
   }
   function setViewerInteractionState(unlocked){
     viewerInteractionUnlocked=unlocked;
+    clearTimeout(interactionRestoreTimer);
+    interactionRestoreTimer=0;
+    interactionActive=false;
+    interactionRenderActive=false;
     section.classList.toggle('is-locked',!unlocked);
     section.classList.toggle('is-interactive',unlocked);
     if(interactionUnlockButton){
@@ -336,6 +386,8 @@ function captureDiagnosticRenderSnapshot(){
       interactionUnlockButton.setAttribute('aria-label',unlocked?'Bloquear interacción 3D':'Ver e interactuar con el modelo 3D');
     }
     updateControlsEnabled();
+    applyPixelRatio(unlocked?NORMAL_DPR_CAP:LOCKED_DPR_CAP);
+    lastRenderTime=0;
     requestViewerRender();
   }
   if(scrollSafePanel){
@@ -482,6 +534,7 @@ function captureDiagnosticRenderSnapshot(){
     resizeRenderer(true);
   }
   function beginInteractionQuality(){
+    if(!viewerInteractionUnlocked||!sectionVisible||document.hidden)return;
     interactionActive=true;
     interactionRenderActive=true;
     requestViewerRender();
@@ -490,6 +543,15 @@ function captureDiagnosticRenderSnapshot(){
     applyPixelRatio(INTERACTION_DPR_CAP);
   }
   function scheduleNormalQuality(){
+    if(!viewerInteractionUnlocked){
+      interactionActive=false;
+      interactionRenderActive=false;
+      clearTimeout(interactionRestoreTimer);
+      interactionRestoreTimer=0;
+      applyPixelRatio(LOCKED_DPR_CAP);
+      requestViewerRender();
+      return;
+    }
     interactionActive=false;
     interactionRenderActive=true;
     requestViewerRender();
@@ -503,10 +565,12 @@ function captureDiagnosticRenderSnapshot(){
   }
   function handleViewerResize(){
     updateInteractionButtonPosition();
-    if(!interactionActive&&!interactionRestoreTimer)applyPixelRatio(NORMAL_DPR_CAP);
+    if(!interactionActive&&!interactionRestoreTimer){
+      applyPixelRatio(viewerInteractionUnlocked?NORMAL_DPR_CAP:LOCKED_DPR_CAP);
+    }
     resizeRenderer();
   }
-  applyPixelRatio(NORMAL_DPR_CAP);
+  applyPixelRatio(viewerInteractionUnlocked?NORMAL_DPR_CAP:LOCKED_DPR_CAP);
   new ResizeObserver(()=>resizeRenderer()).observe(canvas);
   window.addEventListener('resize',handleViewerResize);
 
@@ -556,29 +620,37 @@ function captureDiagnosticRenderSnapshot(){
   canvas.addEventListener('pointercancel',scheduleNormalQuality);
   canvas.addEventListener('pointerleave',scheduleNormalQuality);
   new IntersectionObserver(entries=>{
-    sectionVisible=entries[0].isIntersecting;
+    const entry=entries[0];
+    sectionVisible=entry.isIntersecting&&entry.intersectionRatio>=0.1;
+    updateControlsEnabled();
     if(sectionVisible){
       lastRenderTime=0;
+      applyPixelRatio(viewerInteractionUnlocked?NORMAL_DPR_CAP:LOCKED_DPR_CAP);
       requestViewerRender();
-      startRenderLoop();
     }else{
+      clearTimeout(interactionRestoreTimer);
+      interactionRestoreTimer=0;
+      interactionActive=false;
+      interactionRenderActive=false;
+      renderTimestamps.length=0;
       stopRenderLoop();
     }
-  },{rootMargin:'700px 0px'}).observe(section);
+  },{rootMargin:'0px',threshold:[0,0.1]}).observe(canvas);
   document.addEventListener('visibilitychange',()=>{
     if(document.hidden){
       clearTimeout(interactionRestoreTimer);
       interactionRestoreTimer=0;
       interactionActive=false;
       interactionRenderActive=false;
+      renderTimestamps.length=0;
+      updateControlsEnabled();
       stopRenderLoop();
       return;
     }
-    applyPixelRatio(NORMAL_DPR_CAP);
+    updateControlsEnabled();
+    applyPixelRatio(viewerInteractionUnlocked?NORMAL_DPR_CAP:LOCKED_DPR_CAP);
     resizeRenderer();
     lastRenderTime=0;
     requestViewerRender();
-    startRenderLoop();
   });
-  startRenderLoop();
 }

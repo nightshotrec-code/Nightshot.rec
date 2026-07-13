@@ -1,5 +1,11 @@
 
 // ── FILM GRAIN ────────────────────────────────
+if(new URLSearchParams(window.location.search).get('perf')==='1'){
+  import('./performance-monitor.js').catch(error=>{
+    console.error('Performance monitor failed to load:',error);
+  });
+}
+
 (function(){
 const gc=document.getElementById('grain');
 if(!gc) return;
@@ -757,6 +763,10 @@ document.querySelectorAll('.sec-intro').forEach(el=>glitchObs.observe(el));
   const lazyVideos=videos.filter(video=>video.dataset.videoPriority!=='hero'&&hasUsableSources(video));
   const managedVideos=[...priorityVideos,...lazyVideos];
   const playPendingVideos=new WeakSet();
+  const lifecyclePausedVideos=new WeakSet();
+  const lifecycleStartedVideos=new WeakSet();
+  const userPausedVideos=new WeakSet();
+  const internalPauseEvents=new WeakSet();
 
   function hasUsableSources(video){
     return Array.from(video.querySelectorAll('source')).some(source=>{
@@ -765,26 +775,41 @@ document.querySelectorAll('.sec-intro').forEach(el=>glitchObs.observe(el));
   }
 
   function safePlay(video){
-    if(document.hidden||!video.paused||playPendingVideos.has(video))return;
+    if(document.hidden||video.dataset.videoVisible!=='1'||userPausedVideos.has(video)||!video.paused||playPendingVideos.has(video))return;
     playPendingVideos.add(video);
+    const handlePlayStarted=()=>{
+      playPendingVideos.delete(video);
+      if(video.paused)return;
+      lifecycleStartedVideos.add(video);
+      lifecyclePausedVideos.delete(video);
+    };
     try{
       const playPromise=video.play();
       if(playPromise&&typeof playPromise.then==='function'){
         playPromise.then(
-          ()=>playPendingVideos.delete(video),
+          handlePlayStarted,
           ()=>playPendingVideos.delete(video)
         );
       }else{
-        playPendingVideos.delete(video);
+        handlePlayStarted();
       }
     }catch{
       playPendingVideos.delete(video);
     }
   }
 
+  function resumeVideo(video){
+    if(video.dataset.videoLoaded!=='1'||video.dataset.videoVisible!=='1'||document.hidden)return;
+    if(lifecycleStartedVideos.has(video)&&!lifecyclePausedVideos.has(video))return;
+    safePlay(video);
+  }
+
   function pauseVideo(video){
     const playWasPending=playPendingVideos.delete(video);
-    if(!video.paused||playWasPending)video.pause();
+    if(video.paused&&!playWasPending)return;
+    lifecyclePausedVideos.add(video);
+    internalPauseEvents.add(video);
+    video.pause();
   }
 
   function loadVideoSources(video){
@@ -794,7 +819,7 @@ document.querySelectorAll('.sec-intro').forEach(el=>glitchObs.observe(el));
     sources.forEach(source=>source.setAttribute('src',source.dataset.src));
     video.dataset.videoLoaded='1';
     video.load();
-    if(video.dataset.videoVisible==='1'&&!document.hidden)safePlay(video);
+    resumeVideo(video);
     return true;
   }
 
@@ -818,17 +843,33 @@ document.querySelectorAll('.sec-intro').forEach(el=>glitchObs.observe(el));
         pauseVideo(video);
         return;
       }
-      if(video.dataset.videoLoaded==='1'&&!document.hidden)safePlay(video);
+      resumeVideo(video);
     });
   },{threshold:0.15});
 
   priorityVideos.forEach(video=>{
     if(!hasUsableSources(video))return;
     video.dataset.videoLoaded='1';
-    if(!document.hidden)safePlay(video);
   });
 
-  lazyVideos.forEach(video=>{video.dataset.videoVisible='0';});
+  managedVideos.forEach(video=>{
+    video.dataset.videoVisible='0';
+    if(!video.paused)lifecycleStartedVideos.add(video);
+    video.addEventListener('play',()=>{
+      userPausedVideos.delete(video);
+      lifecycleStartedVideos.add(video);
+      lifecyclePausedVideos.delete(video);
+    });
+    video.addEventListener('pause',()=>{
+      if(internalPauseEvents.has(video)){
+        internalPauseEvents.delete(video);
+        return;
+      }
+      lifecyclePausedVideos.delete(video);
+      if(!document.hidden&&video.dataset.videoVisible==='1')userPausedVideos.add(video);
+    });
+    playbackObserver.observe(video);
+  });
 
   let lazyObserversStarted=false;
   function startLazyVideoObservers(){
@@ -836,7 +877,6 @@ document.querySelectorAll('.sec-intro').forEach(el=>glitchObs.observe(el));
     lazyObserversStarted=true;
     lazyVideos.forEach(video=>{
       preloadObserver.observe(video);
-      playbackObserver.observe(video);
     });
   }
 
@@ -851,12 +891,7 @@ document.querySelectorAll('.sec-intro').forEach(el=>glitchObs.observe(el));
       managedVideos.forEach(pauseVideo);
       return;
     }
-    priorityVideos.forEach(video=>{
-      if(hasUsableSources(video))safePlay(video);
-    });
-    lazyVideos.forEach(video=>{
-      if(video.dataset.videoLoaded==='1'&&video.dataset.videoVisible==='1')safePlay(video);
-    });
+    managedVideos.forEach(resumeVideo);
   });
 })();
 
