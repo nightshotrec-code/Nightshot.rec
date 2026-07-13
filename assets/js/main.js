@@ -123,9 +123,9 @@ if(cur&&curDot&&cursorMotion.matches){
     const W=nc.width,H=nc.height;
     for(let i=0;i<COUNT;i++)for(let j=i+1;j<COUNT;j++){
       const dx=nodes[i].x-nodes[j].x,dy=nodes[i].y-nodes[j].y,d=Math.sqrt(dx*dx+dy*dy);
-      if(d<MAX_DIST){ctx.beginPath();ctx.moveTo(nodes[i].x,nodes[i].y);ctx.lineTo(nodes[j].x,nodes[j].y);ctx.strokeStyle=`rgba(255,255,255,${(1-d/MAX_DIST)*.12})`;ctx.lineWidth=.6;ctx.stroke()}
+      if(d<MAX_DIST){ctx.beginPath();ctx.moveTo(nodes[i].x,nodes[i].y);ctx.lineTo(nodes[j].x,nodes[j].y);ctx.strokeStyle=`rgba(255,255,255,${(1-d/MAX_DIST)*.15})`;ctx.lineWidth=.6;ctx.stroke()}
     }
-    nodes.forEach(n=>{ctx.fillStyle='rgba(255,255,255,.18)';ctx.fillRect(n.x-2.5,n.y-2.5,5,5);n.x+=n.vx;n.y+=n.vy;if(n.x<0||n.x>W)n.vx*=-1;if(n.y<0||n.y>H)n.vy*=-1});
+    nodes.forEach(n=>{ctx.fillStyle='rgba(255,255,255,.24)';ctx.fillRect(n.x-2.5,n.y-2.5,5,5);n.x+=n.vx;n.y+=n.vy;if(n.x<0||n.x>W)n.vx*=-1;if(n.y<0||n.y>H)n.vy*=-1});
     if(Math.random()<.004){const n=nodes[Math.random()*COUNT|0];ctx.font='8px Space Mono,monospace';ctx.fillStyle='rgba(255,255,255,.2)';ctx.fillText(`${n.x|0},${n.y|0}`,n.x+6,n.y-4)}
     networkRaf=requestAnimationFrame(tick);
   }
