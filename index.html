@@ -7,808 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=Press+Start+2P&display=swap" rel="stylesheet">
-<style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-
-:root{
-  --bg:#080808;
-  --fg:#e4e0d8;
-  --dim:#4a4a42;
-  --red:#ff0040;
-  --cyan:#00d4ff;
-  --gold:#c8aa6e;
-  --head:'Bebas Neue',monospace;
-  --mono:'Space Mono',monospace;
-}
-
-html{scroll-behavior:smooth}
-
-body{
-  background:var(--bg);
-  color:var(--fg);
-  font-family:var(--mono);
-  overflow-x:hidden;
-  cursor:none;
-}
-
-/* ── FIXED OVERLAYS ──────────────────────────── */
-
-#grain{position:fixed;inset:0;z-index:9000;pointer-events:none;mix-blend-mode:screen;opacity:1}
-#scanlines{position:fixed;inset:0;z-index:9001;pointer-events:none;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.07) 2px,rgba(0,0,0,.07) 4px)}
-#vignette{position:fixed;inset:0;z-index:9002;pointer-events:none;background:radial-gradient(ellipse at 50% 50%,transparent 40%,rgba(0,0,0,.78) 100%)}
-#burn{position:fixed;inset:0;z-index:9003;pointer-events:none;background:radial-gradient(ellipse 90% 70% at 50% 50%,transparent 65%,rgba(255,190,80,.035) 100%)}
-
-/* ── CURSOR ──────────────────────────── */
-
-.cur{position:fixed;width:22px;height:22px;border:1px solid rgba(255,255,255,.55);border-radius:50%;pointer-events:none;z-index:99999;transform:translate(-50%,-50%);transition:width .2s,height .2s,border-color .2s}
-.cur-dot{position:fixed;width:4px;height:4px;background:#fff;border-radius:50%;pointer-events:none;z-index:99999;transform:translate(-50%,-50%)}
-.cur.big{width:44px;height:44px;border-color:rgba(255,255,255,.25)}
-@media(hover:none){.cur,.cur-dot{display:none}body{cursor:auto}}
-
-/* ── PAGE LOADER ──────────────────────────── */
-#page-loader{position:fixed;inset:0;z-index:99998;background:#080808;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2.8rem;transition:opacity .85s ease}
-#page-loader.ldr-out{opacity:0;pointer-events:none}
-.ldr-logo{font-family:'Bebas Neue',monospace;font-size:clamp(1.6rem,3.5vw,3rem);letter-spacing:.1em;color:#fff;display:flex;align-items:center;gap:.7rem}
-.ldr-logo-dot{width:10px;height:10px;background:#ff0040;border-radius:50%;flex-shrink:0;box-shadow:0 0 8px #ff0040;animation:blink 1.1s step-end infinite}
-.ldr-logo-rec{color:rgba(255,255,255,.32)}
-.ldr-track{width:220px;height:1px;background:rgba(255,255,255,.1);position:relative}
-.ldr-fill{position:absolute;top:0;left:0;height:100%;background:rgba(255,255,255,.65);width:0%;transition:width .3s ease}
-.ldr-pct{position:absolute;right:0;top:7px;font-family:'Space Mono',monospace;font-size:.35rem;letter-spacing:.45em;color:rgba(255,255,255,.35)}
-.ldr-meta{font-family:'Space Mono',monospace;font-size:.36rem;letter-spacing:.5em;color:rgba(255,255,255,.22);text-transform:uppercase}
-#ldrGrain{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;mix-blend-mode:screen;opacity:0}
-
-/* ── BLINK DOT ──────────────────────────── */
-
-.rec-dot{display:inline-block;width:7px;height:7px;background:var(--red);border-radius:50%;animation:blink 1.1s step-end infinite;vertical-align:middle;margin-right:6px}
-@keyframes blink{0%,70%,100%{opacity:1}75%,95%{opacity:0}}
-
-/* ── NAV ──────────────────────────── */
-
-nav{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;justify-content:space-between;align-items:center;padding:1.6rem 3rem;background:rgba(6,6,6,.55);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid rgba(255,255,255,.04)}
-.nav-logo{font-family:var(--head);font-size:1.3rem;letter-spacing:.3em;color:#fff;text-decoration:none;opacity:.9}
-.nav-links{display:flex;gap:2.2rem;list-style:none}
-.nav-links a{font-size:.58rem;letter-spacing:.4em;color:rgba(255,255,255,.75);text-decoration:none;text-transform:uppercase;position:relative;transition:color .25s}
-.nav-links a::after{content:'';position:absolute;bottom:-.35rem;left:0;right:0;height:1px;background:#fff;transform:scaleX(0);transform-origin:left;transition:transform .3s}
-.nav-links a:hover{color:#fff}
-.nav-links a:hover::after{transform:scaleX(1)}
-.nav-right{display:flex;align-items:center;gap:1.4rem}
-
-/* language toggle */
-.lang-btn{font-family:var(--mono);font-size:.6rem;letter-spacing:.4em;text-transform:uppercase;background:rgba(255,255,255,.12);border:1px solid #fff;color:#fff;padding:.45rem 1.1rem;cursor:pointer;transition:all .25s;font-weight:700}
-.lang-btn:hover{background:var(--red);border-color:var(--red);color:#fff}
-
-/* hamburger */
-.ham{display:none;flex-direction:column;gap:5px;cursor:pointer;z-index:1100;background:none;border:none;padding:4px}
-.ham span{display:block;width:24px;height:1px;background:rgba(255,255,255,.7);transition:all .3s}
-.ham.open span:nth-child(1){transform:rotate(45deg) translate(4px,4px)}
-.ham.open span:nth-child(2){opacity:0}
-.ham.open span:nth-child(3){transform:rotate(-45deg) translate(4px,-4px)}
-/* nav close button */
-.nav-close-wrap{list-style:none}
-.nav-close{display:none;background:none;border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.55);font-size:.8rem;width:2.4rem;height:2.4rem;cursor:pointer;letter-spacing:0;transition:color .2s,border-color .2s;line-height:1}
-.nav-close:hover{color:#fff;border-color:rgba(255,255,255,.55)}
-@media(max-width:760px){.nav-close{display:inline-flex;align-items:center;justify-content:center}}
-
-@media(max-width:760px){
-  .ham{display:flex}
-  .nav-links{display:none;position:fixed;top:0;left:0;width:100%;height:100dvh;background:rgba(4,4,4,.97);backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);flex-direction:column;align-items:center;justify-content:center;gap:2.2rem;z-index:9999;overflow-y:auto}
-  .nav-links.open{display:flex}
-  .nav-links a{font-size:.88rem;letter-spacing:.3em}
-  nav{padding:1.4rem 1.5rem}
-}
-
-/* ── SECTION INTRO (glitch type, runs once) ──────────────────────────── */
-
-.sec-intro{
-  font-family:var(--mono);font-size:.62rem;letter-spacing:.2em;line-height:2.1;
-  color:rgba(255,255,255,.42);text-transform:uppercase;margin-bottom:3.5rem;min-height:2em;
-}
-.sec-intro::before{content:'> ';color:var(--red);opacity:.6}
-
-/* ── HERO CTA ──────────────────────────── */
-
-.hero-want-rec{display:inline-flex;position:relative;z-index:1;align-self:flex-start;align-items:center;gap:.75rem;margin-top:2.8rem;font-family:var(--mono);font-size:.68rem;letter-spacing:.4em;text-transform:uppercase;text-decoration:none;padding:1.1rem 2.8rem;border:1px solid rgba(255,255,255,.35);color:rgba(255,255,255,.9);transition:background .3s,color .3s,border-color .3s,letter-spacing .3s;width:fit-content}
-.hero-want-rec:hover{background:#fff;color:#000;border-color:#fff;letter-spacing:.52em}
-.hero-want-rec-dot{width:8px;height:8px;background:var(--red);border-radius:50%;flex-shrink:0;animation:blink 1.1s step-end infinite;box-shadow:0 0 6px var(--red)}
-.hero-want-rec:hover .hero-want-rec-dot{background:var(--red);box-shadow:0 0 8px var(--red)}
-
-/* ── HERO SECTION NAV ──────────────────────────── */
-
-.hero-snav{position:absolute;bottom:2rem;left:0;right:0;z-index:2;display:flex;gap:.65rem;justify-content:center;padding:0 3rem}
-.hero-snav-item{flex:0 1 110px;display:flex;flex-direction:column;align-items:center;gap:.5rem;padding:.9rem .7rem;border:1px solid rgba(255,255,255,.18);text-decoration:none;color:rgba(255,255,255,.55);font-family:var(--mono);font-size:.44rem;letter-spacing:.15em;text-transform:uppercase;background:rgba(10,10,10,.55);position:relative;transition:color .25s,border-color .25s,background .25s}
-.hero-snav-item::after{content:'';position:absolute;bottom:0;left:0;width:0;height:2px;background:#fff;transition:width .3s ease}
-.hero-snav-item:hover{color:#fff;border-color:rgba(255,255,255,.6);background:rgba(255,255,255,.06)}
-.hero-snav-item:hover::after{width:100%}
-.hero-snav-item svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.3;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
-.cam-bar{display:none}
-
-/* ── HERO ──────────────────────────── */
-
-#hero{position:relative;height:100vh;min-height:600px;display:flex;flex-direction:column;justify-content:center;padding:0 3rem;overflow:hidden}
-.hero-eye{font-size:.6rem;letter-spacing:.55em;color:rgba(255,255,255,.75);font-weight:700;text-transform:uppercase;margin-bottom:1.8rem;padding-left:.6rem;display:flex;align-items:center;flex-wrap:wrap;position:relative;z-index:1;pointer-events:none}
-.hero-titles{position:relative;z-index:1;pointer-events:none}
-.h-rec{pointer-events:auto}
-
-.h-title{font-family:var(--head);font-size:clamp(4.5rem,13vw,13rem);line-height:.88;letter-spacing:.02em;color:#fff;display:inline-block}
-
-@keyframes ga{0%,88%,100%{opacity:0;transform:none;clip-path:inset(0 0 100% 0)}89%{opacity:.85;transform:translateX(-7px);clip-path:inset(8% 0 55% 0)}90%{opacity:.85;transform:translateX(7px);clip-path:inset(45% 0 25% 0)}91%{opacity:.85;transform:translateX(-3px);clip-path:inset(72% 0 8% 0)}92%{opacity:0;transform:none;clip-path:inset(0 0 100% 0)}}
-@keyframes gb{0%,85%,100%{opacity:0;transform:none;clip-path:inset(0 0 100% 0)}86%{opacity:.7;transform:translateX(9px);clip-path:inset(25% 0 50% 0)}87%{opacity:.7;transform:translateX(-9px);clip-path:inset(60% 0 15% 0)}88%{opacity:0;transform:none;clip-path:inset(0 0 100% 0)}}
-
-.h-rec{font-family:var(--head);font-size:clamp(4.5rem,13vw,13rem);line-height:.88;letter-spacing:.02em;color:var(--dim);opacity:.35;display:inline-block;position:relative;cursor:pointer;transition:color .4s,opacity .4s,text-shadow .4s}
-.h-rec::before{content:'.REC';position:absolute;top:0;left:0;font-family:var(--head);font-size:inherit;line-height:inherit;letter-spacing:inherit;color:#bf50ff;filter:blur(32px) brightness(2.8);opacity:0;transition:opacity .55s;pointer-events:none;z-index:-1;white-space:nowrap}
-.h-rec:hover{color:#fff;opacity:1;text-shadow:0 0 12px rgba(255,255,255,1),0 0 35px rgba(210,120,255,.9),0 0 80px rgba(170,60,255,.65),0 0 140px rgba(130,20,255,.35)}
-.h-rec:hover::before{opacity:1}
-
-/* .hero-sub removed — replaced by .hero-snav */
-
-.hero-bottom{position:absolute;bottom:2.5rem;left:3rem;right:3rem;display:flex;justify-content:space-between;align-items:flex-end}
-.scroll-ind{font-size:.58rem;letter-spacing:.4em;color:var(--dim);text-transform:uppercase;display:flex;align-items:center;gap:1rem}
-.scroll-line{width:38px;height:1px;background:var(--dim);position:relative;overflow:hidden}
-.scroll-line::after{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:var(--fg);animation:sl 2s ease-in-out infinite}
-@keyframes sl{to{left:100%}}
-
-#net{position:absolute;inset:0;pointer-events:none;opacity:.22;z-index:0}
-
-.hero-vids{position:absolute;right:6%;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:1.2rem;z-index:2}
-.vid-panel{position:relative;overflow:hidden;border:1px solid rgba(255,255,255,.08);width:210px}
-.vid-pi{position:relative;width:100%;animation:vg 7s infinite}
-.vid-panel:nth-child(1) .vid-pi{animation-delay:0s}.vid-panel:nth-child(2) .vid-pi{animation-delay:2.2s}.vid-panel:nth-child(3) .vid-pi{animation-delay:4.5s}
-.vid-panel video{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;filter:grayscale(.55) contrast(1.25) brightness(.85)}
-.vid-pi::before{content:'';position:absolute;inset:0;z-index:2;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.15) 2px,rgba(0,0,0,.15) 4px);pointer-events:none}
-.vid-lbl{position:absolute;bottom:0;left:0;right:0;z-index:3;font-size:.48rem;letter-spacing:.35em;color:rgba(255,255,255,.45);text-transform:uppercase;padding:.4rem .6rem;background:linear-gradient(to top,rgba(0,0,0,.7),transparent)}
-@keyframes vg{0%,88%,100%{clip-path:none;transform:none;filter:brightness(1)}89%{clip-path:inset(20% 0 55% 0);transform:translateX(6px);filter:brightness(1.3) hue-rotate(15deg)}90%{clip-path:inset(60% 0 12% 0);transform:translateX(-6px);filter:brightness(.7)}91%{clip-path:inset(38% 0 35% 0);transform:translateX(3px);filter:brightness(1.1)}92%{clip-path:none;transform:none;filter:brightness(1)}}
-@media(max-width:900px){.hero-vids{display:none}}
-
-.hero-zone{position:absolute;left:32%;right:260px;top:18%;bottom:22%;z-index:0;overflow:hidden;-webkit-mask-image:radial-gradient(ellipse 92% 48% at 50% 50%,black 10%,transparent 75%);mask-image:radial-gradient(ellipse 92% 48% at 50% 50%,black 10%,transparent 75%);transition:-webkit-mask-image .7s ease,mask-image .7s ease}
-.hero-zone video{width:100%;height:100%;object-fit:cover;opacity:.07;filter:grayscale(.7) contrast(1.2) brightness(.75);transition:opacity .7s ease,filter .7s ease}
-.hero-zone:hover{-webkit-mask-image:none;mask-image:none}
-.hero-zone:hover video{opacity:1;filter:grayscale(0) contrast(1.05) brightness(1)}
-
-.hero-floats{position:absolute;inset:0;pointer-events:none;overflow:hidden}
-.float-word{position:absolute;font-family:var(--mono);font-size:.55rem;letter-spacing:.4em;text-transform:uppercase;color:rgba(255,255,255,.18);animation:float-drift 12s ease-in-out infinite}
-.float-word:nth-child(1){top:18%;left:6%;animation-delay:0s}.float-word:nth-child(2){top:32%;left:7%;animation-delay:1.4s}.float-word:nth-child(3){top:48%;left:5%;animation-delay:2.8s}.float-word:nth-child(4){top:65%;left:8%;animation-delay:.7s}.float-word:nth-child(5){top:22%;right:5%;animation-delay:2s}.float-word:nth-child(6){top:55%;right:6%;animation-delay:3.5s}.float-word:nth-child(7){top:72%;right:7%;animation-delay:1s}
-@keyframes float-drift{0%,100%{opacity:.18;transform:translateY(0)}40%{opacity:.35;transform:translateY(-8px)}70%{opacity:.12;transform:translateY(4px)}}
-
-.meta-corner{position:absolute;font-size:.48rem;letter-spacing:.3em;color:rgba(255,255,255,.3);text-transform:uppercase;font-family:var(--mono);line-height:1.8}
-.meta-tl{top:5.5rem;left:3rem}.meta-tr{top:5.5rem;right:3rem;text-align:right}
-
-.cam-bar{position:absolute;bottom:0;left:0;right:0;display:flex;align-items:center;justify-content:center;gap:1.8rem;padding:1.4rem;border-top:1px solid rgba(255,255,255,.06);background:linear-gradient(to top,rgba(0,0,0,.6),transparent)}
-.cam-btn{width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;cursor:none;transition:background .25s;font-size:.55rem;color:rgba(255,255,255,.4)}
-.cam-btn:hover{background:rgba(255,255,255,.12)}
-.cam-btn.main{width:58px;height:58px;background:rgba(255,255,255,.1);border:2px solid rgba(255,255,255,.3)}
-.cam-rec-ring{width:18px;height:18px;border-radius:50%;background:var(--red);box-shadow:0 0 0 3px rgba(255,0,64,.2);animation:rec-pulse 1.5s ease-in-out infinite}
-@keyframes rec-pulse{0%,100%{box-shadow:0 0 0 3px rgba(255,0,64,.2)}50%{box-shadow:0 0 0 8px rgba(255,0,64,.05)}}
-.cam-icon{display:flex;align-items:center;justify-content:center;font-size:.7rem;opacity:.5}
-.cam-label{font-size:.5rem;letter-spacing:.3em;color:rgba(255,255,255,.2);text-transform:uppercase}
-
-@media(max-width:640px){#hero{padding:0 1.5rem}.hero-bottom{left:1.5rem;right:1.5rem}}
-
-/* ── HERO MOBILE: texto izquierda / video derecha ──────────────────────────── */
-@media(max-width:760px){
-  #hero{padding-left:1.5rem;padding-top:6rem;padding-bottom:4.5rem}
-  .hero-eye{font-size:.42rem;max-width:52vw;margin-bottom:1rem}
-  .hero-titles{max-width:52vw}
-  .h-title,.h-rec{font-size:clamp(2.3rem,9.5vw,3.5rem)}
-  .hero-want-rec{position:relative;z-index:2;margin-top:1.6rem;font-size:.5rem;letter-spacing:.28em;padding:.8rem 1.2rem;white-space:nowrap}
-  /* Video: tira derecha, altura completa, visible */
-  .hero-zone{left:auto!important;right:0!important;top:0!important;bottom:0!important;width:48vw!important;-webkit-mask-image:none!important;mask-image:none!important}
-  .hero-zone video{opacity:.88!important;filter:grayscale(.4) contrast(1.1) brightness(.82)!important}
-  /* Fade del borde izquierdo del video hacia el fondo */
-  .hero-zone::after{content:'';position:absolute;inset:0;background:linear-gradient(to right,rgba(8,8,8,.96) 0%,rgba(8,8,8,.5) 38%,transparent 80%);z-index:1;pointer-events:none}
-  /* Ocultar decoraciones desktop */
-  .hero-snav{display:none!important}
-  .hero-floats{display:none!important}
-  .hero-bottom{display:none!important}
-  #net{display:none!important}
-  .meta-corner{display:none!important}
-}
-
-/* ── HERO DOWN ARROW (solo mobile) ──────────────────────────── */
-.hero-down-arrow{display:none;position:absolute;bottom:1.8rem;left:0;right:0;text-align:center;text-decoration:none;z-index:10}
-.hero-down-arrow svg{width:2.6rem;height:2.6rem;color:rgba(255,255,255,.4);display:inline-block;animation:hero-arrow-bob 2s ease-in-out infinite}
-@keyframes hero-arrow-bob{0%,100%{opacity:.4;transform:translateY(0)}50%{opacity:.76;transform:translateY(7px)}}
-@media(max-width:760px){.hero-down-arrow{display:block}}
-
-/* ── MARQUEE ──────────────────────────── */
-
-.marquee{border-top:1px solid rgba(255,255,255,.06);border-bottom:1px solid rgba(255,255,255,.06);overflow:hidden;padding:1.4rem 0;white-space:nowrap}
-.mq-inner{display:inline-flex;animation:mq 22s linear infinite}
-.mq-item{font-family:var(--head);font-size:1.1rem;letter-spacing:.35em;color:rgba(255,255,255,.55);padding:0 1.8rem;transition:color .25s,text-shadow .25s;cursor:none}
-.mq-item:hover{color:#fff;text-shadow:0 0 18px rgba(255,255,255,.7),0 0 40px rgba(255,255,255,.3)}
-.mq-dot{color:var(--red)!important}
-.marquee:hover .mq-inner{animation-play-state:paused}
-@keyframes mq{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-
-/* ── SECTION BASE ──────────────────────────── */
-
-section{padding:8rem 3rem;position:relative}
-@media(max-width:640px){section{padding:5rem 1.5rem}}
-
-.sec-label{font-size:.58rem;letter-spacing:.55em;color:var(--dim);text-transform:uppercase;margin-bottom:2rem;display:flex;align-items:center;gap:1.5rem}
-.sec-label::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.1)}
-
-.reveal{opacity:0;transform:translateY(28px);transition:opacity .9s ease,transform .9s ease}
-.reveal.in{opacity:1;transform:none}
-
-.sec-title{font-family:var(--head);font-size:clamp(2.4rem,7vw,6.5rem);letter-spacing:.06em;line-height:.95;margin-bottom:1.2rem}
-.sec-sub{font-size:.64rem;letter-spacing:.32em;color:rgba(228,224,216,.5);text-transform:uppercase;margin-bottom:3rem}
-
-
-/* ── ENVIRONMENTS ──────────────────────────── */
-#environments{position:relative;overflow:hidden;border-top:1px solid rgba(255,255,255,.06);display:block;min-height:82vh}
-.inst-bg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;display:block}
-.env-layout{position:relative;z-index:2;min-height:82vh;width:100%}
-.env-tag{position:absolute;top:2.6rem;left:7%;display:flex;align-items:center;gap:.55rem;font-family:var(--mono);font-size:.42rem;letter-spacing:.45em;color:rgba(255,255,255,.28);text-transform:uppercase;z-index:4}
-.env-photo{position:absolute;overflow:hidden;z-index:3}
-.env-photo img{width:100%;height:100%;object-fit:cover;filter:grayscale(1) contrast(1.1) brightness(.85);display:block}
-.env-photo-a{top:14%;left:7%;width:22%;aspect-ratio:2/3;z-index:1}
-.env-photo-b{top:8%;right:8%;width:19%;aspect-ratio:3/4}
-.env-photo .cam-lbl{position:absolute;bottom:.5rem;left:.6rem;font-family:var(--mono);font-size:.38rem;letter-spacing:.4em;color:rgba(255,255,255,.5);text-transform:uppercase}
-.env-mid-txt{position:absolute;top:17%;left:34%;max-width:340px;z-index:4}
-.env-mid-txt p{font-family:var(--mono);font-size:.72rem;letter-spacing:.1em;line-height:2;color:rgba(228,224,216,.6);text-transform:uppercase;margin-bottom:1.6rem}
-.env-word{position:absolute;bottom:0;left:-0.4%;font-family:var(--head);font-size:15vw;color:#fff;line-height:.88;letter-spacing:-.015em;z-index:2;pointer-events:none;white-space:nowrap;transform:scaleX(1.07) skewX(-.8deg);transform-origin:bottom left;text-transform:uppercase;opacity:.96}
-.inst-cta{display:inline-flex;font-family:var(--mono);font-size:.52rem;letter-spacing:.35em;text-transform:uppercase;text-decoration:none;color:var(--red);border-bottom:1px solid currentColor;padding-bottom:.2rem;transition:opacity .25s}
-.inst-cta:hover{opacity:.65}
-.env-cta{display:inline-flex;align-items:center;font-family:var(--mono);font-size:.62rem;letter-spacing:.42em;text-transform:uppercase;text-decoration:none;padding:1rem 2.4rem;border:1px solid rgba(255,255,255,.32);color:rgba(255,255,255,.88);transition:background .3s,color .3s,border-color .3s,box-shadow .3s;width:fit-content;white-space:nowrap}
-.env-cta:hover{background:#fff;color:#000;border-color:#fff;box-shadow:0 0 40px rgba(255,255,255,.45),0 0 90px rgba(255,255,255,.2)}
-
-/* ── INSTALLATIONS (3D VIEWER) ──────────────────────────── */
-
-#installations{position:relative;height:100vh;overflow:hidden;border-top:1px solid rgba(255,255,255,.06)}
-#inst-canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
-.inst-loading{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:10;background:var(--bg);pointer-events:none;transition:opacity .7s}
-.inst-loading p{font-family:var(--mono);font-size:.42rem;letter-spacing:.5em;color:rgba(255,255,255,.4);text-transform:uppercase;margin-bottom:1.4rem}
-.inst-loading-bar{width:180px;height:1px;background:rgba(255,255,255,.12)}
-.inst-loading-fill{height:100%;background:rgba(200,160,255,.6);width:0%;transition:width .3s}
-.inst-hud{position:absolute;inset:0;pointer-events:none;font-family:var(--mono);text-transform:uppercase;letter-spacing:.3em;z-index:2}
-.inst-hud-tl{position:absolute;top:2.4rem;left:2.4rem;display:flex;flex-direction:column;gap:.4rem}
-.inst-hud-num{font-size:.56rem;letter-spacing:.5em;color:var(--red);opacity:.9}
-.inst-hud-sec{font-size:.54rem;letter-spacing:.45em;color:rgba(255,255,255,.3)}
-.inst-hud-tr{position:absolute;top:2.4rem;right:2.4rem;text-align:right;display:flex;flex-direction:column;gap:.4rem;align-items:flex-end}
-.inst-hud-meta{font-size:.4rem;letter-spacing:.35em;color:rgba(255,255,255,.28)}
-#inst-tc{font-size:.42rem;letter-spacing:.35em;color:rgba(200,160,255,.35)}
-.inst-hud-btns{display:flex;gap:.6rem;margin-top:.6rem;pointer-events:auto}
-.inst-hud-l{position:absolute;left:2.4rem;top:50%;transform:translateY(-50%);max-width:250px;pointer-events:auto}
-.inst-proj-title{font-family:var(--head);font-size:clamp(2.8rem,5vw,4.8rem);letter-spacing:.06em;line-height:.9;color:#fff;margin-bottom:1rem}
-.inst-proj-sub{font-size:.42rem;letter-spacing:.2em;color:rgba(255,255,255,.35);line-height:2;margin-bottom:1.6rem}
-.inst-palette{display:flex;gap:5px;margin-bottom:1.6rem}
-.inst-swatch{width:16px;height:16px;border-radius:50%;opacity:.75;border:1px solid rgba(255,255,255,.15)}
-.inst-hud-cta{display:inline-flex;align-items:center;font-size:.4rem;letter-spacing:.4em;color:rgba(255,255,255,.5);text-decoration:none;border:1px solid rgba(255,255,255,.16);padding:.5rem 1.1rem;transition:color .2s,border-color .2s}
-.inst-hud-cta:hover{color:#fff;border-color:rgba(255,255,255,.45)}
-.inst-hud-r{position:absolute;right:2.4rem;top:50%;transform:translateY(-50%);max-width:280px;text-align:right}
-.inst-hud-desc{font-size:.62rem;letter-spacing:.1em;line-height:2;color:rgba(255,255,255,.38)}
-.inst-hud-desc strong{color:rgba(255,255,255,.72)}
-.inst-vbtn{font-family:var(--mono);font-size:.56rem;letter-spacing:.4em;text-transform:uppercase;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.5);padding:.75rem 1.6rem;cursor:pointer;transition:background .2s,color .2s,border-color .2s}
-.inst-vbtn:hover,.inst-vbtn.active{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.35);color:#fff}
-.inst-hud-bottom{position:absolute;bottom:0;left:0;right:0;display:grid;grid-template-columns:auto 1fr;align-items:last baseline;gap:3rem;padding:4rem 2.4rem 2rem;background:linear-gradient(to top,rgba(4,4,4,.92) 0%,rgba(4,4,4,.55) 55%,transparent 100%);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
-.inst-hud-bottom::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(to right,transparent 0%,rgba(200,176,224,.6) 10%,rgba(200,176,224,.6) 90%,transparent 100%);pointer-events:none}
-.inst-bottom-title{font-family:var(--head);font-size:clamp(5rem,11vw,13rem);letter-spacing:.04em;line-height:.88;color:#fff;white-space:nowrap}
-.inst-bottom-desc{font-family:var(--mono);font-size:.74rem;letter-spacing:.1em;line-height:1.8;color:rgba(255,255,255,.52);text-transform:uppercase;max-width:540px;margin:0;padding-bottom:0}
-.inst-hud-br{position:absolute;bottom:2.4rem;right:2.4rem;font-size:.38rem;letter-spacing:.35em;color:rgba(255,255,255,.18)}
-.inst-hint{position:absolute;bottom:5.5rem;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:.38rem;letter-spacing:.4em;color:rgba(255,255,255,.28);text-transform:uppercase;opacity:0;transition:opacity .5s;pointer-events:none;white-space:nowrap}
-@media(max-width:900px){.inst-hud-l,.inst-hud-r{display:none}.inst-hud-br{display:none}.inst-bottom-desc{display:none}}
-
-/* ── CAMERA WORKS ──────────────────────────── */
-
-#camera{
-  position:relative;
-  padding:0;
-  border-top:1px solid rgba(255,255,255,.06);
-}
-.cam-split{
-  position:relative;
-  display:grid;
-  grid-template-columns:1fr 1fr;
-}
-/* grid full-width para los videos */
-.cam-grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:2px;
-  background:rgba(255,255,255,.05);
-}
-
-/* ── LEFT: sticky panel ── */
-.cam-sticky{
-  position:sticky;
-  top:0;
-  height:100vh;
-  background:var(--bg);
-  overflow:hidden;
-  border-right:1px solid rgba(255,255,255,.06);
-}
-.cam-sticky-top{
-  position:absolute;top:1.8rem;left:2.4rem;right:2.4rem;
-  display:flex;justify-content:space-between;align-items:flex-start;
-}
-.cam-eyebrow{
-  font-family:var(--mono);font-size:.42rem;letter-spacing:.45em;
-  color:rgba(255,255,255,.35);text-transform:uppercase;
-}
-.cam-date{
-  font-family:var(--mono);font-size:.42rem;letter-spacing:.3em;
-  color:rgba(255,255,255,.28);
-}
-.cam-big{
-  position:absolute;
-  left:2.4rem;
-  top:50%;
-  transform:translateY(-50%);
-  font-family:var(--head);
-  font-size:clamp(6rem,19vw,19rem);
-  line-height:.82;
-  letter-spacing:-.02em;
-  color:#fff;
-}
-.cam-scroll-hint{position:absolute;bottom:2.6rem;left:2.4rem;font-family:var(--mono);font-size:.42rem;letter-spacing:.45em;text-transform:uppercase;color:rgba(255,255,255,.38);white-space:nowrap;margin:0;animation:reveal-bob 2.2s ease-in-out infinite}
-.cam-info-block{
-  display:flex;flex-direction:column;
-  justify-content:flex-end;
-  gap:2rem;
-  padding:3rem 3.5rem;
-  flex:0 0 auto;
-  min-height:55vh;
-  border-bottom:1px solid rgba(255,255,255,.06);
-}
-.cam-desc{
-  font-family:var(--mono);font-size:.74rem;
-  letter-spacing:.12em;line-height:2;
-  color:rgba(255,255,255,.65);text-transform:uppercase;
-  max-width:380px;
-}
-.yt-btn{
-  display:inline-flex;align-items:center;gap:.7rem;
-  align-self:flex-start;
-  font-family:var(--mono);font-size:.52rem;letter-spacing:.38em;
-  text-transform:uppercase;text-decoration:none;
-  color:rgba(255,255,255,.8);border:1px solid rgba(255,255,255,.3);
-  padding:.85rem 1.6rem;white-space:nowrap;
-  transition:background .25s,color .25s,border-color .25s;
-}
-.yt-btn:hover{background:#fff;color:#1a38ff;border-color:#fff;}
-
-.cam-right{
-  display:flex;
-  flex-direction:column;
-  background:var(--bg);
-  scrollbar-width:none;
-  -ms-overflow-style:none;
-}
-.cam-right::-webkit-scrollbar{display:none}
-.cam-panel{
-  position:relative;overflow:hidden;
-  flex-shrink:0;
-  aspect-ratio:16/9;background:#0a0a0a;
-}
-.cam-panel img,.cam-panel video{
-  width:100%;height:100%;object-fit:cover;display:block;
-  filter:grayscale(.2) contrast(1.1) brightness(.85);
-  transition:filter .45s,transform .55s;
-}
-.cam-panel:hover img,.cam-panel:hover video{
-  filter:grayscale(0) contrast(1.15) brightness(1);
-  transform:scale(1.03);
-}
-.cam-lbl{
-  position:absolute;bottom:.8rem;left:.9rem;
-  font-family:var(--mono);font-size:.42rem;letter-spacing:.35em;
-  color:rgba(255,255,255,.6);text-transform:uppercase;z-index:2;
-  pointer-events:none;
-}
-.cam-panel-info{
-  position:absolute;inset:0;z-index:3;
-  display:flex;flex-direction:column;justify-content:flex-end;
-  padding:1.2rem;
-  background:linear-gradient(to top,rgba(0,0,0,.75) 0%,transparent 55%);
-  opacity:0;transition:opacity .35s;
-}
-.cam-panel:hover .cam-panel-info{opacity:1;}
-.cam-panel-title{
-  font-family:var(--head);font-size:1.1rem;
-  letter-spacing:.04em;color:#fff;margin-bottom:.3rem;
-}
-.cam-panel-spec{
-  font-family:var(--mono);font-size:.4rem;
-  letter-spacing:.25em;color:rgba(255,255,255,.55);
-  text-transform:uppercase;
-}
-
-/* wide card */
-.cam-panel.wide{ aspect-ratio:21/9; }
-/* stacked panels inside scrollable cam-right */
-.cam-panel-stack{display:flex;flex-direction:column;gap:2px}
-
-@media(max-width:900px){
-  .cam-split{grid-template-columns:1fr;height:auto;overflow:visible;}
-  .cam-sticky{position:relative;height:60vw;min-height:320px;}
-  .cam-right{height:auto;overflow-y:visible;grid-template-columns:1fr;}
-  .cam-grid{grid-template-columns:1fr;}
-  .cam-panel.wide{grid-column:span 1;aspect-ratio:4/3;}
-}
-
-/* ── TÉCNICA ──────────────────────────── */
-
-#tecnica{border-top:1px solid rgba(255,255,255,.06)}
-
-.tec-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1px;background:rgba(255,255,255,.07);margin-top:1rem}
-.tec-card{background:var(--bg);padding:2.8rem 2.4rem;position:relative;overflow:hidden;transition:background .35s}
-.tec-card:hover{background:#0d0d0d}
-.tec-num{font-size:.58rem;letter-spacing:.35em;color:var(--dim);margin-bottom:2rem;display:block}
-.tec-name{font-family:var(--head);font-size:clamp(1.7rem,2.8vw,2.6rem);letter-spacing:.06em;line-height:1.05;margin-bottom:1.4rem;transition:text-shadow .4s}
-.tec-card:hover .tec-name{text-shadow:0 0 12px rgba(255,255,255,.9),0 0 28px rgba(255,255,255,.4)}
-.tec-desc{font-size:.66rem;letter-spacing:.16em;color:rgba(228,224,216,.66);line-height:2.1;text-transform:uppercase}
-.tec-bar{position:absolute;bottom:0;left:0;height:2px;width:0;background:var(--fg);transition:width .5s}
-.tec-card:hover .tec-bar{width:100%}
-
-/* ── VISUALS IN CONTEXT ──────────────────────────── */
-
-#visuals{
-  border-top:1px solid rgba(255,255,255,.06);
-  display:grid;
-  grid-template-columns:17vw 1fr;
-  min-height:100vh;
-}
-
-/* LEFT: sticky viewport window — title scrolls inside via JS */
-.vis-title-col{
-  background:var(--bg);
-  border-right:1px solid rgba(255,255,255,.08);
-  position:sticky;top:0;height:100vh;
-  overflow:hidden;
-  z-index:2;
-}
-.vis-num-sm{
-  position:absolute;top:2rem;left:50%;
-  transform:translateX(-50%);
-  font-family:var(--mono);font-size:.38rem;
-  letter-spacing:.55em;color:rgba(255,255,255,.18);
-  text-transform:uppercase;
-  writing-mode:vertical-rl;
-  white-space:nowrap;
-}
-/* Giant title — JS moves it vertically as section scrolls */
-#visuals .sec-title{
-  position:absolute;
-  top:0;left:50%;
-  transform:translateX(-50%);
-  writing-mode:vertical-lr;
-  white-space:nowrap;
-  font-size:clamp(3.5rem,11.5vw,13rem);
-  line-height:1;
-  letter-spacing:.08em;
-  color:#fff;
-  margin:0;
-  text-transform:uppercase;
-  will-change:transform;
-}
-.vis-rec-dot{
-  position:absolute;bottom:2rem;left:50%;
-  transform:translateX(-50%);
-  width:7px;height:7px;border-radius:50%;
-  background:var(--red);box-shadow:0 0 8px var(--red);
-  z-index:3;
-}
-
-/* RIGHT: content column — videos smaller */
-.vis-comp{
-  display:flex;
-  flex-direction:column;
-  padding:3rem 2.5rem 5rem 2.5rem;
-  gap:0;
-}
-
-/* Text at top-left */
-.vis-txt{
-  align-self:flex-start;
-  max-width:400px;
-  margin-bottom:2rem;
-}
-.vis-txt p{
-  font-family:var(--mono);font-size:.66rem;
-  letter-spacing:.14em;line-height:2.1;
-  color:rgba(228,224,216,.48);text-transform:uppercase;
-}
-.vis-txt p strong{color:rgba(255,255,255,.82)}
-
-/* Image + text side by side */
-.vis-main-row{
-  display:flex;
-  align-items:center;
-  gap:3rem;
-  margin-bottom:1rem;
-}
-.vis-main-row .vi-main{
-  flex:0 0 62%;
-  width:auto;
-  align-self:auto;
-}
-/* Secondary text — right of image */
-.vis-txt-b{
-  flex:1;
-  min-width:0;
-}
-.vis-txt-b p{
-  font-family:var(--mono);font-size:.66rem;
-  letter-spacing:.14em;line-height:2.1;
-  color:rgba(228,224,216,.52);text-transform:uppercase;
-}
-.vis-txt-b p strong{color:rgba(255,255,255,.86)}
-
-/* Shared image base */
-.vi{
-  position:relative;overflow:hidden;cursor:none;flex-shrink:0;
-}
-.vi img,.vi video{
-  display:block;width:100%;height:100%;
-  object-fit:cover;
-  filter:grayscale(.25) contrast(1.1) brightness(.85);
-  transition:filter .45s,transform .55s;
-}
-.vi:hover img,.vi:hover video{
-  filter:grayscale(0) contrast(1.15) brightness(1);
-  transform:scale(1.03);
-}
-.vi-sm img{
-  object-position:center center;
-}
-.vi-lbl{
-  position:absolute;bottom:.65rem;left:.8rem;
-  font-family:var(--mono);font-size:.4rem;
-  letter-spacing:.38em;color:rgba(255,255,255,.55);
-  text-transform:uppercase;z-index:2;pointer-events:none;
-}
-
-/* Big main image — reducido */
-.vi-main{
-  width:62%;
-  aspect-ratio:16/10;
-  align-self:flex-start;
-}
-
-/* Row of smaller images below */
-.vis-sm-row{
-  display:flex;
-  gap:1rem;
-  margin-top:1rem;
-  align-items:flex-start;
-}
-.vi-sm{
-  flex:0 0 26%;
-  aspect-ratio:4/3;
-}
-.vis-end-txt{font-family:var(--mono);font-size:.72rem;letter-spacing:.12em;line-height:2;color:rgba(228,224,216,.62);text-transform:uppercase;margin-top:2.5rem;max-width:560px}
-.vis-end-txt strong{color:rgba(255,255,255,.92)}
-
-@media(max-width:900px){
-  #visuals{grid-template-columns:1fr}
-  .vis-title-col{position:relative;height:auto;overflow:visible}
-  #visuals .sec-title{position:relative;left:auto;writing-mode:horizontal-tb;transform:none;font-size:clamp(2.5rem,8vw,5rem);white-space:normal}
-  .vis-comp{padding:2rem}
-  .vi-main{width:100%}
-  .vis-sm-row{flex-wrap:wrap}
-  .vi-sm{flex:0 0 45%}
-  .vi-sm:nth-child(2){margin-top:0}
-}
-@media(max-width:640px){
-  .vi-sm{flex:0 0 100%}
-}
-
-/* ── ART ──────────────────────────── */
-
-#art{border-top:1px solid rgba(255,255,255,.06)}
-
-.art-layout{display:grid;grid-template-columns:1fr 1fr;gap:5rem;margin-bottom:5rem;align-items:start}
-@media(max-width:900px){.art-layout{grid-template-columns:1fr;gap:3rem}}
-
-.art-text p{font-size:.68rem;letter-spacing:.16em;line-height:2.2;color:rgba(228,224,216,.68);text-transform:uppercase;margin-bottom:1.4rem}
-.art-text p strong{color:var(--fg)}
-
-.tec-tags{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:1.8rem}
-.tec-tag{font-size:.48rem;letter-spacing:.35em;text-transform:uppercase;border:1px solid rgba(255,255,255,.15);padding:.3rem .9rem;color:rgba(255,255,255,.45);transition:all .25s;cursor:none}
-.tec-tag:hover{border-color:rgba(255,255,255,.4);color:rgba(255,255,255,.8)}
-.tec-cards{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:rgba(255,255,255,.07);margin-top:2.5rem;width:100%}
-.tec-card{background:var(--bg);padding:1.8rem 1.6rem;display:flex;flex-direction:column;gap:.55rem;cursor:none;transition:background .3s}
-.tec-card:hover{background:rgba(255,255,255,.035)}
-.tec-card-num{font-family:var(--mono);font-size:.38rem;letter-spacing:.44em;color:rgba(255,255,255,.2);text-transform:uppercase}
-.tec-card-name{font-family:var(--head);font-size:clamp(1.1rem,2.2vw,2rem);letter-spacing:.04em;color:rgba(255,255,255,.78);line-height:.95;text-transform:uppercase;transition:color .3s}
-.tec-card:hover .tec-card-name{color:#fff}
-
-.art-proc{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:2px;background:rgba(255,255,255,.09);aspect-ratio:1/1;isolation:isolate}
-.art-panel{position:relative;overflow:hidden}
-.art-panel img,.art-panel video{width:100%;height:100%;object-fit:cover;display:block;transition:filter .5s}
-.art-panel:nth-child(1) img,.art-panel:nth-child(1) video{filter:contrast(1.15) brightness(.92)}
-.art-panel:nth-child(2) img,.art-panel:nth-child(2) video{filter:contrast(1.3) brightness(.9) sepia(.4) saturate(1.4) hue-rotate(-10deg)}
-.art-panel:nth-child(3) img,.art-panel:nth-child(3) video{filter:grayscale(1) contrast(1.6) brightness(.85)}
-.art-panel:nth-child(4) img,.art-panel:nth-child(4) video{filter:grayscale(1) contrast(1.7) brightness(1.25) invert(.32)}
-.art-panel-lbl{position:absolute;top:.6rem;left:.7rem;font-size:.48rem;letter-spacing:.3em;color:rgba(255,255,255,.5);text-transform:uppercase;z-index:2}
-
-.art-gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:rgba(255,255,255,.07);isolation:isolate;margin:4rem auto;max-width:55%}
-.ag{position:relative;overflow:hidden;cursor:none;aspect-ratio:4/3}
-.ag.span2{grid-column:span 2;aspect-ratio:16/7}
-.ag img,.ag video{display:block;width:100%;height:100%;object-fit:cover;filter:grayscale(.4) contrast(1.1) brightness(.9);transition:filter .4s}
-.ag:hover img,.ag:hover video{filter:grayscale(0) contrast(1.15) brightness(1)}
-.ag-overlay{position:absolute;inset:0;z-index:3;display:flex;align-items:flex-end;padding:1.2rem;background:linear-gradient(to top,rgba(0,0,0,.65),transparent 55%);opacity:0;transition:opacity .35s}
-.ag:hover .ag-overlay{opacity:1}
-.ag-lbl{font-size:.5rem;letter-spacing:.4em;color:rgba(255,255,255,.8);text-transform:uppercase}
-@media(max-width:640px){.art-gallery{grid-template-columns:1fr}.ag.span2{grid-column:span 1}}
-
-/* ── ARTWORKS REVEAL ──────────────────────────── */
-#artworks{overflow:hidden}
-.art-zone{position:relative;overflow:hidden}
-.art-rect{position:absolute;background:#fff;mix-blend-mode:difference;z-index:5;pointer-events:none;opacity:0;transition:opacity .2s;box-sizing:border-box}
-.art-rect.visible{opacity:1}
-.art-ol{display:none}
-.art-ol .sec-label{display:flex;gap:2rem;font-family:var(--mono);font-size:.52rem;letter-spacing:.35em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:1.2rem}
-.art-ol .sec-title{font-family:var(--head);font-size:clamp(2.4rem,7vw,6.5rem);letter-spacing:.06em;line-height:.95;margin-bottom:1.2rem;color:transparent;-webkit-text-stroke:2px rgba(255,255,255,.9)}
-.art-ol .art-intro{font-family:var(--mono);font-size:.62rem;letter-spacing:.2em;line-height:2.1;color:rgba(255,255,255,.45);text-transform:uppercase;margin-bottom:3.5rem}
-.art-ol .art-intro::before{content:'> ';color:var(--red);opacity:.7}
-.art-ol .art-layout{display:grid;grid-template-columns:1fr 1fr;gap:5rem;margin-bottom:5rem;align-items:start}
-.art-ol .art-text p{font-size:.68rem;letter-spacing:.16em;line-height:2.2;color:rgba(255,255,255,.42);text-transform:uppercase;margin-bottom:1.4rem}
-.art-ol .art-text strong{color:rgba(255,255,255,.7)}
-.art-ol .tec-cards{background:rgba(255,255,255,.06);margin-top:2.5rem;margin-bottom:3rem}
-.art-ol .tec-card{background:#0d0d0d}
-.art-ol .tec-card-num{color:rgba(255,255,255,.18)}
-.art-ol .tec-card-name{color:rgba(255,255,255,.42)}
-.art-ol .art-proc-ghost{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:2px;background:#1c1c1c;aspect-ratio:1/1}
-.art-ol .art-panel-ghost{position:relative;overflow:hidden;background:#111;display:flex;align-items:flex-end;padding:.4rem .6rem}
-.art-ol .art-panel-lbl{font-size:.48rem;letter-spacing:.3em;color:rgba(255,255,255,.4);text-transform:uppercase}
-.art-ol .art-gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:#0d0d0d;margin:0 auto;max-width:55%}
-.art-ol .ag-ghost{position:relative;overflow:hidden;background:#111;display:flex;align-items:flex-end;padding:1.2rem;aspect-ratio:4/3}
-.art-ol .ag-ghost.span2{grid-column:span 2}
-.art-ol .ag-ghost-lbl{font-size:.5rem;letter-spacing:.4em;color:rgba(255,255,255,.4);text-transform:uppercase}
-@media(max-width:900px){.art-ol{display:none}.art-rect{display:none}}
-
-/* ── CAMERA REVEAL ──────────────────────────── */
-.cam-line{display:none}
-.cam-ol{display:none}
-#camera.cam-active .cam-ol{display:none}
-@media(max-width:900px){.cam-ol{display:none}.cam-line{display:none}}
-.cam-sticky-ghost{background:var(--bg);border-right:1px solid rgba(255,255,255,.06);position:sticky;top:0;height:100vh;overflow:hidden;display:flex;align-items:center}
-.cam-reveal-hint-wrap{display:none}
-.cam-ol-hint{background:var(--bg);position:sticky;top:0;height:100vh;display:flex;align-items:center;padding-left:2.8rem;}
-.cam-reveal-hint{font-family:var(--mono);font-size:.72rem;letter-spacing:.42em;text-transform:uppercase;color:rgba(255,255,255,.62);white-space:nowrap;margin:0;animation:reveal-bob 2.2s ease-in-out infinite}
-@keyframes reveal-bob{0%,100%{opacity:.35;transform:translateY(0)}50%{opacity:.88;transform:translateY(8px)}}
-.cam-big-ol{font-family:var(--head);font-size:clamp(6rem,19vw,19rem);line-height:.82;letter-spacing:-.02em;color:transparent;-webkit-text-stroke:2px rgba(255,255,255,.75);padding-left:2.4rem}
-@media(max-width:900px){.cam-ol{display:none}.cam-line{display:none}}
-
-/* ── ABOUT ──────────────────────────── */
-
-#about{border-top:1px solid rgba(255,255,255,.06);display:grid;grid-template-columns:1fr 1fr;gap:6rem;align-items:start}
-@media(max-width:900px){#about{grid-template-columns:1fr}.about-vis{display:none}}
-
-.about-title{font-family:var(--head);font-size:clamp(2.5rem,5vw,5rem);letter-spacing:.08em;line-height:1;margin-bottom:2.5rem}
-.about-text{font-size:.68rem;letter-spacing:.16em;color:rgba(228,224,216,.68);line-height:2.5;text-transform:uppercase}
-.about-text strong{color:var(--fg)}
-.about-text p{margin-bottom:1.4rem}
-
-.about-links{margin-top:3rem;display:flex;flex-direction:column;gap:1rem}
-.about-link{display:inline-flex;align-items:center;gap:.9rem;font-family:var(--mono);font-size:.52rem;letter-spacing:.38em;text-transform:uppercase;text-decoration:none;color:rgba(255,255,255,.55);transition:color .25s}
-.about-link:hover{color:#fff}
-.about-yt-list{margin-top:2rem;display:flex;flex-direction:column;gap:1rem}
-.about-yt-item{font-size:.66rem;letter-spacing:.35em;text-transform:uppercase;color:rgba(255,255,255,.55);text-decoration:none;display:flex;align-items:center;gap:.7rem;transition:color .25s}
-.about-yt-item::before{content:'▶';font-size:.52rem;color:var(--red);flex-shrink:0}
-.about-yt-item:hover{color:rgba(255,255,255,.8)}
-.about-yt-label{font-size:.58rem;letter-spacing:.4em;color:var(--dim);text-transform:uppercase;opacity:.6;margin-bottom:.4rem}
-
-.about-vis{position:sticky;top:8rem}
-.hud-frame{width:100%;aspect-ratio:4/3;background:linear-gradient(160deg,#101010,#181818);position:relative;overflow:hidden}
-.hud-frame::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.12) 3px,rgba(0,0,0,.12) 6px);pointer-events:none;z-index:1}
-.hud-corner{position:absolute;width:18px;height:18px}
-.hud-corner.tl{top:.9rem;left:.9rem;border-top:1px solid rgba(255,255,255,.4);border-left:1px solid rgba(255,255,255,.4)}
-.hud-corner.tr{top:.9rem;right:.9rem;border-top:1px solid rgba(255,255,255,.4);border-right:1px solid rgba(255,255,255,.4)}
-.hud-corner.bl{bottom:.9rem;left:.9rem;border-bottom:1px solid rgba(255,255,255,.4);border-left:1px solid rgba(255,255,255,.4)}
-.hud-corner.br{bottom:.9rem;right:.9rem;border-bottom:1px solid rgba(255,255,255,.4);border-right:1px solid rgba(255,255,255,.4)}
-.hud-cross{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:60px;height:60px}
-.hud-cross-h{position:absolute;top:50%;left:0;width:100%;height:1px;background:rgba(255,255,255,.2);transform:translateY(-50%)}
-.hud-cross-v{position:absolute;left:50%;top:0;height:100%;width:1px;background:rgba(255,255,255,.2);transform:translateX(-50%)}
-.hud-cross-c{position:absolute;top:50%;left:50%;width:10px;height:10px;border:1px solid rgba(255,255,255,.5);border-radius:50%;transform:translate(-50%,-50%);animation:pulsec 2s ease-in-out infinite}
-@keyframes pulsec{0%,100%{box-shadow:0 0 0 0 rgba(255,255,255,0)}50%{box-shadow:0 0 0 6px rgba(255,255,255,.08)}}
-.hud-top{position:absolute;top:1.2rem;left:50%;transform:translateX(-50%);display:flex;gap:1.5rem;z-index:2}
-.hud-bottom{position:absolute;bottom:1.2rem;left:50%;transform:translateX(-50%);display:flex;gap:1.5rem;z-index:2}
-.hud-lbl{font-size:.5rem;letter-spacing:.35em;color:rgba(255,255,255,.35);text-transform:uppercase}
-.hud-lbl.red{color:var(--red)}
-.hud-grid{position:absolute;inset:0;z-index:2;background-image:linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px);background-size:40px 40px}
-.hud-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.55;filter:grayscale(.6) contrast(1.2) brightness(.8);z-index:0}
-.hud-scan{position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent);animation:scan 4s ease-in-out infinite;z-index:3}
-@keyframes scan{0%{top:0;opacity:0}10%{opacity:1}90%{opacity:1}100%{top:100%;opacity:0}}
-
-/* ── CONTACT ──────────────────────────── */
-
-#contact{border-top:none;text-align:center;padding:10rem 3rem;background:#fff}
-#contact .cta-title{text-shadow:0 0 80px rgba(0,0,0,.07)}
-#contact .cta-pre{color:rgba(0,0,0,.4)}
-#contact .cta-link{color:rgba(0,0,0,.55);border-color:rgba(0,0,0,.18)}
-#contact .cta-link:hover{background:#0a0a0a;color:#fff;border-color:#0a0a0a}
-#contact .cta-contact-sub{color:rgba(0,0,0,.72)}
-.cta-pre{font-size:.62rem;letter-spacing:.5em;color:var(--dim);text-transform:uppercase;margin-bottom:2rem;display:flex;align-items:center;justify-content:center;gap:.6rem;font-weight:700}
-.cta-title{font-family:var(--head);font-size:clamp(3.5rem,11vw,11rem);letter-spacing:.04em;line-height:.9;margin-bottom:3.5rem;position:relative;display:inline-block;color:#0a0a0a;text-shadow:0 0 55px rgba(255,255,255,.95),0 0 110px rgba(255,255,255,.65),0 0 220px rgba(255,255,255,.35)}
-.cta-title[data-text]::before,.cta-title[data-text]::after{display:none}
-.cta-link{font-size:.62rem;letter-spacing:.45em;color:var(--dim);text-decoration:none;text-transform:uppercase;display:inline-flex;align-items:center;gap:1rem;padding:1.1rem 2.8rem;border:1px solid rgba(255,255,255,.15);transition:background .3s,color .3s,border-color .3s;font-weight:700}
-.cta-link:hover{background:#fff;color:#000;border-color:#fff}
-.cta-contact-sub{font-size:.76rem;letter-spacing:.3em;font-weight:700;color:var(--dim);text-transform:uppercase;margin-top:2rem;opacity:1}
-
-/* ── FOOTER ──────────────────────────── */
-
-footer{border-top:1px solid rgba(255,255,255,.06);padding:2rem 3rem;display:flex;justify-content:space-between;align-items:center}
-.ft-logo{font-family:var(--head);font-size:.95rem;letter-spacing:.3em;color:#fff;opacity:.82}
-.ft-copy{font-size:.52rem;letter-spacing:.3em;color:rgba(255,255,255,.6);opacity:1}
-@media(max-width:640px){footer{flex-direction:column;gap:1rem;text-align:center}}
-
-/* ── MOBILE RESPONSIVE ──────────────────────────── */
-@media(max-width:640px){
-  /* Loader text */
-  .ldr-logo{font-size:clamp(1.4rem,6vw,2.4rem)}
-  .ldr-meta{font-size:.65rem;letter-spacing:.3em}
-  .ldr-pct{font-size:.6rem}
-  /* Section text */
-  .sec-intro{font-size:.76rem}
-  .sec-sub{font-size:.72rem}
-
-  /* ── Hero — centered, bigger, snav horizontal carousel at bottom ── */
-  #hero{height:100dvh;min-height:unset;align-items:center;text-align:center;padding:5.5rem 2rem 2rem}
-  .hero-eye{max-width:100%;text-align:center;justify-content:center;font-size:.57rem;margin-bottom:2rem}
-  .hero-titles{max-width:100%;text-align:center}
-  .h-title,.h-rec{font-size:clamp(4.55rem,16.9vw,6.5rem)}
-  .hero-want-rec{font-size:.72rem;padding:.9rem 1.8rem;letter-spacing:.3em;align-self:center;margin-top:2rem}
-  /* Video full-width behind centered text */
-  .hero-zone{width:100%!important;left:0!important;right:0!important}
-  .hero-zone::after{background:rgba(8,8,8,.52)!important}
-  /* Shortcut cards — horizontal swipe carousel, 2 visible at a time */
-  .hero-snav{position:absolute!important;bottom:5rem!important;left:0!important;right:0!important;display:flex!important;flex-direction:row!important;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;gap:.5rem;padding:0 1rem;box-sizing:border-box;scrollbar-width:none}
-  .hero-snav::-webkit-scrollbar{display:none}
-  .hero-snav-item{flex:0 0 calc(50% - .5rem)!important;scroll-snap-align:start;min-width:0}
-
-  /* ── Environments — flow layout on mobile ── */
-  #environments{min-height:auto;overflow:visible}
-  .env-layout{min-height:auto;display:flex;flex-direction:column;padding:5rem 1.6rem 2.5rem;gap:1.5rem}
-  .env-tag{position:relative;top:auto;left:auto;order:1}
-  .env-word{position:relative;bottom:auto;left:auto;order:2;font-size:clamp(3rem,16vw,5rem);line-height:.9;white-space:normal;transform:none;width:100%;margin-bottom:.5rem}
-  .env-photo{position:relative;top:auto;left:auto;right:auto;width:100%}
-  .env-photo-a{order:3;width:100%;aspect-ratio:3/2}
-  .env-photo-b{display:none}
-  .env-mid-txt{position:relative;top:auto;left:auto;max-width:100%;order:4}
-  .env-mid-txt p{font-size:.64rem;margin-bottom:1.4rem}
-  .env-cta{font-size:.54rem;padding:.9rem 2rem;width:100%;justify-content:center}
-
-  /* ── Installations (#visuals) ── */
-  #visuals .vis-title-col{display:none}
-  .vis-txt{display:none}
-  .vis-comp{padding:2rem 1.5rem}
-  .vis-txt p,.vis-txt-b p,.vis-end-txt{font-size:.74rem}
-  .vi-lbl{font-size:.58rem}
-  .vis-main-row{flex-direction:column;gap:1.5rem}
-  .vis-main-row .vi-main{width:100%;flex:none}
-  .vis-txt-b{width:100%;flex:none}
-  .vi-sm{flex:0 0 calc(50% - .5rem)}
-
-  /* ── Camera section ── */
-  .cam-split{height:auto;overflow:visible}
-  .cam-sticky{position:relative;height:52vw;min-height:180px}
-  .cam-right{height:auto;overflow-y:visible}
-  .cam-info-block{min-height:unset;justify-content:flex-start;padding:2rem 1.5rem}
-  .cam-desc{font-size:.76rem}
-  .cam-scroll-hint{display:none}
-
-  /* ── Artworks / Técnica ── */
-  .tec-desc{font-size:.76rem}
-  .tec-card-name{font-size:clamp(1.4rem,5.5vw,2rem)}
-  .tec-card-num{font-size:.46rem}
-  .art-text p{font-size:.76rem}
-
-  /* About */
-  #about{gap:3rem}
-}
-/* ── ENV → INST BRIDGE ARROW ────────────────────── */
-.env-bridge{display:flex;justify-content:center;align-items:center;padding:1.6rem 0;background:var(--bg)}
-.env-bridge-arrow{font-family:var(--head);font-size:2.2rem;color:rgba(255,255,255,.22);text-decoration:none;display:block;transform:rotate(90deg);line-height:1;transition:color .3s,transform .3s}
-.env-bridge-arrow:hover{color:rgba(255,255,255,.55);transform:rotate(90deg) translateY(4px)}
-
-/* ── ABOUT CAROUSEL ─────────────────────────────── */
-.about-carousel{position:absolute;inset:0;z-index:0}
-.about-carousel-slide{position:absolute;inset:0;opacity:0;transition:opacity 1.4s ease}
-.about-carousel-slide.active{opacity:1}
-.about-carousel-slide img{width:100%;height:100%;object-fit:cover;filter:grayscale(.2) brightness(.55) contrast(1.1)}
-</style>
+<link rel="stylesheet" href="assets/css/site.css">
 <script type="importmap">
 {"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.158.0/examples/jsm/"}}
 </script>
@@ -823,16 +22,13 @@ footer{border-top:1px solid rgba(255,255,255,.06);padding:2rem 3rem;display:flex
     <div class="ldr-fill" id="ldrFill"></div>
     <span class="ldr-pct" id="ldrPct">0%</span>
   </div>
-  <div class="ldr-meta">ARQUITECTURA AUDIOVISUAL &nbsp;·&nbsp; V1.0</div>
 </div>
 
 <div class="cur" id="cur"></div>
 <div class="cur-dot" id="curDot"></div>
 
 <canvas id="grain" aria-hidden="true"></canvas>
-<div id="scanlines" aria-hidden="true"></div>
-<div id="vignette" aria-hidden="true"></div>
-<div id="burn" aria-hidden="true"></div>
+<div id="screen-fx" aria-hidden="true"></div>
 
 <!-- NAV -->
 <nav>
@@ -858,28 +54,28 @@ footer{border-top:1px solid rgba(255,255,255,.06);padding:2rem 3rem;display:flex
   <canvas id="net" aria-hidden="true"></canvas>
 
   <div class="hero-zone">
-    <video autoplay muted loop playsinline>
-      <source src="Videos%20comprimidos/video%20inicio%20editado.webm" type="video/webm">
-      <source src="video%20inicio%20editado.mp4" type="video/mp4">
+    <video data-video-priority="hero" autoplay muted loop playsinline preload="auto">
+      <source src="assets/media/video/hero/video%20inicio%20editado.webm" type="video/webm">
+      <source src="assets/media/video/hero/video%20inicio%20editado.mp4" type="video/mp4">
     </video>
   </div>
 
   <div class="hero-vids" aria-hidden="true">
     <div class="vid-panel">
       <div class="vid-pi">
-        <video autoplay muted loop playsinline><source src="Contenido/Mult-Overlay%20Screen%20Burn%20.mp4" type="video/mp4"></video>
+        <video muted loop playsinline preload="none"><source data-src="assets/media/video/shared/Mult-Overlay%20Screen%20Burn%20.webm" type="video/webm"><source data-src="assets/media/video/shared/Mult-Overlay%20Screen%20Burn%20.mp4" type="video/mp4"></video>
         <span class="vid-lbl">_SCREEN BURN</span>
       </div>
     </div>
     <div class="vid-panel">
       <div class="vid-pi">
-        <video autoplay muted loop playsinline><source src="Contenido/overlay%20fantasia%20.mp4" type="video/mp4"></video>
+        <video muted loop playsinline preload="none"><source data-src="assets/media/video/shared/overlay%20fantasia%20.webm" type="video/webm"><source data-src="assets/media/video/shared/overlay%20fantasia%20.mp4" type="video/mp4"></video>
         <span class="vid-lbl">_OVERLAY</span>
       </div>
     </div>
     <div class="vid-panel">
       <div class="vid-pi">
-        <video autoplay muted loop playsinline><source src="Contenido/4%20File%20In%20Flash%20%20.mp4" type="video/mp4"></video>
+        <video muted loop playsinline preload="none"><source data-src="assets/media/video/overlays/4%20File%20In%20Flash%20%20.webm" type="video/webm"><source data-src="assets/media/video/overlays/4%20File%20In%20Flash%20%20.mp4" type="video/mp4"></video>
         <span class="vid-lbl">_FLASH</span>
       </div>
     </div>
@@ -969,12 +165,12 @@ footer{border-top:1px solid rgba(255,255,255,.06);padding:2rem 3rem;display:flex
     </div>
 
     <div class="env-photo env-photo-a reveal">
-      <img loading="lazy" src="refes%20imagenes%20y%20video/Captura%20de%20pantalla%202026-06-11%20194947.png" alt="LED Wall">
+      <img loading="lazy" src="assets/media/images/environments/Captura%20de%20pantalla%202026-06-11%20194947.webp" alt="LED Wall">
       <span class="cam-lbl">_LED WALL</span>
     </div>
 
     <div class="env-photo env-photo-b reveal">
-      <img loading="lazy" src="refes%20imagenes%20y%20video/Captura%20de%20pantalla%202026-06-11%20194933.png" alt="Laser">
+      <img loading="lazy" src="assets/media/images/environments/Captura%20de%20pantalla%202026-06-11%20194933.webp" alt="Laser">
       <span class="cam-lbl">_LASER</span>
     </div>
 
@@ -984,7 +180,6 @@ footer{border-top:1px solid rgba(255,255,255,.06);padding:2rem 3rem;display:flex
         Identidades visuales temporales para espacios, eventos y entornos.<br><br>
         NIGHTSHOT diseña entornos visuales a través de la luz, la imagen en movimiento, el color y la composición espacial, creando atmósferas propias de cada lugar y cada momento.
       </p>
-      <a href="#about" class="env-cta" data-es="INICIAR PROYECTO →" data-en="START A PROJECT →">INICIAR PROYECTO →</a>
     </div>
 
     <div class="env-word" data-es="ENTORNOS" data-en="ENVIRONMENTS">ENVIRONMENTS</div>
@@ -997,8 +192,11 @@ footer{border-top:1px solid rgba(255,255,255,.06);padding:2rem 3rem;display:flex
 </div>
 
 <!-- 02 — INSTALLATIONS -->
-<section id="installations">
+<section id="installations" class="is-locked">
   <canvas id="inst-canvas"></canvas>
+  <div class="inst-viewer-lock" id="inst-viewer-lock">
+    <button type="button" class="inst-viewer-lock-btn" id="inst-viewer-unlock" aria-controls="inst-canvas" aria-pressed="false" aria-label="Ver e interactuar con el modelo 3D" disabled>VER</button>
+  </div>
   <div class="inst-loading" id="inst-loading">
     <p data-es="CARGANDO ESPACIO" data-en="LOADING SPACE">CARGANDO ESPACIO</p>
     <div class="inst-loading-bar"><div class="inst-loading-fill" id="inst-fill"></div></div>
@@ -1073,7 +271,7 @@ footer{border-top:1px solid rgba(255,255,255,.06);padding:2rem 3rem;display:flex
     <!-- Main image + secondary text side by side -->
     <div class="vis-main-row">
       <div class="vi vi-main reveal">
-        <img loading="lazy" src="refes%20imagenes%20y%20video/Captura%20de%20pantalla%202026-06-11%20194321.png" alt="CRT Stack live">
+        <img loading="lazy" src="assets/media/images/visuals/Captura%20de%20pantalla%202026-06-11%20194321.webp" alt="CRT Stack live">
         <span class="vi-lbl">CRT STACK · LIVE EVENT</span>
       </div>
       <div class="vis-txt-b reveal">
@@ -1087,11 +285,11 @@ footer{border-top:1px solid rgba(255,255,255,.06);padding:2rem 3rem;display:flex
     <!-- Smaller images row below -->
     <div class="vis-sm-row">
       <div class="vi vi-sm reveal">
-        <img loading="lazy" src="imagenes%20web/1-final.JPEG" alt="Live Visual">
+        <img loading="lazy" src="assets/media/images/visuals/1-final.webp" alt="Live Visual">
         <span class="vi-lbl">LIVE · FESTIVAL</span>
       </div>
       <div class="vi vi-sm reveal">
-        <img loading="lazy" src="imagenes%20web/2-final.PNG" alt="Live Visual">
+        <img loading="lazy" src="assets/media/images/visuals/2-final.webp" alt="Live Visual">
         <span class="vi-lbl">SESSION · LIVE</span>
       </div>
     </div>
@@ -1175,19 +373,19 @@ footer{border-top:1px solid rgba(255,255,255,.06);padding:2rem 3rem;display:flex
 
     <div class="art-proc reveal">
       <div class="art-panel">
-        <video autoplay muted loop playsinline><source src="Videos%20comprimidos/EJEMPLOS%20con%20mi%20contenido%20FILM%20LOOK%20COLOR%20GRANDING.webm" type="video/webm"><source src="Contenido/EJEMPLOS%20con%20mi%20contenido%20FILM%20LOOK%20COLOR%20GRANDING.mp4" type="video/mp4"></video>
+        <video muted loop playsinline preload="none"><source data-src="assets/media/video/shared/EJEMPLOS%20con%20mi%20contenido%20FILM%20LOOK%20COLOR%20GRANDING.webm" type="video/webm"><source data-src="assets/media/video/shared/EJEMPLOS%20con%20mi%20contenido%20FILM%20LOOK%20COLOR%20GRANDING.mp4" type="video/mp4"></video>
         <span class="art-panel-lbl">_ORIGINAL</span>
       </div>
       <div class="art-panel">
-        <video autoplay muted loop playsinline><source src="Videos%20comprimidos/EJEMPLO%20general%20con%20visaules%20LOOK%20COLOR%20GRANDING.webm" type="video/webm"><source src="Contenido/EJEMPLO%20general%20con%20visaules%20LOOK%20COLOR%20GRANDING.mp4" type="video/mp4"></video>
+        <video muted loop playsinline preload="none"><source data-src="assets/media/video/shared/Ejemplo%20003.webm" type="video/webm"><source data-src="assets/media/video/shared/Ejemplo%20003.mp4" type="video/mp4"></video>
         <span class="art-panel-lbl">_COLOR</span>
       </div>
       <div class="art-panel">
-        <video autoplay muted loop playsinline><source src="Contenido/Mult-Overlay%20Screen%20Burn%20.mp4" type="video/mp4"></video>
+        <video muted loop playsinline preload="none"><source data-src="assets/media/video/shared/Mult-Overlay%20Screen%20Burn%20.webm" type="video/webm"><source data-src="assets/media/video/shared/Mult-Overlay%20Screen%20Burn%20.mp4" type="video/mp4"></video>
         <span class="art-panel-lbl">_BURN</span>
       </div>
       <div class="art-panel">
-        <video autoplay muted loop playsinline><source src="Contenido/overlay%20fantasia%20.mp4" type="video/mp4"></video>
+        <video muted loop playsinline preload="none"><source data-src="assets/media/video/shared/overlay%20fantasia%20.webm" type="video/webm"><source data-src="assets/media/video/shared/overlay%20fantasia%20.mp4" type="video/mp4"></video>
         <span class="art-panel-lbl">_SOLARIZE</span>
       </div>
     </div>
@@ -1197,29 +395,30 @@ footer{border-top:1px solid rgba(255,255,255,.06);padding:2rem 3rem;display:flex
 
   <div class="art-gallery">
     <div class="ag reveal">
-      <img loading="lazy" src="refes%20imagenes%20y%20video/Captura%20de%20pantalla%202026-06-11%20194336.png" alt="Glitch RGB">
+      <img loading="lazy" src="assets/media/images/artworks/Captura%20de%20pantalla%202026-06-11%20194336.webp" alt="Glitch RGB">
       <div class="ag-overlay"><span class="ag-lbl">_GLITCH RGB</span></div>
     </div>
     <div class="ag span2 reveal">
-      <video autoplay muted loop playsinline>
-        <source src="refes%20imagenes%20y%20video/SaveClip.App_AQOvkVLhKlgx__mQsaS10_UBQharAttw3RA-ErVylm5tr1e9ddkVnC3bkavjuGPY7NyR0xF9_HvGkKvzZ866vawE.mp4" type="video/mp4">
+      <video muted loop playsinline preload="none">
+        <source data-src="assets/media/video/artworks/SaveClip.App_AQOvkVLhKlgx__mQsaS10_UBQharAttw3RA-ErVylm5tr1e9ddkVnC3bkavjuGPY7NyR0xF9_HvGkKvzZ866vawE.webm" type="video/webm">
+        <source data-src="assets/media/video/artworks/SaveClip.App_AQOvkVLhKlgx__mQsaS10_UBQharAttw3RA-ErVylm5tr1e9ddkVnC3bkavjuGPY7NyR0xF9_HvGkKvzZ866vawE.mp4" type="video/mp4">
       </video>
       <div class="ag-overlay"><span class="ag-lbl">_SCREEN BURN — ARQUITECTURA</span></div>
     </div>
     <div class="ag span2 reveal">
-      <img loading="lazy" src="refes%20imagenes%20y%20video/Captura%20de%20pantalla%202026-06-11%20194407.png" alt="Solarize glitch">
+      <img loading="lazy" src="assets/media/images/artworks/Captura%20de%20pantalla%202026-06-11%20194407.webp" alt="Solarize glitch">
       <div class="ag-overlay"><span class="ag-lbl">_SOLARIZE — GLITCH</span></div>
     </div>
     <div class="ag reveal">
-      <img loading="lazy" src="refes%20imagenes%20y%20video/Captura%20de%20pantalla%202026-06-11%20194401.png" alt="Visual">
+      <img loading="lazy" src="assets/media/images/artworks/Captura%20de%20pantalla%202026-06-11%20194401.webp" alt="Visual">
       <div class="ag-overlay"><span class="ag-lbl">_BLOOM</span></div>
     </div>
     <div class="ag span2 reveal">
-      <img loading="lazy" src="imagenes%20web/galeria/1.JPEG" alt="Visual">
+      <img loading="lazy" src="assets/media/images/artworks/1.webp" alt="Visual">
       <div class="ag-overlay"><span class="ag-lbl">_VISUAL 05</span></div>
     </div>
     <div class="ag reveal">
-      <img loading="lazy" src="imagenes%20web/galeria/installatiosn.JPEG" alt="Instalación">
+      <img loading="lazy" src="assets/media/images/artworks/installatiosn.webp" alt="Instalación">
       <div class="ag-overlay"><span class="ag-lbl">_INSTALACIÓN</span></div>
     </div>
   </div>
@@ -1269,9 +468,9 @@ footer{border-top:1px solid rgba(255,255,255,.06);padding:2rem 3rem;display:flex
       </div>
       <div class="cam-panel-stack">
         <div class="cam-panel reveal">
-          <video autoplay muted loop playsinline>
-            <source src="Videos%20comprimidos/EJEMPLOS%20con%20mi%20contenido%20FILM%20LOOK%20COLOR%20GRANDING.webm" type="video/webm">
-            <source src="Contenido/EJEMPLOS%20con%20mi%20contenido%20FILM%20LOOK%20COLOR%20GRANDING.mp4" type="video/mp4">
+          <video muted loop playsinline preload="none">
+            <source data-src="assets/media/video/shared/EJEMPLOS%20con%20mi%20contenido%20FILM%20LOOK%20COLOR%20GRANDING.webm" type="video/webm">
+            <source data-src="assets/media/video/shared/EJEMPLOS%20con%20mi%20contenido%20FILM%20LOOK%20COLOR%20GRANDING.mp4" type="video/mp4">
           </video>
           <div class="cam-panel-info">
             <div class="cam-panel-title">FILM LOOK</div>
@@ -1280,7 +479,7 @@ footer{border-top:1px solid rgba(255,255,255,.06);padding:2rem 3rem;display:flex
           <span class="cam-lbl">_DIGITAL</span>
         </div>
         <div class="cam-panel reveal">
-          <img loading="lazy" src="refes%20imagenes%20y%20video/Captura%20de%20pantalla%202026-06-11%20194437.png" alt="Analog">
+          <img loading="lazy" src="assets/media/images/camera/Captura%20de%20pantalla%202026-06-11%20194437.webp" alt="Analog">
           <div class="cam-panel-info">
             <div class="cam-panel-title" data-es="ANALÓGICO" data-en="ANALOG">ANALÓGICO</div>
             <div class="cam-panel-spec">FILM · 16MM · 2023</div>
@@ -1288,7 +487,7 @@ footer{border-top:1px solid rgba(255,255,255,.06);padding:2rem 3rem;display:flex
           <span class="cam-lbl">_ANALOG</span>
         </div>
         <div class="cam-panel reveal">
-          <img loading="lazy" src="refes%20imagenes%20y%20video/SaveClip.App_649621131_18319161811264589_5853546863548978061_n.jpg" alt="Setup">
+          <img loading="lazy" src="assets/media/images/camera/SaveClip.App_649621131_18319161811264589_5853546863548978061_n.webp" alt="Setup">
           <div class="cam-panel-info">
             <div class="cam-panel-title" data-es="SETUP EN CAMPO" data-en="FIELD SETUP">SETUP EN CAMPO</div>
             <div class="cam-panel-spec" data-es="PRODUCCIÓN · LIVE EVENT" data-en="PRODUCTION · LIVE EVENT">PRODUCCIÓN · LIVE EVENT</div>
@@ -1296,8 +495,7 @@ footer{border-top:1px solid rgba(255,255,255,.06);padding:2rem 3rem;display:flex
           <span class="cam-lbl">_SETUP</span>
         </div>
         <div class="cam-panel wide reveal">
-          <video autoplay muted loop playsinline>
-            <source src="refes%20imagenes%20y%20video/Realtime%20Audioreactive.mp4" type="video/mp4">
+          <video muted loop playsinline preload="none">
           </video>
           <div class="cam-panel-info">
             <div class="cam-panel-title">AUDIOREACTIVO EN VIVO</div>
@@ -1347,10 +545,10 @@ footer{border-top:1px solid rgba(255,255,255,.06);padding:2rem 3rem;display:flex
     <div class="hud-frame">
       <div class="about-carousel">
         <div class="about-carousel-slide active">
-          <img src="imagenes%20web/About%20me/aboutme.JPEG" alt="Nightshot">
+          <img src="assets/media/images/about/aboutme.webp" alt="Nightshot">
         </div>
         <div class="about-carousel-slide">
-          <img src="imagenes%20web/About%20me/aboutme2.JPEG" alt="Nightshot">
+          <img src="assets/media/images/about/aboutme2.webp" alt="Nightshot">
         </div>
       </div>
       <div class="hud-grid"></div>
@@ -1393,791 +591,14 @@ footer{border-top:1px solid rgba(255,255,255,.06);padding:2rem 3rem;display:flex
   <span class="ft-copy" data-es="© 2025 — Todos los derechos reservados" data-en="© 2025 — All rights reserved">© 2025 — Todos los derechos reservados</span>
 </footer>
 
-<script>
-// ── FILM GRAIN ────────────────────────────────
-const gc=document.getElementById('grain'),gx=gc.getContext('2d');
-let gw,gh,gframe=0;
-function resizeGrain(){gw=gc.width=window.innerWidth;gh=gc.height=window.innerHeight}
-function drawGrain(){
-  gframe++;
-  if(gframe%2===0){
-    const scale=1.0,sw=gw/scale|0,sh=gh/scale|0;
-    const img=gx.createImageData(sw,sh),d=img.data;
-    for(let i=0;i<d.length;i+=4){const v=Math.random()*255|0;d[i]=d[i+1]=d[i+2]=v;d[i+3]=38}
-    const tmp=document.createElement('canvas');tmp.width=sw;tmp.height=sh;
-    tmp.getContext('2d').putImageData(img,0,0);
-    gx.clearRect(0,0,gw,gh);gx.imageSmoothingEnabled=false;gx.drawImage(tmp,0,0,gw,gh);
-  }
-  requestAnimationFrame(drawGrain);
-}
-resizeGrain();drawGrain();window.addEventListener('resize',resizeGrain);
 
-// ── CURSOR ────────────────────────────────────
-const cur=document.getElementById('cur'),curDot=document.getElementById('curDot');
-let mx=-100,my=-100,cx2=-100,cy2=-100;
-document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;curDot.style.left=mx+'px';curDot.style.top=my+'px'});
-(function anim(){cx2+=(mx-cx2)*.13;cy2+=(my-cy2)*.13;cur.style.left=cx2+'px';cur.style.top=cy2+'px';requestAnimationFrame(anim)})();
-document.querySelectorAll('a,button,.tec-card').forEach(el=>{
-  el.addEventListener('mouseenter',()=>cur.classList.add('big'));
-  el.addEventListener('mouseleave',()=>cur.classList.remove('big'));
-});
 
-// ── HAMBURGER ─────────────────────────────────
-const ham=document.getElementById('ham'),navLinks=document.getElementById('navLinks');
-ham.addEventListener('click',()=>{ham.classList.toggle('open');navLinks.classList.toggle('open')});
-navLinks.querySelectorAll('a').forEach(a=>{
-  a.addEventListener('click',()=>{ham.classList.remove('open');navLinks.classList.remove('open')});
-});
-const navClose=document.getElementById('navClose');
-if(navClose) navClose.addEventListener('click',()=>{ham.classList.remove('open');navLinks.classList.remove('open')});
-
-// ── LANGUAGE TOGGLE ───────────────────────────
-let lang='es';
-const langBtn=document.getElementById('langToggle');
-
-function applyLang(l){
-  lang=l;
-  document.documentElement.lang=l;
-  langBtn.textContent=l==='es'?'EN':'ES';
-  document.querySelectorAll('[data-es]').forEach(el=>{
-    if(el===langBtn) return;
-    if(el.classList.contains('inst-title')||el.classList.contains('sec-title')||el.classList.contains('cam-big')||el.classList.contains('env-word')) return;
-    const val=el.dataset[l];
-    if(!val) return;
-    el.innerHTML=val;
-  });
-  // cipher decode on section titles
-  document.querySelectorAll('.inst-title[data-es],.sec-title[data-es],.cam-big[data-es],.env-word[data-es]').forEach(el=>{
-    const val=el.dataset[l];
-    if(val) cipherDecode(el,val);
-  });
-  // update cta-title glitch pseudo-element text
-  const ctaTitle=document.querySelector('.cta-title');
-  if(ctaTitle){
-    const t=ctaTitle.dataset[l]||ctaTitle.textContent.trim();
-    ctaTitle.dataset.text=t;
-    ctaTitle.textContent=t;
-  }
-  // update glitch intros and retrigger if visible
-  document.querySelectorAll('.sec-intro').forEach(el=>{
-    const key='glitch'+l.charAt(0).toUpperCase()+l.slice(1);
-    if(el.dataset[key]){
-      el.dataset.glitch=el.dataset[key];
-      el.dataset.typed='';
-      const r=el.getBoundingClientRect();
-      if(r.top<window.innerHeight&&r.bottom>0) glitchType(el);
-    }
-  });
-}
-
-langBtn.addEventListener('click',()=>applyLang(lang==='es'?'en':'es'));
-
-// ── SCROLL REVEAL ─────────────────────────────
-const obs=new IntersectionObserver(entries=>{
-  entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('in')});
-},{threshold:.1});
-document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
-
-// ── ABOUT CAROUSEL ────────────────────────────
-(function(){
-  const slides=document.querySelectorAll('.about-carousel-slide');
-  if(!slides.length) return;
-  let cur=0;
-  setInterval(function(){
-    slides[cur].classList.remove('active');
-    cur=(cur+1)%slides.length;
-    slides[cur].classList.add('active');
-  },8000);
-})();
-
-// ── VISUALS PARALLAX TITLE ─────────────────────
-(function(){
-  const sec=document.getElementById('visuals');
-  const title=sec&&sec.querySelector('.sec-title');
-  if(!sec||!title) return;
-  function tick(){
-    const rect=sec.getBoundingClientRect();
-    const sH=sec.offsetHeight;
-    const vH=window.innerHeight;
-    const tH=title.offsetHeight;
-    const scrollRoom=sH-vH;
-    if(scrollRoom<=0){title.style.transform='translateX(-50%)';return;}
-    const progress=Math.max(0,Math.min(1,-rect.top/scrollRoom));
-    const maxOffset=Math.max(0,tH-vH);
-    title.style.transform=`translateX(-50%) translateY(-${progress*maxOffset}px)`;
-  }
-  window.addEventListener('scroll',tick,{passive:true});
-  tick();
-})();
-
-// ── CIPHER DECODE (for titles on lang switch) ─
-const TCHARS='█▓▒░|/\\#@%ABCDEFGHIJKLMNOPQRSTUVWXYZ01';
-function cipherDecode(el,newHTML){
-  const plain=newHTML.replace(/<br\s*\/?>/gi,'\n');
-  let frame=0;
-  const total=plain.replace(/\n/g,'').length*1.6+6;
-  let iv=setInterval(function(){
-    frame++;
-    let out='';
-    let revealed=0;
-    for(let i=0;i<plain.length;i++){
-      if(plain[i]==='\n'){out+='<br>';continue;}
-      if(revealed<Math.floor(frame/1.5)){
-        out+=plain[i];revealed++;
-      } else {
-        out+=Math.random()>.35?TCHARS[Math.random()*TCHARS.length|0]:'_';
-        revealed++;
-      }
-    }
-    el.innerHTML=out;
-    if(frame>=total){el.innerHTML=newHTML;clearInterval(iv);}
-  },32);
-}
-
-// ── GLITCH TYPE (once on scroll) ─────────────
-const GCHARS='█▓▒░|/\\#@%';
-function glitchType(el){
-  if(el.dataset.typed==='1') return;
-  el.dataset.typed='1';
-  const text=el.dataset.glitch||'';
-  if(!text) return;
-  let i=0;
-  const iv=setInterval(()=>{
-    const gc2=Math.random()>.65?GCHARS[Math.random()*GCHARS.length|0]:'';
-    el.textContent=text.slice(0,i)+gc2+(i<text.length?'_':'');
-    if(Math.random()>.4) i++;
-    if(i>text.length){el.textContent=text;clearInterval(iv)}
-  },38);
-}
-
-document.querySelectorAll('.sec-intro').forEach(el=>{
-  el.dataset.glitch=el.dataset.glitchEs||'';
-});
-
-const glitchObs=new IntersectionObserver(entries=>{
-  entries.forEach(e=>{if(e.isIntersecting) glitchType(e.target)});
-},{threshold:.4});
-document.querySelectorAll('.sec-intro').forEach(el=>glitchObs.observe(el));
-
-// ── TIMECODE ──────────────────────────────────
-(function(){
-  let f=0;
-  const els=['timecode','camtc'].map(id=>document.getElementById(id)).filter(Boolean);
-  setInterval(()=>{
-    f++;
-    const fr=f%25,ss=Math.floor(f/25)%60,mm=Math.floor(f/1500)%60,hh=Math.floor(f/90000)%24;
-    const txt=String(hh).padStart(2,'0')+':'+String(mm).padStart(2,'0')+':'+String(ss).padStart(2,'0')+':'+String(fr).padStart(2,'0');
-    els.forEach(el=>el.textContent=txt);
-  },40);
-})();
-
-// ── NETWORK CANVAS ────────────────────────────
-(function(){
-  const nc=document.getElementById('net');if(!nc) return;
-  const ctx=nc.getContext('2d'),hero=document.getElementById('hero');
-  function resize(){nc.width=hero.offsetWidth;nc.height=hero.offsetHeight}
-  resize();window.addEventListener('resize',resize);
-  const COUNT=55,MAX_DIST=160;
-  const nodes=Array.from({length:COUNT},()=>({x:Math.random()*nc.width,y:Math.random()*nc.height,vx:(Math.random()-.5)*.55,vy:(Math.random()-.5)*.55}));
-  function tick(){
-    ctx.clearRect(0,0,nc.width,nc.height);
-    const W=nc.width,H=nc.height;
-    for(let i=0;i<COUNT;i++)for(let j=i+1;j<COUNT;j++){
-      const dx=nodes[i].x-nodes[j].x,dy=nodes[i].y-nodes[j].y,d=Math.sqrt(dx*dx+dy*dy);
-      if(d<MAX_DIST){ctx.beginPath();ctx.moveTo(nodes[i].x,nodes[i].y);ctx.lineTo(nodes[j].x,nodes[j].y);ctx.strokeStyle=`rgba(255,255,255,${(1-d/MAX_DIST)*.12})`;ctx.lineWidth=.6;ctx.stroke()}
-    }
-    nodes.forEach(n=>{ctx.fillStyle='rgba(255,255,255,.18)';ctx.fillRect(n.x-2.5,n.y-2.5,5,5);n.x+=n.vx;n.y+=n.vy;if(n.x<0||n.x>W)n.vx*=-1;if(n.y<0||n.y>H)n.vy*=-1});
-    if(Math.random()<.004){const n=nodes[Math.random()*COUNT|0];ctx.font='8px Space Mono,monospace';ctx.fillStyle='rgba(255,255,255,.2)';ctx.fillText(`${n.x|0},${n.y|0}`,n.x+6,n.y-4)}
-    requestAnimationFrame(tick);
-  }
-  tick();
-})();
-
-// ── RANDOM GLITCH TEAR ────────────────────────
-function glitchTear(){
-  setTimeout(()=>{
-    const s=(Math.random()-.5)*8;
-    document.body.style.transform=`translateX(${s}px)`;
-    setTimeout(()=>{document.body.style.transform=''},70);
-    setTimeout(()=>{document.body.style.transform=`translateX(${-s*.5}px)`;setTimeout(()=>{document.body.style.transform=''},50)},90);
-    glitchTear();
-  },2500+Math.random()*6000);
-}
-glitchTear();
-
-// ── INSTALACIONES — SALA INMERSIVA (perspective room) ────────────────
-(function(){
-  const cv=document.querySelector('.inst-bg');if(!cv) return;
-  const ctx=cv.getContext('2d');
-  const sec=document.getElementById('environments');
-  if(!sec) return;
-  const cta=sec.querySelector('.inst-cta');
-
-  let W=0,H=0;
-  // vanishing point (fractional)
-  let tvpx=.5,tvpy=.42,vpx=.5,vpy=.42;
-  // zoom: 0=normal, 1=fully zoomed in
-  let tzoom=0,zoom=0;
-  // invert flag for CTA hover
-  let inverted=false;
-
-  function resize(){
-    W=cv.width=sec.offsetWidth;
-    H=cv.height=sec.offsetHeight;
-  }
-
-  sec.addEventListener('mousemove',e=>{
-    const r=sec.getBoundingClientRect();
-    tvpx=.38+(e.clientX-r.left)/r.width*.24;
-    tvpy=.32+(e.clientY-r.top)/r.height*.2;
-  });
-  sec.addEventListener('mouseleave',()=>{tvpx=.5;tvpy=.42});
-
-  if(cta){
-    cta.addEventListener('mouseenter',()=>{tzoom=1;inverted=true});
-    cta.addEventListener('mouseleave',()=>{tzoom=0;inverted=false});
-  }
-
-  function draw(){
-    vpx+=(tvpx-vpx)*.045;
-    vpy+=(tvpy-vpy)*.045;
-    zoom+=(tzoom-zoom)*.04;
-
-    ctx.clearRect(0,0,W,H);
-
-    // invert background on CTA hover
-    if(inverted&&zoom>.05){
-      ctx.fillStyle=`rgba(228,224,216,${zoom*.08})`;
-      ctx.fillRect(0,0,W,H);
-    }
-
-    const VX=vpx*W, VY=vpy*H;
-    // zoom pulls VP toward center-bottom = forward motion
-    const zVX=VX+(W*.5-VX)*zoom*.3;
-    const zVY=VY+(H*.62-VY)*zoom*.4;
-
-    // ── RADIAL RAYS from vanishing point ──
-    const RAYS=32;
-    for(let i=0;i<RAYS;i++){
-      const a=(i/RAYS)*Math.PI*2;
-      const cos=Math.cos(a),sin=Math.sin(a);
-      let tx,ty;
-      if(Math.abs(cos)>1e-6&&Math.abs(sin)>1e-6){
-        const tx1=cos>0?W:0, ty1=zVY+(tx1-zVX)*sin/cos;
-        const ty2=sin>0?H:0, tx2=zVX+(ty2-zVY)*cos/sin;
-        // pick whichever hits first
-        const d1=(tx1-zVX)**2+(ty1-zVY)**2;
-        const d2=(tx2-zVX)**2+(ty2-zVY)**2;
-        if(d1<d2){tx=tx1;ty=ty1}else{tx=tx2;ty=ty2}
-      }else if(Math.abs(cos)<1e-6){
-        tx=zVX;ty=sin>0?H:0;
-      }else{
-        tx=cos>0?W:0;ty=zVY;
-      }
-      tx=Math.max(0,Math.min(W,tx));
-      ty=Math.max(0,Math.min(H,ty));
-
-      // ray brightness: edges dimmer, floor/ceiling area brighter
-      const brightA=.038+zoom*.025;
-      ctx.strokeStyle=`rgba(255,255,255,${brightA})`;
-      ctx.lineWidth=.5;
-      ctx.beginPath();ctx.moveTo(zVX,zVY);ctx.lineTo(tx,ty);ctx.stroke();
-    }
-
-    // ── DEPTH RINGS (concentric perspective rects) ──
-    const DEPTHS=10;
-    for(let d=1;d<=DEPTHS;d++){
-      // t ranges 0→1 as rings go outward; zoom pulls rings inward
-      const raw=d/DEPTHS;
-      const t=Math.max(0,Math.min(1,raw+zoom*.12));
-
-      // rect corners via linear interpolation VP → edges
-      const x0=zVX*(1-t);
-      const y0=zVY*(1-t);
-      const x1=zVX+(W-zVX)*t;
-      const y1=zVY+(H-zVY)*t;
-
-      const alpha=(1-raw)*.075+.01+zoom*.02;
-      // innermost rings get a cyan tint on zoom
-      const r2=inverted?`rgba(0,212,255,${alpha*zoom})`:`rgba(255,255,255,${alpha})`;
-      ctx.strokeStyle=r2;
-      ctx.lineWidth=.55;
-      ctx.strokeRect(x0,y0,x1-x0,y1-y0);
-    }
-
-    // ── FLOOR GRID (bottom third, horizontal parallels) ──
-    const FLOOR=8;
-    for(let f=1;f<=FLOOR;f++){
-      const t=f/FLOOR;
-      // exponential compression toward horizon
-      const yFloor=zVY+(H-zVY)*Math.pow(t,1.6+zoom*.5);
-      // width of the floor line at this depth
-      const spread=(W*.9)*(1-Math.pow(1-t,2));
-      const alpha=t*.06+zoom*.02;
-      ctx.strokeStyle=`rgba(255,255,255,${alpha})`;
-      ctx.lineWidth=.4;
-      ctx.beginPath();
-      ctx.moveTo(zVX-spread/2,yFloor);
-      ctx.lineTo(zVX+spread/2,yFloor);
-      ctx.stroke();
-    }
-
-    // ── VP GLOW ──
-    const glowR=90+zoom*60;
-    const g=ctx.createRadialGradient(zVX,zVY,0,zVX,zVY,glowR);
-    g.addColorStop(0,`rgba(0,212,255,${.055+zoom*.12})`);
-    g.addColorStop(.45,`rgba(0,212,255,.012)`);
-    g.addColorStop(1,'rgba(0,212,255,0)');
-    ctx.fillStyle=g;
-    ctx.beginPath();ctx.arc(zVX,zVY,glowR,0,Math.PI*2);ctx.fill();
-
-    requestAnimationFrame(draw);
-  }
-
-  resize();window.addEventListener('resize',resize);draw();
-})();
-
-// ── TITLE HOVER VIDEO FEEDBACK ────────────────────
-(function(){
-  function initFeedback(el){
-    if(!el||!el.parentElement) return;
-    const parent=el.parentElement;
-    if(getComputedStyle(parent).position==='static') parent.style.position='relative';
-    el.style.position='relative';
-    el.style.zIndex='1';
-
-    // visible canvas
-    const cv=document.createElement('canvas');
-    cv.style.cssText='position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;opacity:0;transition:opacity .35s;z-index:0;mix-blend-mode:screen';
-    parent.insertBefore(cv,el);
-
-    // offscreen buffer for double-buffering
-    const buf=document.createElement('canvas');
-    const bx=buf.getContext('2d');
-    const ctx=cv.getContext('2d');
-
-    let W=0,H=0,raf=null,active=false;
-
-    function init(){
-      W=cv.width=buf.width=el.offsetWidth||500;
-      H=cv.height=buf.height=el.offsetHeight||120;
-      ctx.clearRect(0,0,W,H);
-      // seed: gentle luminous band across midheight
-      ctx.fillStyle='rgba(228,224,216,.22)';
-      ctx.fillRect(0,H*.15,W,H*.7);
-    }
-
-    function tick(){
-      if(!active){raf=null;return}
-      // snapshot current cv into buffer
-      bx.clearRect(0,0,W,H);
-      bx.drawImage(cv,0,0);
-      // clear cv, draw buffer scaled inward (feedback zoom)
-      ctx.clearRect(0,0,W,H);
-      ctx.save();
-      ctx.globalAlpha=.84;
-      const sc=.963;
-      ctx.translate(W*(1-sc)/2, H*(1-sc)/2);
-      ctx.scale(sc,sc);
-      ctx.drawImage(buf,0,0);
-      ctx.restore();
-      // fresh glowing input at center so feedback doesn't die out
-      const cy=H*.42;
-      const g=ctx.createRadialGradient(W*.5,cy,0,W*.5,cy,W*.55);
-      g.addColorStop(0,`rgba(228,224,216,.07)`);
-      g.addColorStop(.55,'rgba(200,190,255,.02)');
-      g.addColorStop(1,'rgba(0,0,0,0)');
-      ctx.globalAlpha=1;
-      ctx.fillStyle=g;
-      ctx.fillRect(0,0,W,H);
-      raf=requestAnimationFrame(tick);
-    }
-
-    el.addEventListener('mouseenter',()=>{
-      active=true;
-      init();
-      cv.style.opacity='1';
-      if(!raf) raf=requestAnimationFrame(tick);
-    });
-    el.addEventListener('mouseleave',()=>{
-      active=false;
-      cv.style.opacity='0';
-      setTimeout(()=>{if(!active) ctx.clearRect(0,0,W,H)},400);
-    });
-  }
-
-  // targets: inst-title, about-title + first sec-title per section
-  document.querySelectorAll('.inst-title,.about-title').forEach(el=>initFeedback(el));
-  ['#camera-works','#art','#tecnica'].forEach(id=>{
-    const el=document.querySelector(id+' .sec-title');
-    if(el) initFeedback(el);
-  });
-})();
-
-// ── ARTWORKS REVEAL (difference blend rectangle) ─────────
-(function(){
-  const zone = document.getElementById('artZone');
-  const rect = document.getElementById('artRect');
-  if(!zone||!rect) return;
-
-  const RW = 0.42;
-  const RH = 0.72;
-
-  function update(cx, cy){
-    const W = zone.offsetWidth  * RW;
-    const H = zone.offsetHeight * RH;
-    const l = Math.max(0, Math.min(cx - W/2, zone.offsetWidth  - W));
-    const t = Math.max(0, Math.min(cy - H/2, zone.offsetHeight - H));
-    rect.style.left   = l+'px';
-    rect.style.top    = t+'px';
-    rect.style.width  = W+'px';
-    rect.style.height = H+'px';
-    rect.classList.add('visible');
-  }
-
-  zone.addEventListener('mousemove', function(e){
-    const r = zone.getBoundingClientRect();
-    update(e.clientX - r.left, e.clientY - r.top);
-  });
-
-  zone.addEventListener('mouseleave', function(){
-    rect.classList.remove('visible');
-  });
-})();
-
-// ── CAMERA REVEAL ──────────────────────────────
-(function(){
-  const sec=document.getElementById('camera');
-  const split=sec&&sec.querySelector('.cam-split');
-  const line=document.getElementById('camLine');
-  const ol=split&&split.querySelector('.cam-ol');
-  if(!sec||!split||!line||!ol) return;
-
-  function setX(pct){
-    const p=Math.max(0,Math.min(100,pct)).toFixed(1);
-    ol.style.clipPath='inset(0 0 0 '+p+'%)';
-    line.style.left=p+'%';
-  }
-
-  split.addEventListener('mousemove',function(e){
-    const r=split.getBoundingClientRect();
-    setX((e.clientX-r.left)/r.width*100);
-    line.classList.add('visible');
-  });
-
-  split.addEventListener('mouseleave',function(){
-    ol.style.clipPath='inset(0 0 0 38%)';
-    line.style.left='38%';
-    line.classList.remove('visible');
-  });
-
-  new IntersectionObserver(function(entries){
-    sec.classList.toggle('cam-active',entries[0].isIntersecting);
-  },{threshold:0.05}).observe(sec);
-})();
-
-// ── VISUALS TITLE SCROLL PARALLAX ─────────────────────────────
-(function(){
-  const sec = document.getElementById('visuals');
-  const titleEl = sec && sec.querySelector('#visuals .sec-title');
-  if(!sec || !titleEl) return;
-  function update(){
-    if(window.innerWidth <= 900){ titleEl.style.transform=''; return; }
-    const rect = sec.getBoundingClientRect();
-    const secH = sec.offsetHeight;
-    const vH = window.innerHeight;
-    const scrollRange = secH - vH;
-    if(scrollRange <= 0) return;
-    const scrolled = Math.max(0, -rect.top);
-    const progress = Math.min(1, scrolled / scrollRange);
-    const titleH = titleEl.offsetHeight;
-    const excess = Math.max(0, titleH - vH);
-    const offset = (progress * excess).toFixed(1);
-    titleEl.style.transform = 'translateX(-50%) translateY(-'+offset+'px)';
-  }
-  window.addEventListener('scroll', update, {passive:true});
-  window.addEventListener('resize', update);
-  update();
-})();
-
-// ── PAGE LOADER ──────────────────────────────────────────────
-(function(){
-  const ldr  = document.getElementById('page-loader');
-  const fill = document.getElementById('ldrFill');
-  const pct  = document.getElementById('ldrPct');
-  if(!ldr||!fill) return;
-
-  // Grain canvas inside loader
-  const lgc = document.getElementById('ldrGrain');
-  let lgx, lgw, lgh, lgActive = true;
-  if(lgc){
-    lgx = lgc.getContext('2d');
-    function resizeLg(){lgw=lgc.width=window.innerWidth;lgh=lgc.height=window.innerHeight}
-    resizeLg();
-    window.addEventListener('resize',resizeLg);
-    (function drawLg(){
-      if(!lgActive) return;
-      const sw=lgw>>1, sh=lgh>>1;
-      const img=lgx.createImageData(sw,sh), d=img.data;
-      for(let i=0;i<d.length;i+=4){const v=Math.random()*255|0;d[i]=d[i+1]=d[i+2]=v;d[i+3]=28}
-      const tmp=document.createElement('canvas');tmp.width=sw;tmp.height=sh;
-      tmp.getContext('2d').putImageData(img,0,0);
-      lgx.clearRect(0,0,lgw,lgh);lgx.imageSmoothingEnabled=false;lgx.drawImage(tmp,0,0,lgw,lgh);
-      requestAnimationFrame(drawLg);
-    })();
-  }
-
-  let p = 0;
-  const startTime = Date.now();
-  const MIN_MS = 2800;
-
-  function setP(v){
-    p = Math.min(100, v);
-    fill.style.width = p.toFixed(1)+'%';
-    if(pct) pct.textContent = Math.round(p)+'%';
-    if(lgc) lgc.style.opacity = (p / 100 * 0.32).toFixed(3);
-  }
-
-  // ease to 88% while waiting for real load
-  const fakeInterval = setInterval(function(){
-    if(p < 88){ setP(p + (88-p)*0.055 + 0.35); }
-    else { clearInterval(fakeInterval); }
-  }, 40);
-
-  function finish(){
-    clearInterval(fakeInterval);
-    const wait = Math.max(0, MIN_MS - (Date.now()-startTime));
-    setTimeout(function(){
-      setP(100);
-      setTimeout(function(){
-        ldr.classList.add('ldr-out');
-        ldr.style.display='none';
-        lgActive = false;
-      }, 900);
-    }, wait);
-  }
-
-  window.addEventListener('load', finish);
-  setTimeout(finish, 9000); // hard cap
-})();
-</script>
 
 <!-- ── INSTALLATIONS 3D VIEWER ────────────────────────────── -->
-<script type="module">
-import * as THREE from 'three';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-const canvas  = document.getElementById('inst-canvas');
-const loading = document.getElementById('inst-loading');
-const fillEl  = document.getElementById('inst-fill');
-const hint    = document.getElementById('inst-hint');
-const tc      = document.getElementById('inst-tc');
-if(!canvas) throw new Error('inst-canvas not found');
 
-const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:false });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-renderer.setClearColor(0x040404, 1);
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type    = THREE.PCFSoftShadowMap;
 
-const scene = new THREE.Scene();
-scene.fog   = new THREE.FogExp2(0x040404, .008);
 
-const cam = new THREE.PerspectiveCamera(42, 1, .1, 2000);
-cam.position.set(0, 18, 40);
-
-const controls = new OrbitControls(cam, canvas);
-controls.enableDamping   = true;
-controls.dampingFactor   = .05;
-controls.minDistance     = 0.1;
-controls.maxDistance     = 200;
-controls.autoRotate      = true;
-controls.autoRotateSpeed = .28;
-controls.enableZoom      = true;
-controls.zoomSpeed       = 1.4;
-
-scene.add(new THREE.AmbientLight(0x080610, 4));
-const keyLight = new THREE.DirectionalLight(0xc8b0ff, 2.2);
-keyLight.position.set(15, 30, 15);
-keyLight.castShadow = true;
-scene.add(keyLight);
-const fillLight = new THREE.DirectionalLight(0x70d5e0, 1.1);
-fillLight.position.set(-20, 8, -10);
-scene.add(fillLight);
-const rimLight = new THREE.DirectionalLight(0xe0a860, .7);
-rimLight.position.set(0, -8, -25);
-scene.add(rimLight);
-const botLight = new THREE.DirectionalLight(0xc8b0e0, .4);
-botLight.position.set(0, -20, 0);
-scene.add(botLight);
-
-const matSolid = new THREE.MeshPhongMaterial({
-  color:0x0e0c12, emissive:0x0a0815, specular:0x3a2860, shininess:45, side:THREE.DoubleSide,
-  transparent:true, opacity:0.07
-});
-const matWire = new THREE.MeshBasicMaterial({
-  color:0xc8b0e0, wireframe:true, transparent:true, opacity:.22, side:THREE.DoubleSide
-});
-
-let initCamPos = null, initTarget = null;
-
-const t0 = Date.now();
-function updateTC(){
-  if(!tc) return;
-  const s = Math.floor((Date.now()-t0)/1000);
-  tc.textContent =
-    String(Math.floor(s/3600)).padStart(2,'0')+':'+
-    String(Math.floor((s%3600)/60)).padStart(2,'0')+':'+
-    String(s%60).padStart(2,'0');
-}
-
-const draco = new DRACOLoader();
-draco.setDecoderPath('https://cdn.jsdelivr.net/npm/three@0.158.0/examples/jsm/libs/draco/');
-const loader = new GLTFLoader();
-loader.setDRACOLoader(draco);
-loader.load(
-  'SPOOK/SPOOK%20feli.glb',
-  (gltf) => {
-    const obj    = gltf.scene;
-    const box    = new THREE.Box3().setFromObject(obj);
-    const center = box.getCenter(new THREE.Vector3());
-    const size   = box.getSize(new THREE.Vector3());
-    const maxDim = Math.max(size.x, size.y, size.z);
-    const s      = 22 / maxDim;
-
-    obj.scale.setScalar(s);
-    obj.position.copy(center.multiplyScalar(-s));
-
-    const wire = obj.clone();
-    obj.traverse(c=>{ if(c.isMesh){ c.material=matSolid; c.castShadow=true; c.receiveShadow=true; }});
-    wire.traverse(c=>{ if(c.isMesh) c.material=matWire; });
-
-    scene.add(obj);
-    scene.add(wire);
-
-    cam.position.set(maxDim*s*.18, maxDim*s*.42, maxDim*s*.62);
-    controls.target.set(0, 0, 0);
-    controls.update();
-
-    initCamPos = cam.position.clone();
-    initTarget = controls.target.clone();
-
-    if(loading){ loading.style.opacity='0'; setTimeout(()=>{ loading.style.display='none'; },700); }
-    if(hint){ setTimeout(()=>{ hint.style.opacity='1'; setTimeout(()=>{ hint.style.opacity='0'; },3200); },900); }
-  },
-  (xhr) => { if(xhr.lengthComputable && fillEl) fillEl.style.width=(xhr.loaded/xhr.total*100).toFixed(1)+'%'; },
-  (err) => {
-    console.warn('GLB load error', err);
-    if(loading){
-      loading.querySelector('p').textContent = 'MODELO NO DISPONIBLE';
-      setTimeout(()=>{ loading.style.opacity='0'; setTimeout(()=>{ loading.style.display='none'; },700); }, 2500);
-    }
-  }
-);
-
-function resize(){
-  const w=canvas.clientWidth, h=canvas.clientHeight;
-  renderer.setSize(w,h,false);
-  cam.aspect=w/h;
-  cam.updateProjectionMatrix();
-}
-resize();
-new ResizeObserver(resize).observe(canvas);
-
-let xray = true;
-const btnXray  = document.getElementById('inst-xray');
-const btnReset = document.getElementById('inst-reset');
-btnXray && btnXray.classList.add('active');
-
-btnXray && btnXray.addEventListener('click', ()=>{
-  xray = !xray;
-  matSolid.transparent = xray;
-  matSolid.opacity     = xray ? 0.07 : 1;
-  matWire.opacity      = xray ? 0.22 : 0.045;
-  btnXray.classList.toggle('active', xray);
-});
-
-btnReset && btnReset.addEventListener('click', ()=>{
-  if(!initCamPos) return;
-  cam.position.copy(initCamPos);
-  controls.target.copy(initTarget);
-  controls.autoRotate = true;
-  controls.update();
-});
-
-canvas.addEventListener('pointerdown', ()=>{ controls.autoRotate=false; });
-
-(function animate(){
-  requestAnimationFrame(animate);
-  controls.update();
-  renderer.render(scene, cam);
-  updateTC();
-})();
-</script>
-
-<script>
-// ── ENVIRONMENTS PHOTO PARALLAX ────────────────────────────────
-(function(){
-  const sec    = document.getElementById('environments');
-  const photoA = sec && sec.querySelector('.env-photo-a');
-  const photoB = sec && sec.querySelector('.env-photo-b');
-  if(!sec || !photoA || !photoB) return;
-  function update(){
-    const r   = sec.getBoundingClientRect();
-    const vh  = window.innerHeight;
-    const raw = (vh - r.top) / (vh + r.height);
-    const p   = Math.max(0, Math.min(1, raw));
-    photoA.style.transform = 'translateY(-'+(p*70).toFixed(1)+'px)';
-    photoB.style.transform = 'translateY(-'+(p*45).toFixed(1)+'px)';
-  }
-  window.addEventListener('scroll', update, {passive:true});
-  update();
-})();
-
-// ── HERO VID-PANELS PARALLAX ────────────────────────────────────
-(function(){
-  const hero   = document.getElementById('hero');
-  const panels = hero && hero.querySelectorAll('.vid-panel');
-  if(!hero || !panels.length) return;
-  const maxPx = [62, 40, 20];
-  function update(){
-    const p = Math.min(1, window.scrollY / hero.offsetHeight);
-    panels.forEach(function(panel, i){
-      panel.style.transform = 'translateY(' + (-(p * maxPx[i]).toFixed(1)) + 'px)';
-    });
-  }
-  window.addEventListener('scroll', update, {passive:true});
-})();
-
-// ── LAZY VIDEO LOADING ──────────────────────────────────────────
-// Todos los videos excepto el hero (primero) se cargan solo cuando
-// están a 400px del viewport, evitando descargar ~530 MB al inicio.
-(function(){
-  const all = document.querySelectorAll('video');
-  const obs = new IntersectionObserver(function(entries){
-    entries.forEach(function(e){
-      if(!e.isIntersecting) return;
-      const v = e.target;
-      v.querySelectorAll('source[data-src]').forEach(function(s){
-        s.src = s.dataset.src;
-        delete s.dataset.src;
-      });
-      v.load();
-      obs.unobserve(v);
-    });
-  },{rootMargin:'400px'});
-
-  all.forEach(function(v, i){
-    if(i === 0) return; // hero carga inmediato
-    v.querySelectorAll('source').forEach(function(s){
-      if(s.src){ s.dataset.src = s.src; s.removeAttribute('src'); }
-    });
-    v.load(); // libera lo que el browser ya cargó
-    obs.observe(v);
-  });
-})();
-</script>
+<script src="assets/js/main.js"></script>
 </body>
 </html>
