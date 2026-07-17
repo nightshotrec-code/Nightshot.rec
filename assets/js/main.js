@@ -234,8 +234,8 @@ if(cur&&curDot&&cursorMotion.matches){
       const y1=zVY+(H-zVY)*t;
 
       const alpha=(1-raw)*.075+.01+zoom*.02;
-      // innermost rings get a cyan tint on zoom
-      const r2=inverted?`rgba(0,212,255,${alpha*zoom})`:`rgba(255,255,255,${alpha})`;
+      // innermost rings get a muted red tint on zoom
+      const r2=inverted?`rgba(190,70,60,${alpha*zoom})`:`rgba(150,55,50,${alpha})`;
       ctx.strokeStyle=r2;
       ctx.lineWidth=.55;
       ctx.strokeRect(x0,y0,x1-x0,y1-y0);
@@ -261,9 +261,9 @@ if(cur&&curDot&&cursorMotion.matches){
     // ── VP GLOW ──
     const glowR=90+zoom*60;
     const g=ctx.createRadialGradient(zVX,zVY,0,zVX,zVY,glowR);
-    g.addColorStop(0,`rgba(0,212,255,${.055+zoom*.12})`);
-    g.addColorStop(.45,`rgba(0,212,255,.012)`);
-    g.addColorStop(1,'rgba(0,212,255,0)');
+    g.addColorStop(0,`rgba(184,74,66,${.055+zoom*.12})`);
+    g.addColorStop(.45,`rgba(170,55,50,.012)`);
+    g.addColorStop(1,'rgba(170,55,50,0)');
     ctx.fillStyle=g;
     ctx.beginPath();ctx.arc(zVX,zVY,glowR,0,Math.PI*2);ctx.fill();
 
@@ -512,7 +512,7 @@ if(cur&&curDot&&cursorMotion.matches){
 
   let p = 0;
   const startTime = Date.now();
-  const MIN_MS = 700;
+  const MIN_MS = 1700;
   const SAFETY_MS = 5000;
   const COMPLETE_PAUSE_MS = 320;
   const FADE_MS = 850;
@@ -535,10 +535,10 @@ if(cur&&curDot&&cursorMotion.matches){
   function finish(){
     if(finished) return;
     finished = true;
-    clearInterval(fakeInterval);
     clearTimeout(safetyTimer);
     const wait = Math.max(0, MIN_MS - (Date.now()-startTime));
     setTimeout(function(){
+      clearInterval(fakeInterval);
       setP(100);
       setTimeout(function(){
         ldr.classList.add('ldr-out');
@@ -598,16 +598,20 @@ navLinks.querySelectorAll('a').forEach(a=>{
 const navClose=document.getElementById('navClose');
 if(navClose) navClose.addEventListener('click',()=>{ham.classList.remove('open');navLinks.classList.remove('open')});
 
-// ── LANGUAGE TOGGLE ───────────────────────────
+// ── LANGUAGE SELECTOR ─────────────────────────
+const langBtns=document.querySelectorAll('.lang-btn[data-lang]');
 let lang='es';
-const langBtn=document.getElementById('langToggle');
 
 function applyLang(l){
   lang=l;
   document.documentElement.lang=l;
-  langBtn.textContent=l==='es'?'EN':'ES';
+  langBtns.forEach(btn=>{
+    const active=btn.dataset.lang===l;
+    btn.classList.toggle('active',active);
+    btn.setAttribute('aria-pressed',String(active));
+  });
+  try{localStorage.setItem('nightshot-lang',l)}catch(e){}
   document.querySelectorAll('[data-es]').forEach(el=>{
-    if(el===langBtn) return;
     if(el.classList.contains('inst-title')||el.classList.contains('sec-title')||el.classList.contains('cam-big')||el.classList.contains('env-word')) return;
     const val=el.dataset[l];
     if(!val) return;
@@ -637,7 +641,10 @@ function applyLang(l){
   });
 }
 
-langBtn.addEventListener('click',()=>applyLang(lang==='es'?'en':'es'));
+langBtns.forEach(btn=>btn.addEventListener('click',()=>applyLang(btn.dataset.lang)));
+let savedLang;
+try{savedLang=localStorage.getItem('nightshot-lang')}catch(e){}
+applyLang(savedLang==='en'?'en':'es');
 
 // ── SCROLL REVEAL ─────────────────────────────
 const obs=new IntersectionObserver(entries=>{
@@ -893,6 +900,62 @@ document.querySelectorAll('.sec-intro').forEach(el=>glitchObs.observe(el));
     }
     managedVideos.forEach(resumeVideo);
   });
+})();
+
+// ── BALAKAO VIDEO CONTROL ─────────────────────────────────────
+(function initBalakaoVideoControl(){
+  const button=document.querySelector('[data-balakao-video-control]');
+  if(!button)return;
+  const video=button.closest('.cam-panel')?.querySelector('video');
+  const icon=button.querySelector('.cam-video-toggle-icon');
+  const rec=button.closest('.cam-video-controls')?.querySelector('.cam-video-rec');
+  if(!video||!icon||!rec)return;
+  let isActuallyPlaying=false;
+
+  function syncControl(){
+    const isPlaying=!video.paused&&!video.ended;
+    const iconSrc=isPlaying?button.dataset.pauseIcon:button.dataset.playIcon;
+    if(icon.getAttribute('src')!==iconSrc)icon.setAttribute('src',iconSrc);
+    button.setAttribute('aria-label',`${isPlaying?'Pause':'Play'} BALAKAO.REC SESSIONS`);
+    rec.hidden=!(isActuallyPlaying&&isPlaying);
+  }
+
+  button.addEventListener('click',()=>{
+    if(video.paused||video.ended){
+      try{
+        const playPromise=video.play();
+        if(playPromise&&typeof playPromise.catch==='function'){
+          playPromise.catch(syncControl);
+        }
+      }catch{
+        syncControl();
+      }
+      return;
+    }
+    video.pause();
+  });
+
+  video.addEventListener('play',()=>{
+    isActuallyPlaying=false;
+    syncControl();
+  });
+  video.addEventListener('playing',()=>{
+    isActuallyPlaying=!video.paused&&!video.ended;
+    syncControl();
+  });
+  video.addEventListener('pause',()=>{
+    isActuallyPlaying=false;
+    syncControl();
+  });
+  video.addEventListener('ended',()=>{
+    isActuallyPlaying=false;
+    syncControl();
+  });
+  video.addEventListener('waiting',()=>{
+    isActuallyPlaying=false;
+    syncControl();
+  });
+  syncControl();
 })();
 
 // ── STAGED INSTALLATIONS 3D MODULE ────────────────────────────
