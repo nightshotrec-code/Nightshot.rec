@@ -31,3 +31,4 @@ desktop.ini
 
 # Local Netlify folder
 .netlify
+.netlify/

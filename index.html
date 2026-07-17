@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NIGHTSHOT.REC</title>
+<link rel="icon" type="image/svg+xml" href="/assets/media/images/favicon/favicon.svg">
+<meta name="theme-color" content="#0a0a0a">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=Press+Start+2P&display=swap" rel="stylesheet">
@@ -17,7 +19,7 @@
 <!-- PAGE LOADER -->
 <div id="page-loader" aria-hidden="true">
   <canvas id="ldrGrain" aria-hidden="true"></canvas>
-  <div class="ldr-logo"><span class="ldr-logo-dot"></span>NIGHTSHOT<span class="ldr-logo-rec">.REC</span></div>
+  <div class="ldr-logo">NIGHTSHOT<span class="ldr-logo-rec">.REC</span></div>
   <div class="ldr-track">
     <div class="ldr-fill" id="ldrFill"></div>
     <span class="ldr-pct" id="ldrPct">0%</span>
@@ -32,17 +34,20 @@
 
 <!-- NAV -->
 <nav>
-  <a href="#hero" class="nav-logo"><span class="rec-dot"></span>NIGHTSHOT.REC</a>
+  <a href="#hero" class="nav-logo">NIGHTSHOT.<span class="nav-logo-rec">REC</span></a>
   <ul class="nav-links" id="navLinks">
     <li class="nav-close-wrap"><button class="nav-close" id="navClose" aria-label="Cerrar menú">✕</button></li>
     <li><a href="#environments" data-es="ENTORNOS" data-en="ENVIRONMENTS">ENTORNOS</a></li>
-    <li><a href="#installations" data-es="INSTALACIONES" data-en="INSTALLATIONS">INSTALACIONES</a></li>
-    <li><a href="#artworks" data-es="ARTWORKS" data-en="ARTWORKS">ARTWORKS</a></li>
+    <li><a href="#installations-content" data-es="INSTALACIONES" data-en="INSTALLATIONS">INSTALACIONES</a></li>
+    <li><a href="#artworks" data-es="VISUALES" data-en="VISUALS">VISUALES</a></li>
     <li><a href="#camera" data-es="CÁMARA" data-en="CAMERA">CÁMARA</a></li>
     <li><a href="#about" data-es="SOBRE MÍ" data-en="ABOUT">SOBRE MÍ</a></li>
   </ul>
   <div class="nav-right">
-    <button class="lang-btn" id="langToggle">EN</button>
+    <div class="lang-selector" role="group" aria-label="Seleccionar idioma">
+      <button class="lang-btn active" id="langEs" type="button" data-lang="es" aria-pressed="true">ES</button>
+      <button class="lang-btn" id="langEn" type="button" data-lang="en" aria-pressed="false">EN</button>
+    </div>
     <button class="ham" id="ham" aria-label="Menu">
       <span></span><span></span><span></span>
     </button>
@@ -90,60 +95,12 @@
   </p>
   <div class="hero-titles">
     <span class="h-title">NIGHTSHOT</span><br>
-    <span class="h-rec">.REC</span>
+    <span class="h-rec" tabindex="0">.REC</span>
   </div>
   <a href="#about" class="hero-want-rec">
     <span class="hero-want-rec-dot"></span>
-    <span data-es="WANT TO REC.?" data-en="WANT TO REC.?">WANT TO REC.?</span>
+    <span data-es="QUIERO GRABAR" data-en="WANT TO REC">QUIERO GRABAR</span>
   </a>
-
-  <div class="hero-snav" role="navigation" aria-label="Secciones">
-    <a href="#environments" class="hero-snav-item" data-es="ENTORNOS" data-en="ENVIRONMENTS">
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <ellipse cx="12" cy="6.5" rx="7" ry="2"/>
-        <line x1="5" y1="6.5" x2="5" y2="17.5"/>
-        <line x1="19" y1="6.5" x2="19" y2="17.5"/>
-        <path d="M5 17.5 Q5 19.5 12 19.5 Q19 19.5 19 17.5"/>
-        <path d="M9.5 5.3 A3.5 1 0 0 1 14.5 5.3"/>
-        <polyline points="14.5,4.3 14.5,6.3 12.5,5.3"/>
-        <path d="M14.5 19 A3.5 1 0 0 1 9.5 19"/>
-        <polyline points="9.5,18 9.5,20 11.5,19"/>
-      </svg>
-      <span data-es="ENTORNOS" data-en="ENVIRONMENTS">ENTORNOS</span>
-    </a>
-    <a href="#installations" class="hero-snav-item" data-es="INSTALACIONES" data-en="INSTALLATIONS">
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M6.5 9.5 Q5 12 6.5 14.5"/>
-        <path d="M4.5 7 Q1.5 12 4.5 17"/>
-        <rect x="7" y="5" width="9" height="14" rx="1"/>
-        <polyline points="18,9 22,12 18,15 18,9"/>
-        <circle cx="22.5" cy="12" r="1"/>
-      </svg>
-      <span data-es="INSTALACIONES" data-en="INSTALLATIONS">INSTALACIONES</span>
-    </a>
-    <a href="#visuals" class="hero-snav-item" data-es="VISUALES" data-en="VISUALS">
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-        <circle cx="12" cy="12" r="3"/>
-      </svg>
-      <span data-es="VISUALES" data-en="VISUALS">VISUALES</span>
-    </a>
-    <a href="#artworks" class="hero-snav-item" data-es="ARTWORKS" data-en="ARTWORKS">
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <line x1="12" y1="2"  x2="12" y2="22"/>
-        <line x1="2"  y1="7"  x2="22" y2="17"/>
-        <line x1="2"  y1="17" x2="22" y2="7"/>
-      </svg>
-      <span data-es="ARTWORKS" data-en="ARTWORKS">ARTWORKS</span>
-    </a>
-    <a href="#camera" class="hero-snav-item" data-es="CÁMARA" data-en="CAMERA">
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
-        <circle cx="12" cy="13" r="4"/>
-      </svg>
-      <span data-es="CÁMARA" data-en="CAMERA">CÁMARA</span>
-    </a>
-  </div>
 
   <a href="#environments" class="hero-down-arrow" aria-label="Ir a Entornos">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 8 12 16 20 8"/></svg>
@@ -159,30 +116,24 @@
   <canvas class="inst-bg" aria-hidden="true"></canvas>
 
   <div class="env-layout">
-    <div class="env-tag">
-      <span class="rec-dot"></span>
-      <span data-es="01 — Entornos" data-en="01 — Environments">01 — Environments</span>
-    </div>
-
     <div class="env-photo env-photo-a reveal">
-      <img loading="lazy" src="assets/media/images/environments/Captura%20de%20pantalla%202026-06-11%20194947.webp" alt="LED Wall">
+      <img loading="lazy" src="assets/media/images/artworks/installatiosn.webp" alt="Silueta trabajando en una instalación iluminada en rojo">
       <span class="cam-lbl">_LED WALL</span>
     </div>
 
     <div class="env-photo env-photo-b reveal">
-      <img loading="lazy" src="assets/media/images/environments/Captura%20de%20pantalla%202026-06-11%20194933.webp" alt="Laser">
+      <img loading="lazy" src="assets/media/images/about/aboutme.webp" alt="Silueta frente a monitores y un haz de luz en una instalación audiovisual">
       <span class="cam-lbl">_LASER</span>
     </div>
 
     <div class="env-mid-txt reveal">
-      <p data-es="Identidades visuales temporales para espacios, eventos y entornos.<br><br>NIGHTSHOT diseña entornos visuales a través de la luz, la imagen en movimiento, el color y la composición espacial, creando atmósferas propias de cada lugar y cada momento."
-         data-en="Temporary visual identities for spaces, events and installations.<br><br>NIGHTSHOT designs visual environments through light, moving image, color and spatial composition, creating atmospheres that belong specifically to each place and moment.">
-        Identidades visuales temporales para espacios, eventos y entornos.<br><br>
-        NIGHTSHOT diseña entornos visuales a través de la luz, la imagen en movimiento, el color y la composición espacial, creando atmósferas propias de cada lugar y cada momento.
+      <p data-es="NIGHTSHOT diseña entornos, visuales e instalaciones a través de la luz, la imagen en movimiento, el color, la materialidad y la composición espacial, creando atmósferas propias de cada lugar y momento."
+         data-en="NIGHTSHOT designs environments, visuals and installations through light, moving image, color, materiality and spatial composition, creating atmospheres specific to each place and moment.">
+        NIGHTSHOT diseña entornos, visuales e instalaciones a través de la luz, la imagen en movimiento, el color, la materialidad y la composición espacial, creando atmósferas propias de cada lugar y momento.
       </p>
     </div>
 
-    <div class="env-word" data-es="ENTORNOS" data-en="ENVIRONMENTS">ENVIRONMENTS</div>
+    <div class="env-word main-section-title-scale" data-es="ENTORNOS" data-en="ENVIRONMENTS">ENVIRONMENTS</div>
   </div>
 </section>
 
@@ -203,8 +154,7 @@
   </div>
   <div class="inst-hud">
     <div class="inst-hud-tl">
-      <div class="inst-hud-num">01 — ENVIRONMENTS</div>
-      <div class="inst-hud-sec" data-es="Arquitectura Audiovisual" data-en="Audiovisual Architecture">Arquitectura Audiovisual</div>
+      <div class="inst-hud-num" data-es="CREANDO UN NUEVO ENTORNO VISUAL" data-en="CREATING A NEW VISUAL ENVIRONMENT">CREANDO UN NUEVO ENTORNO VISUAL</div>
     </div>
     <div class="inst-hud-tr">
       <span class="inst-hud-meta" data-es="SPOOK.ISI — RECONVERSIÓN ESCÉNICA" data-en="SPOOK.ISI — SCENIC RECONVERSION">SPOOK.ISI — RECONVERSIÓN ESCÉNICA</span>
@@ -237,62 +187,52 @@
         entornos inmersivos.
       </p>
     </div>
-    <div class="inst-hud-bottom">
-      <div class="inst-bottom-title">INSTALLATIONS</div>
-      <p class="inst-bottom-desc"
-         data-es="NIGHTSHOT crea instalaciones en las que la imagen en movimiento, la luz, los sistemas analógicos y la composición espacial se funden en una única experiencia audiovisual."
-         data-en="NIGHTSHOT creates installations where moving image, light, analog systems and spatial composition become part of a single audiovisual experience.">NIGHTSHOT crea instalaciones en las que la imagen en movimiento, la luz, los sistemas analógicos y la composición espacial se funden en una única experiencia audiovisual.</p>
-    </div>
     <div class="inst-hud-br" data-es="DRAG · SCROLL · ROTAR" data-en="DRAG · SCROLL · ROTATE">DRAG · SCROLL · ROTAR</div>
   </div>
   <div class="inst-hint" id="inst-hint" data-es="← ARRASTRÁ PARA EXPLORAR →" data-en="← DRAG TO EXPLORE →">← ARRASTRÁ PARA EXPLORAR →</div>
 </section>
 
+<div class="inst-hud-bottom" id="installations-content">
+  <div class="inst-bottom-title main-section-title-scale main-section-title-reduced" data-es="INSTALACIONES" data-en="INSTALLATIONS">INSTALACIONES</div>
+  <p class="sec-intro reveal"
+     data-glitch-es="Obras físicas que nacen y mueren para un evento específico."
+     data-glitch-en="Physical works created to exist and disappear within a specific event."></p>
+  <div class="inst-gallery">
+    <figure class="inst-gallery-item reveal">
+      <img src="assets/media/images/visuals/%7B70915DAB-5973-4E46-996D-C5BED5250A9D%7D.webp" width="908" height="1139" loading="lazy" decoding="async" alt="Instalación de monitores en blanco y negro con figuras concéntricas">
+    </figure>
+    <figure class="inst-gallery-item reveal">
+      <img src="assets/media/images/visuals/2-final.webp" width="1179" height="1621" loading="lazy" decoding="async" alt="Torre de pantallas CRT iluminada entre humo">
+    </figure>
+    <figure class="inst-gallery-item reveal">
+      <img src="assets/media/images/visuals/51.webp" width="1536" height="2048" loading="lazy" decoding="async" alt="Escultura robótica con monitores y circuitos expuestos">
+    </figure>
+    <figure class="inst-gallery-item reveal">
+      <img src="assets/media/images/visuals/7.2.webp" width="1086" height="1062" loading="lazy" decoding="async" alt="Vista en blanco y negro de equipos CRT y cámaras en un espacio escénico">
+    </figure>
+    <figure class="inst-gallery-item reveal">
+      <img src="assets/media/images/visuals/7.3.webp" width="1586" height="992" loading="lazy" decoding="async" alt="Pantalla translúcida con figuras y reflejos en blanco y negro">
+    </figure>
+    <figure class="inst-gallery-item reveal">
+      <img src="assets/media/images/visuals/IMG_2459.webp" width="1536" height="2048" loading="lazy" decoding="async" alt="Estructura escénica triangular con pantallas iluminadas en naranja">
+    </figure>
+    <figure class="inst-gallery-item reveal">
+      <img src="assets/media/images/visuals/IMG_8350.webp" width="1536" height="2048" loading="lazy" decoding="async" alt="Detalle de monitores CRT y reflejos de luz naranja">
+    </figure>
+    <figure class="inst-gallery-item reveal">
+      <img src="assets/media/images/visuals/vlcsnap-2025-11-05-23h54m18s643.webp" width="2059" height="3432" loading="lazy" decoding="async" alt="Torre de pantallas CRT con visuales rojas entre humo">
+    </figure>
+    <figure class="inst-gallery-item reveal">
+      <img src="assets/media/images/visuals/vlcsnap-2026-07-17-02h39m31s174.webp" width="1792" height="2673" loading="lazy" decoding="async" alt="Instalación suspendida con rostros proyectados entre cadenas">
+    </figure>
+  </div>
+</div>
+
 <!-- 03 — VISUALS IN CONTEXT -->
 <section id="visuals">
 
-  <!-- LEFT: wide title column — huge wrapping text -->
-  <div class="vis-title-col">
-    <span class="vis-num-sm" data-es="03 — INSTALACIONES" data-en="03 — INSTALLATIONS">03 — INSTALACIONES</span>
-    <h2 class="sec-title" data-es="INSTALACIONES" data-en="INSTALLATIONS">INSTALACIONES</h2>
-  </div>
-
-  <!-- RIGHT: stacked content -->
+  <!-- Stacked gallery content -->
   <div class="vis-comp">
-
-    <!-- Text block top-right -->
-    <div class="vis-txt">
-      <p data-es="Visuales funcionando en entornos reales.<br><br>Clips en discotecas, festivales, conciertos y actuaciones en directo, donde el sonido, la arquitectura y el público forman parte de <strong>una misma experiencia</strong>." data-en="Visuals working in real environments.<br><br>Clips in clubs, festivals, concerts and live performances, where sound, architecture and the audience are part of <strong>the same experience</strong>.">
-        Visuales funcionando en entornos reales.<br><br>
-        Clips en discotecas, festivales, conciertos y actuaciones en directo, donde el sonido, la arquitectura y el público forman parte de <strong>una misma experiencia</strong>.
-      </p>
-    </div>
-
-    <!-- Main image + secondary text side by side -->
-    <div class="vis-main-row">
-      <div class="vi vi-main reveal">
-        <img loading="lazy" src="assets/media/images/visuals/Captura%20de%20pantalla%202026-06-11%20194321.webp" alt="CRT Stack live">
-        <span class="vi-lbl">CRT STACK · LIVE EVENT</span>
-      </div>
-      <div class="vis-txt-b reveal">
-        <p data-es="Las imágenes no existen solamente como contenido digital, sino como parte de <strong>una experiencia colectiva y temporal</strong>.<br><br>Registros de eventos, documentación de directos, festivales y clubes donde el material visual se activa en tiempo real." data-en="Images do not exist only as digital content, but as part of <strong>a collective and temporary experience</strong>.<br><br>Event recordings, live show documentation, festivals and clubs where visual material is activated in real time.">
-          Las imágenes no existen solamente como contenido digital, sino como parte de <strong>una experiencia colectiva y temporal</strong>.<br><br>
-          Registros de eventos, documentación de directos, festivales y clubes donde el material visual se activa en tiempo real.
-        </p>
-      </div>
-    </div>
-
-    <!-- Smaller images row below -->
-    <div class="vis-sm-row">
-      <div class="vi vi-sm reveal">
-        <img loading="lazy" src="assets/media/images/visuals/1-final.webp" alt="Live Visual">
-        <span class="vi-lbl">LIVE · FESTIVAL</span>
-      </div>
-      <div class="vi vi-sm reveal">
-        <img loading="lazy" src="assets/media/images/visuals/2-final.webp" alt="Live Visual">
-        <span class="vi-lbl">SESSION · LIVE</span>
-      </div>
-    </div>
 
     <p class="vis-end-txt reveal"
        data-es="Lo que sucede en escena no puede repetirse — y eso es exactamente lo que lo hace <strong>parte del evento.</strong>"
@@ -303,7 +243,7 @@
   </div><!-- /vis-comp -->
 </section>
 
-<!-- 04 — ARTWORKS -->
+<!-- 03 — VISUALS -->
 <section id="artworks">
 
   <div class="art-zone" id="artZone">
@@ -313,8 +253,8 @@
 
   <!-- Outline overlay (right side of line) -->
   <div class="art-ol" aria-hidden="true">
-    <div class="sec-label"><span>04</span><span>Artworks</span></div>
-    <h2 class="sec-title">ARTWORKS</h2>
+    <div class="sec-label"><span>03</span><span data-es="VISUALES" data-en="VISUALS">VISUALES</span></div>
+    <h2 class="sec-title" data-es="VISUALES" data-en="VISUALS">VISUALES</h2>
     <p class="art-intro">El laboratorio. De aquí nace el lenguaje.</p>
     <div class="art-layout">
       <div class="art-text">
@@ -347,8 +287,8 @@
     </div>
   </div>
 
-  <div class="sec-label"><span>04</span><span data-es="Obras" data-en="Artworks">Artworks</span></div>
-  <h2 class="sec-title reveal" data-es="OBRAS" data-en="ARTWORKS">ARTWORKS</h2>
+  <div class="sec-label"><span>03</span><span data-es="VISUALES" data-en="VISUALS">VISUALES</span></div>
+  <h2 class="sec-title reveal main-section-title-scale main-section-title-reduced" data-es="VISUALES" data-en="VISUALS">VISUALES</h2>
 
   <p class="sec-intro reveal"
      data-glitch-es="El laboratorio. De aquí nace el lenguaje."
@@ -373,7 +313,7 @@
 
     <div class="art-proc reveal">
       <div class="art-panel">
-        <video muted loop playsinline preload="none"><source data-src="assets/media/video/shared/EJEMPLOS%20con%20mi%20contenido%20FILM%20LOOK%20COLOR%20GRANDING.webm" type="video/webm"><source data-src="assets/media/video/shared/EJEMPLOS%20con%20mi%20contenido%20FILM%20LOOK%20COLOR%20GRANDING.mp4" type="video/mp4"></video>
+        <img src="assets/media/images/camera/IMG_2646.webp" alt="Original film look color grading still" loading="lazy" decoding="async">
         <span class="art-panel-lbl">_ORIGINAL</span>
       </div>
       <div class="art-panel">
@@ -454,29 +394,43 @@
         <span class="cam-eyebrow">05 — Camera Works</span>
         <span class="cam-date">2022 — 2025</span>
       </div>
-      <div class="cam-big" data-es="CÁMARA<br>WORKS" data-en="CAMERA<br>WORKS">CAMERA<br>WORKS</div>
-      <p class="cam-scroll-hint" data-es="> DESLIZÁ PARA REVELAR" data-en="> SCROLL TO REVEAL">> DESLIZÁ PARA REVELAR</p>
+      <div class="cam-copy">
+        <div class="cam-big main-section-title-scale main-section-title-reduced" data-es="CÁMARA<br>WORKS" data-en="CAMERA<br>WORKS">CAMERA<br>WORKS</div>
+        <div class="cam-description">
+          <p class="cam-desc"
+             data-es="No se trata únicamente de registrar un evento o capturar una escena, sino de <strong>construir una mirada</strong>."
+             data-en="It is not only about documenting an event or capturing a scene, but about <strong>constructing a point of view</strong>.">No se trata únicamente de registrar un evento o capturar una escena, sino de <strong>construir una mirada</strong>.</p>
+          <p class="cam-services" data-es="Filmmaker · Switch · Streaming · Drone" data-en="Filmmaker · Switch · Streaming · Drone">Filmmaker · Switch · Streaming · Drone</p>
+          <a href="#" target="_blank" class="yt-btn">▶ YOUTUBE</a>
+        </div>
+      </div>
     </div>
 
     <!-- RIGHT: dark info panel + scrolling media -->
     <div class="cam-right">
-      <div class="cam-info-block">
-        <p class="cam-desc"
-           data-es="No se trata únicamente de registrar un evento o capturar una escena, sino de <strong>construir una mirada</strong>.<br><br>Switch · Streaming · Drone"
-           data-en="It's not only about recording an event or capturing a scene, but about <strong>building a gaze</strong>.<br><br>Switch · Streaming · Drone">No se trata únicamente de registrar un evento o capturar una escena, sino de <strong>construir una mirada</strong>.<br><br>Switch · Streaming · Drone</p>
-        <a href="#" target="_blank" class="yt-btn">▶ YOUTUBE</a>
-      </div>
       <div class="cam-panel-stack">
-        <div class="cam-panel reveal">
-          <video muted loop playsinline preload="none">
-            <source data-src="assets/media/video/shared/EJEMPLOS%20con%20mi%20contenido%20FILM%20LOOK%20COLOR%20GRANDING.webm" type="video/webm">
-            <source data-src="assets/media/video/shared/EJEMPLOS%20con%20mi%20contenido%20FILM%20LOOK%20COLOR%20GRANDING.mp4" type="video/mp4">
+        <div class="cam-panel wide reveal">
+          <video muted loop playsinline preload="none" data-video-loaded="1">
+            <source src="assets/media/video/camera/BALAKAO-REC%20%C2%BFQUIENES%20SON2_1.webm" type="video/webm">
+            <source src="assets/media/video/camera/BALAKAO-REC%20%C2%BFQUIENES%20SON2_1.mp4" type="video/mp4">
           </video>
-          <div class="cam-panel-info">
-            <div class="cam-panel-title">FILM LOOK</div>
-            <div class="cam-panel-spec">COLOR GRADING · DIGITAL · 2024</div>
+          <div class="cam-video-controls">
+            <span class="cam-video-rec" aria-hidden="true" hidden>REC</span>
+            <button type="button"
+                    class="cam-video-toggle"
+                    data-balakao-video-control
+                    data-play-icon="assets/media/images/icons/play.png"
+                    data-pause-icon="assets/media/images/icons/pause.png"
+                    aria-label="Play BALAKAO.REC SESSIONS">
+              <img class="cam-video-toggle-icon"
+                   src="assets/media/images/icons/play.png"
+                   alt=""
+                   aria-hidden="true">
+            </button>
           </div>
-          <span class="cam-lbl">_DIGITAL</span>
+          <div class="cam-panel-info">
+            <div class="cam-panel-title">BALAKAO.REC SESSIONS</div>
+          </div>
         </div>
         <div class="cam-panel reveal">
           <img loading="lazy" src="assets/media/images/camera/Captura%20de%20pantalla%202026-06-11%20194437.webp" alt="Analog">
@@ -494,14 +448,13 @@
           </div>
           <span class="cam-lbl">_SETUP</span>
         </div>
-        <div class="cam-panel wide reveal">
-          <video muted loop playsinline preload="none">
-          </video>
+        <div class="cam-panel reveal">
+          <img src="assets/media/images/camera/IMG_2646.webp" alt="Film look color grading camera work" loading="lazy" decoding="async">
           <div class="cam-panel-info">
-            <div class="cam-panel-title">AUDIOREACTIVO EN VIVO</div>
-            <div class="cam-panel-spec">REALTIME · VJ · 2024</div>
+            <div class="cam-panel-title">FILM LOOK</div>
+            <div class="cam-panel-spec">COLOR GRADING · DIGITAL · 2024</div>
           </div>
-          <span class="cam-lbl">_LIVE</span>
+          <span class="cam-lbl">_DIGITAL</span>
         </div>
       </div>
     </div>
@@ -550,6 +503,9 @@
         <div class="about-carousel-slide">
           <img src="assets/media/images/about/aboutme2.webp" alt="Nightshot">
         </div>
+        <div class="about-carousel-slide">
+          <img src="assets/media/images/about/0D6CBE8A-4079-48B2-9AEF-FCF3577D7B5D.webp" width="1415" height="1436" loading="lazy" decoding="async" alt="NIGHTSHOT artist portrait">
+        </div>
       </div>
       <div class="hud-grid"></div>
       <div class="hud-scan"></div>
@@ -583,7 +539,7 @@
   <a href="mailto:hola@nightshot.rec" class="cta-link reveal">
     <span class="rec-dot"></span>hola@nightshot.rec
   </a>
-  <p class="cta-contact-sub" data-es="Entornos · Instalaciones · Visuales · Artworks · Cámara" data-en="Environments · Installations · Visuals · Artworks · Camera">Environments · Installations · Visuals · Artworks · Camera</p>
+  <p class="cta-contact-sub" data-es="Entornos · Instalaciones · Visuales · Cámara" data-en="Environments · Installations · Visuals · Camera">Entornos · Instalaciones · Visuales · Cámara</p>
 </section>
 
 <footer>
