@@ -765,7 +765,7 @@ document.querySelectorAll('.sec-intro').forEach(el=>glitchObs.observe(el));
   if(root.dataset.videoLifecycleInitialized==='1')return;
   root.dataset.videoLifecycleInitialized='1';
 
-  const videos=Array.from(document.querySelectorAll('video'));
+  const videos=Array.from(document.querySelectorAll('video')).filter(video=>!video.closest('#camera'));
   const priorityVideos=videos.filter(video=>video.dataset.videoPriority==='hero');
   const lazyVideos=videos.filter(video=>video.dataset.videoPriority!=='hero'&&hasUsableSources(video));
   const managedVideos=[...priorityVideos,...lazyVideos];
@@ -904,24 +904,33 @@ document.querySelectorAll('.sec-intro').forEach(el=>glitchObs.observe(el));
 
 // ── BALAKAO VIDEO CONTROL ─────────────────────────────────────
 (function initBalakaoVideoControl(){
-  const button=document.querySelector('[data-balakao-video-control]');
-  if(!button)return;
-  const video=button.closest('.cam-panel')?.querySelector('video');
-  const icon=button.querySelector('.cam-video-toggle-icon');
-  const rec=button.closest('.cam-video-controls')?.querySelector('.cam-video-rec');
-  if(!video||!icon||!rec)return;
-  let isActuallyPlaying=false;
+  document.querySelectorAll('[data-balakao-video-control]').forEach(button=>{
+    if(button.dataset.videoControlInitialized==='1')return;
+    button.dataset.videoControlInitialized='1';
+    const video=button.closest('.cam-panel')?.querySelector('video');
+    const icon=button.querySelector('.cam-video-toggle-icon');
+    if(!video||!icon)return;
+    const isCameraVideo=Boolean(video.closest('#camera'));
+    const panel=button.closest('.cam-panel');
+    const cameraRight=button.closest('.cam-right');
+    const sharedRecIndicator=Array.from(cameraRight?.children||[]).find(child=>child.classList.contains('cam-rec-indicator'));
+    const recIndicator=panel?.querySelector('.cam-rec-indicator')||(panel?.classList.contains('wide')?sharedRecIndicator:null);
+    const videoLabel=(button.getAttribute('aria-label')||'video').replace(/^(Play|Pause)\s+/,'');
 
-  function syncControl(){
-    const isPlaying=!video.paused&&!video.ended;
-    const iconSrc=isPlaying?button.dataset.pauseIcon:button.dataset.playIcon;
-    if(icon.getAttribute('src')!==iconSrc)icon.setAttribute('src',iconSrc);
-    button.setAttribute('aria-label',`${isPlaying?'Pause':'Play'} BALAKAO.REC SESSIONS`);
-    rec.hidden=!(isActuallyPlaying&&isPlaying);
-  }
+    function syncControl(){
+      const isPlaying=!video.paused&&!video.ended;
+      const iconSrc=isPlaying?button.dataset.pauseIcon:button.dataset.playIcon;
+      if(icon.getAttribute('src')!==iconSrc)icon.setAttribute('src',iconSrc);
+      button.setAttribute('aria-label',`${isPlaying?'Pause':'Play'} ${videoLabel}`);
+      if(isCameraVideo){
+        panel?.classList.toggle('is-playing',isPlaying);
+        if(recIndicator){
+          recIndicator.dataset.recVisible=isPlaying?'true':'false';
+        }
+      }
+    }
 
-  button.addEventListener('click',()=>{
-    if(video.paused||video.ended){
+    function playVideo(){
       try{
         const playPromise=video.play();
         if(playPromise&&typeof playPromise.catch==='function'){
@@ -930,32 +939,75 @@ document.querySelectorAll('.sec-intro').forEach(el=>glitchObs.observe(el));
       }catch{
         syncControl();
       }
-      return;
     }
+
+    function pauseVideo(){
+      video.pause();
+      syncControl();
+    }
+
+    button.addEventListener('click',()=>{
+      if(video.paused||video.ended){
+        playVideo();
+        return;
+      }
+      pauseVideo();
+    });
+
+    video.addEventListener('play',syncControl);
+    video.addEventListener('playing',syncControl);
+    video.addEventListener('pause',syncControl);
+    video.addEventListener('ended',syncControl);
+    video.addEventListener('waiting',syncControl);
+    video.addEventListener('camera-video-paused',syncControl);
+    syncControl();
+  });
+})();
+
+// ── CAMERA WORKS PAUSED VIDEO LIFECYCLE ────────────────────────
+(function initCameraVideoPausedLifecycle(){
+  const section=document.getElementById('camera');
+  if(!section)return;
+  if(section.dataset.cameraVideoLifecycleInitialized==='1')return;
+  section.dataset.cameraVideoLifecycleInitialized='1';
+  const videos=Array.from(section.querySelectorAll('.cam-panel video'));
+  if(!videos.length)return;
+
+  function loadCameraVideoSources(video){
+    if(video.dataset.videoLoaded==='1')return;
+    const sources=Array.from(video.querySelectorAll('source[data-src]'));
+    if(!sources.length)return;
+    sources.forEach(source=>source.setAttribute('src',source.dataset.src));
+    video.dataset.videoLoaded='1';
+    video.load();
+  }
+
+  function pauseCameraVideo(video){
     video.pause();
+    video.dispatchEvent(new CustomEvent('camera-video-paused'));
+  }
+
+  videos.forEach(video=>{
+    video.removeAttribute('autoplay');
+    pauseCameraVideo(video);
   });
 
-  video.addEventListener('play',()=>{
-    isActuallyPlaying=false;
-    syncControl();
+  const cameraVideoObserver=new IntersectionObserver(entries=>{
+    entries.forEach(entry=>{
+      const video=entry.target;
+      if(entry.isIntersecting){
+        loadCameraVideoSources(video);
+        return;
+      }
+      pauseCameraVideo(video);
+    });
+  },{threshold:0.15});
+
+  videos.forEach(video=>cameraVideoObserver.observe(video));
+
+  document.addEventListener('visibilitychange',()=>{
+    if(document.hidden)videos.forEach(pauseCameraVideo);
   });
-  video.addEventListener('playing',()=>{
-    isActuallyPlaying=!video.paused&&!video.ended;
-    syncControl();
-  });
-  video.addEventListener('pause',()=>{
-    isActuallyPlaying=false;
-    syncControl();
-  });
-  video.addEventListener('ended',()=>{
-    isActuallyPlaying=false;
-    syncControl();
-  });
-  video.addEventListener('waiting',()=>{
-    isActuallyPlaying=false;
-    syncControl();
-  });
-  syncControl();
 })();
 
 // ── STAGED INSTALLATIONS 3D MODULE ────────────────────────────
