@@ -60,6 +60,7 @@
     transition:color .25s;
   }
   .nav-back:hover{color:#fff;}
+  .is-embedded .nav-back{visibility:hidden;pointer-events:none;}
 
   /* ── HERO (header + viewer apilados) ── */
   .spook-hero{
@@ -107,13 +108,6 @@
     letter-spacing:.04em;line-height:.9;color:#fff;
   }
   .spook-title span{color:var(--lila);}
-  .spook-intro{
-    max-width:380px;text-align:right;
-    font-family:var(--mono);font-size:.55rem;
-    letter-spacing:.1em;line-height:1.9;
-    color:rgba(255,255,255,.5);text-transform:uppercase;
-    flex-shrink:0;
-  }
 
   .spook-hud-br{
     position:absolute;bottom:1.4rem;right:1.8rem;
@@ -333,7 +327,6 @@
   /* ── RESPONSIVE ── */
   @media(max-width:1000px){
     .spook-header{flex-direction:column;align-items:flex-start;padding:6rem 1.8rem 2rem;}
-    .spook-intro{text-align:left;max-width:100%;}
     .spook-palette{grid-template-columns:repeat(2,1fr)}
     .spook-swatch:nth-child(2){border-right:none;}
     .spook-body{grid-template-columns:1fr}
@@ -354,7 +347,7 @@
 
 <nav>
   <a class="nav-logo" href="index.html">Nightshot<span>.rec</span></a>
-  <a class="nav-back" href="index.html">← Volver</a>
+  <a class="nav-back" href="index.html#installations">← Volver</a>
 </nav>
 
 <!-- HERO: header flotante + viewer de fondo -->
@@ -365,13 +358,6 @@
     <span class="spook-label"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--lila);margin-right:.6rem;vertical-align:middle;"></span>Sub-propuesta — Arquitectura Audiovisual</span>
     <h1 class="spook-title">SPOOK<span>.</span></h1>
   </div>
-  <p class="spook-intro">
-    Reconversión escénica y lumínica.<br>
-    Una nueva identidad espacial basada<br>
-    en arquitectura audiovisual,<br>
-    iluminación por escenas<br>
-    y colorimetría propia.
-  </p>
 </div>
 
 <!-- 3D VIEWER -->
@@ -468,6 +454,22 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+const projectBackLink = document.querySelector('.nav-back');
+if(window.parent!==window)document.documentElement.classList.add('is-embedded');
+projectBackLink?.addEventListener('click',event=>{
+  if(window.parent!==window){
+    event.preventDefault();
+    window.parent.postMessage({type:'nightshot-close-environment-project'},location.origin);
+    return;
+  }
+  if(!document.referrer)return;
+  const previousPage=new URL(document.referrer);
+  const cameFromHome=previousPage.origin===location.origin&&(/\/index\.html$/.test(previousPage.pathname)||/\/$/.test(previousPage.pathname));
+  if(!cameFromHome)return;
+  event.preventDefault();
+  history.back();
+});
 
 const canvas  = document.getElementById('spook-canvas');
 const loading = document.getElementById('spook-loading');

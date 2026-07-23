@@ -3,16 +3,20 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 
 let initialized=false;
 const PERF_MODE=new URLSearchParams(window.location.search).get('perf')==='1';
+const SPOOK_VECTOR_COLOR=0xc8b0e0;
+const SPOOK_VECTOR_OPACITY=.22;
+const SPOOK_PREVIEW_AUTO_ROTATE_SPEED=3.54375;
+const SPOOK_PREVIEW_FRAMING_MARGIN=1.0615384615;
 
 export function initInstallationsViewer(){
 const section = document.getElementById('installations');
 const canvas  = document.getElementById('inst-canvas');
-const scrollSafePanel = document.querySelector('.inst-hud-bottom');
-const interactionUnlockButton = document.getElementById('inst-viewer-unlock');
-const projectPanel = section&&section.querySelector('.inst-hud-l');
+const projectDetails = section?[...section.querySelectorAll('.inst-project-detail')]:[];
+const projectOpenLink = section&&section.querySelector('.environment-project-intro__button');
 const DEBUG_3D = new URLSearchParams(window.location.search).get('debug3d') === '1';
 if(initialized||!section||!canvas) return;
 initialized=true;
@@ -24,19 +28,75 @@ const hint    = document.getElementById('inst-hint');
 const tc      = document.getElementById('inst-tc');
 let sectionVisible=false,rafId=0;
 let renderer,scene,cam,controls;
-const NORMAL_DPR_CAP=1.5;
-const INTERACTION_DPR_CAP=1.0;
-const LOCKED_DPR_CAP=0.6;
-const QUALITY_RESTORE_DELAY=350;
-const NORMAL_RENDER_FPS=30;
-const INTERACTION_RENDER_FPS=45;
-const LOCKED_RENDER_FPS=10;
-let currentPixelRatio=0,interactionRestoreTimer=0,interactionActive=false,interactionRenderActive=false;
+const PREVIEW_DPR_CAP=1.0;
+const PREVIEW_RENDER_FPS=30;
+let currentPixelRatio=0;
 let lastRenderWidth=0,lastRenderHeight=0;
 let lastRenderTime=0,renderRequested=true;
-let viewerInteractionUnlocked=!section.classList.contains('is-locked');
 const renderTimestamps=[];
 const drawingBufferSize=new THREE.Vector2();
+let projectOverlay=null,projectFrame=null,projectReturnFocus=null,projectFrameReleaseTimer=0;
+
+function ensureEnvironmentProjectOverlay(){
+  if(projectOverlay)return;
+  projectOverlay=document.createElement('div');
+  projectOverlay.className='environment-project-overlay';
+  projectOverlay.setAttribute('role','dialog');
+  projectOverlay.setAttribute('aria-modal','true');
+  projectOverlay.setAttribute('aria-label','Proyecto completo SPOOK');
+  projectOverlay.innerHTML='<button type="button" class="environment-project-close" aria-label="Cerrar proyecto completo">CERRAR</button><iframe class="environment-project-frame" title="Proyecto completo SPOOK"></iframe>';
+  projectFrame=projectOverlay.querySelector('.environment-project-frame');
+  projectOverlay.querySelector('.environment-project-close').addEventListener('click',()=>updateEnvironmentProjectUI(false));
+  document.body.appendChild(projectOverlay);
+}
+
+function updateEnvironmentProjectUI(isProjectOpen){
+  if(isProjectOpen)ensureEnvironmentProjectOverlay();
+  section.classList.toggle('project-expanded',isProjectOpen);
+  projectDetails.forEach(element=>{
+    element.setAttribute('aria-hidden',String(!isProjectOpen));
+    element.inert=!isProjectOpen;
+  });
+  document.body.classList.toggle('environment-project-open',isProjectOpen);
+  if(projectOverlay){
+    projectOverlay.classList.toggle('is-open',isProjectOpen);
+    projectOverlay.setAttribute('aria-hidden',String(!isProjectOpen));
+  }
+  if(isProjectOpen){
+    clearTimeout(projectFrameReleaseTimer);
+    projectFrameReleaseTimer=0;
+    projectReturnFocus=document.activeElement;
+    if(projectFrame&&!projectFrame.getAttribute('src'))projectFrame.src=projectOpenLink.href;
+    stopRenderLoop();
+    if(controls)controls.enabled=false;
+    requestAnimationFrame(()=>projectOverlay?.querySelector('.environment-project-close')?.focus());
+  }else{
+    if(controls)updateControlsEnabled();
+    requestViewerRender();
+    if(projectReturnFocus instanceof HTMLElement)projectReturnFocus.focus();
+    projectReturnFocus=null;
+    clearTimeout(projectFrameReleaseTimer);
+    projectFrameReleaseTimer=window.setTimeout(()=>{
+      projectFrameReleaseTimer=0;
+      if(projectFrame&&!section.classList.contains('project-expanded'))projectFrame.removeAttribute('src');
+    },400);
+  }
+}
+
+updateEnvironmentProjectUI(false);
+window.addEventListener('pageshow',()=>updateEnvironmentProjectUI(false));
+projectOpenLink?.addEventListener('click',event=>{
+  event.preventDefault();
+  updateEnvironmentProjectUI(true);
+});
+window.addEventListener('keydown',event=>{
+  if(event.key==='Escape'&&section.classList.contains('project-expanded'))updateEnvironmentProjectUI(false);
+});
+window.addEventListener('message',event=>{
+  if(event.origin===location.origin&&event.source===projectFrame?.contentWindow&&event.data?.type==='nightshot-close-environment-project'){
+    updateEnvironmentProjectUI(false);
+  }
+});
 const diagnostics=DEBUG_3D?{
   model:null,
   network:null,
@@ -57,9 +117,8 @@ function updateTC(){
 }
 
 function getTargetRenderFps(){
-  if(!sectionVisible||document.hidden)return 0;
-  if(!viewerInteractionUnlocked)return LOCKED_RENDER_FPS;
-  return interactionActive||interactionRenderActive?INTERACTION_RENDER_FPS:NORMAL_RENDER_FPS;
+  if(!sectionVisible||document.hidden||section.classList.contains('project-expanded'))return 0;
+  return PREVIEW_RENDER_FPS;
 }
 function getTargetFrameInterval(){
   const targetFps=getTargetRenderFps();
@@ -71,7 +130,7 @@ function requestViewerRender(){
 }
 function animate(timestamp){
   rafId=0;
-  if(!initialized||!sectionVisible||document.hidden) return;
+  if(!initialized||!sectionVisible||document.hidden||section.classList.contains('project-expanded')) return;
   const interval=getTargetFrameInterval();
   const elapsed=timestamp-lastRenderTime;
   if(lastRenderTime&&elapsed<interval){
@@ -79,7 +138,7 @@ function animate(timestamp){
     return;
   }
   const controlsChanged=(controls.enabled||controls.autoRotate)&&controls.update()===true;
-  const requiresContinuousRender=controls.autoRotate||interactionActive||interactionRenderActive||controlsChanged;
+  const requiresContinuousRender=controls.autoRotate||controlsChanged;
   if(!requiresContinuousRender&&!renderRequested)return;
   updateTC();
   lastRenderTime=lastRenderTime?timestamp-(elapsed%interval):timestamp;
@@ -93,7 +152,7 @@ function animate(timestamp){
   if(requiresContinuousRender)rafId=requestAnimationFrame(animate);
 }
 function startRenderLoop(){
-  if(!initialized||!sectionVisible||document.hidden||!renderer||!controls||rafId) return;
+  if(!initialized||!sectionVisible||document.hidden||section.classList.contains('project-expanded')||!renderer||!controls||rafId) return;
   rafId=requestAnimationFrame(animate);
 }
 function stopRenderLoop(){
@@ -112,8 +171,8 @@ if(PERF_MODE){
       return {
         initialized,
         visible:sectionVisible&&!document.hidden,
-        locked:!viewerInteractionUnlocked,
-        interactionActive,
+        preview:true,
+        interactionActive:false,
         targetFps:getTargetRenderFps(),
         actualRenderFps:sectionVisible&&renderTimestamps.length>1&&renderTimestamps[renderTimestamps.length-1]>renderTimestamps[0]
           ?(renderTimestamps.length-1)*1000/(renderTimestamps[renderTimestamps.length-1]-renderTimestamps[0])
@@ -252,10 +311,10 @@ function getRendererDiagnostics(){
     'Shadow map type':getShadowMapTypeName(renderer.shadowMap.type),
     'Shadow map autoUpdate':renderer.shadowMap.autoUpdate,
     'Current X-RAY state':xray?'Enabled':'Disabled',
-    'Normal FPS cap':NORMAL_RENDER_FPS,
-    'Interaction FPS cap':INTERACTION_RENDER_FPS,
-    'Normal DPR cap':NORMAL_DPR_CAP,
-    'Interaction DPR cap':INTERACTION_DPR_CAP
+    'Preview FPS cap':PREVIEW_RENDER_FPS,
+    'Preview DPR cap':PREVIEW_DPR_CAP,
+    'Preview interaction':'Disabled',
+    'Auto-rotate speed':controls.autoRotateSpeed
   };
 }
 function printDiagnosticRenderSnapshot(snapshot){
@@ -334,80 +393,35 @@ function captureDiagnosticRenderSnapshot(){
   diagnostics.forceRenderReport=false;
 }
 
-  renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:false });
-  renderer.setClearColor(0x040404, 1);
+  const siteBackground = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || '#080808';
+  renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:true });
+  renderer.setClearColor(siteBackground, 0);
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type    = THREE.PCFSoftShadowMap;
 
   scene = new THREE.Scene();
-  scene.fog = new THREE.FogExp2(0x040404, .008);
+  scene.background = null;
+  scene.fog = new THREE.FogExp2(siteBackground, .008);
 
   cam = new THREE.PerspectiveCamera(42, 1, .1, 2000);
   cam.position.set(0, 18, 40);
 
   controls = new OrbitControls(cam, canvas);
+  controls.enabled         = false;
   controls.enableDamping   = true;
   controls.dampingFactor   = .05;
   controls.minDistance     = 0.1;
   controls.maxDistance     = 200;
   controls.autoRotate      = true;
-  controls.autoRotateSpeed = .28;
-  controls.enableZoom      = true;
-  controls.zoomSpeed       = 1.4;
+  controls.autoRotateSpeed = SPOOK_PREVIEW_AUTO_ROTATE_SPEED;
+  controls.enableRotate    = false;
+  controls.enableZoom      = false;
+  controls.enablePan       = false;
 
-  let pointerOverScrollSafePanel=false;
-  function updateInteractionButtonPosition(){
-    if(!interactionUnlockButton)return;
-    const sectionRect=section.getBoundingClientRect();
-    const buttonHeight=interactionUnlockButton.offsetHeight;
-    const projectRect=projectPanel&&projectPanel.getBoundingClientRect();
-    const projectPanelVisible=projectPanel&&getComputedStyle(projectPanel).display!=='none'&&projectRect.width>0;
-    const left=projectPanelVisible?projectRect.left-sectionRect.left:24;
-    const top=projectPanelVisible
-      ?Math.max(24,projectRect.top-sectionRect.top-buttonHeight-12)
-      :Math.max(24,section.clientHeight*.5-buttonHeight*.5);
-    interactionUnlockButton.style.setProperty('--inst-lock-left',`${left}px`);
-    interactionUnlockButton.style.setProperty('--inst-lock-top',`${top}px`);
-  }
   function updateControlsEnabled(){
-    controls.enabled=viewerInteractionUnlocked&&sectionVisible&&!document.hidden&&!pointerOverScrollSafePanel;
+    controls.enabled=false;
   }
-  function setViewerInteractionState(unlocked){
-    viewerInteractionUnlocked=unlocked;
-    clearTimeout(interactionRestoreTimer);
-    interactionRestoreTimer=0;
-    interactionActive=false;
-    interactionRenderActive=false;
-    section.classList.toggle('is-locked',!unlocked);
-    section.classList.toggle('is-interactive',unlocked);
-    if(interactionUnlockButton){
-      interactionUnlockButton.textContent=unlocked?'LOCK':'VER';
-      interactionUnlockButton.setAttribute('aria-pressed',String(unlocked));
-      interactionUnlockButton.setAttribute('aria-label',unlocked?'Bloquear interacción 3D':'Ver e interactuar con el modelo 3D');
-    }
-    updateControlsEnabled();
-    applyPixelRatio(unlocked?NORMAL_DPR_CAP:LOCKED_DPR_CAP);
-    lastRenderTime=0;
-    requestViewerRender();
-  }
-  if(scrollSafePanel){
-    scrollSafePanel.addEventListener('pointerenter',()=>{
-      pointerOverScrollSafePanel=true;
-      updateControlsEnabled();
-    });
-    scrollSafePanel.addEventListener('pointerleave',()=>{
-      pointerOverScrollSafePanel=false;
-      updateControlsEnabled();
-    });
-  }
-  if(interactionUnlockButton){
-    updateInteractionButtonPosition();
-    interactionUnlockButton.disabled=false;
-    interactionUnlockButton.addEventListener('click',()=>{
-      setViewerInteractionState(!viewerInteractionUnlocked);
-    });
-  }
-  setViewerInteractionState(viewerInteractionUnlocked);
+  updateControlsEnabled();
 
   scene.add(new THREE.AmbientLight(0x080610, 4));
   const keyLight = new THREE.DirectionalLight(0xc8b0ff, 2.2);
@@ -426,24 +440,49 @@ function captureDiagnosticRenderSnapshot(){
 
   const matSolid = new THREE.MeshPhongMaterial({
     color:0x0e0c12, emissive:0x0a0815, specular:0x3a2860, shininess:45, side:THREE.DoubleSide,
-    transparent:true, opacity:0.07
+    transparent:true, opacity:0.07, depthWrite:false
   });
   const matWire = new THREE.MeshBasicMaterial({
-    color:0xc8b0e0, wireframe:true, transparent:true, opacity:.22, side:THREE.DoubleSide
+    color:SPOOK_VECTOR_COLOR, wireframe:true, transparent:true, opacity:SPOOK_VECTOR_OPACITY,
+    side:THREE.DoubleSide, depthWrite:false
   });
 
   let solidRoot = null, wireRoot = null;
   let initCamPos = null, initTarget = null;
+  let previewModelMaxDimension = 0;
   let xray = true;
   const btnXray  = document.getElementById('inst-xray');
   const btnReset = document.getElementById('inst-reset');
   btnXray && btnXray.classList.add('active');
 
+  function setEnvironmentPreviewFraming(modelMaxDimension,preserveOrbitAngle=false){
+    if(!modelMaxDimension||!cam||!controls)return;
+    previewModelMaxDimension=modelMaxDimension;
+    const verticalFov=THREE.MathUtils.degToRad(cam.fov);
+    const horizontalFov=2*Math.atan(Math.tan(verticalFov*.5)*cam.aspect);
+    const limitingFov=Math.min(verticalFov,horizontalFov);
+    const framingMargin=SPOOK_PREVIEW_FRAMING_MARGIN;
+    const orbitRadius=(modelMaxDimension*.5/Math.tan(limitingFov*.5))*framingMargin;
+    const orbitDirection=preserveOrbitAngle
+      ?cam.position.clone().sub(controls.target).normalize()
+      :new THREE.Vector3(.24,.3,1).normalize();
+
+    controls.target.set(0,0,0);
+    cam.position.copy(orbitDirection.multiplyScalar(orbitRadius));
+    cam.updateProjectionMatrix();
+    controls.update();
+    if(initCamPos){
+      initCamPos.copy(cam.position);
+      initTarget.copy(controls.target);
+    }
+  }
+
   function applyXrayState(){
     matSolid.transparent = xray;
     matSolid.opacity     = xray ? 0.07 : 1;
+    matSolid.depthWrite  = !xray;
     if(wireRoot) wireRoot.visible = xray;
-    matWire.opacity = 0.22;
+    matWire.opacity = SPOOK_VECTOR_OPACITY;
     btnXray && btnXray.classList.toggle('active', xray);
     requestViewerRender();
   }
@@ -455,6 +494,35 @@ function captureDiagnosticRenderSnapshot(){
       object.matrixAutoUpdate=false;
     });
     root.updateMatrixWorld(true);
+  }
+
+  function mergeStaticPreviewGeometry(root){
+    root.updateMatrixWorld(true);
+    const geometries=[];
+    root.traverse(object=>{
+      if(!object.isMesh||!object.geometry?.getAttribute('position'))return;
+      const geometry=object.geometry.clone();
+      if(!geometry.index){
+        const vertexCount=geometry.getAttribute('position').count;
+        const IndexArray=vertexCount>65535?Uint32Array:Uint16Array;
+        const index=new IndexArray(vertexCount);
+        for(let i=0;i<vertexCount;i++)index[i]=i;
+        geometry.setIndex(new THREE.BufferAttribute(index,1));
+      }
+      Object.keys(geometry.attributes).forEach(attribute=>{
+        if(attribute!=='position'&&attribute!=='normal')geometry.deleteAttribute(attribute);
+      });
+      geometry.morphAttributes={};
+      if(!geometry.getAttribute('normal'))geometry.computeVertexNormals();
+      geometry.applyMatrix4(object.matrixWorld);
+      geometries.push(geometry);
+    });
+    const merged=mergeGeometries(geometries,false);
+    geometries.forEach(geometry=>geometry.dispose());
+    if(!merged)throw new Error('SPOOK preview geometry could not be merged');
+    merged.computeBoundingBox();
+    merged.computeBoundingSphere();
+    return merged;
   }
 
   const draco = new DRACOLoader();
@@ -475,23 +543,23 @@ function captureDiagnosticRenderSnapshot(){
       solidRoot.position.copy(center.multiplyScalar(-s));
 
       const sourceResources=DEBUG_3D?collectSourceMaterialResources(solidRoot):null;
-      wireRoot = solidRoot.clone();
-      solidRoot.traverse(c=>{ if(c.isMesh){ c.material=matSolid; c.castShadow=true; c.receiveShadow=true; }});
-      wireRoot.traverse(c=>{ if(c.isMesh){ c.material=matWire; c.castShadow=false; c.receiveShadow=false; }});
+      if(DEBUG_3D)diagnostics.model=collectModelDiagnostics(solidRoot,gltf,sourceResources);
+      const previewGeometry=mergeStaticPreviewGeometry(solidRoot);
+      solidRoot=new THREE.Mesh(previewGeometry,matSolid);
+      solidRoot.castShadow=true;
+      solidRoot.receiveShadow=true;
+      wireRoot=new THREE.Mesh(previewGeometry,matWire);
+      wireRoot.castShadow=false;
+      wireRoot.receiveShadow=false;
 
       scene.add(solidRoot);
       scene.add(wireRoot);
       freezeStaticTransforms(solidRoot);
       freezeStaticTransforms(wireRoot);
-      if(DEBUG_3D){
-        diagnostics.model=collectModelDiagnostics(solidRoot,gltf,sourceResources);
-        diagnostics.network=collectGLBTiming();
-      }
+      if(DEBUG_3D)diagnostics.network=collectGLBTiming();
       applyXrayState();
 
-      cam.position.set(maxDim*s*.18, maxDim*s*.42, maxDim*s*.62);
-      controls.target.set(0, 0, 0);
-      controls.update();
+      setEnvironmentPreviewFraming(maxDim*s);
 
       initCamPos = cam.position.clone();
       initTarget = controls.target.clone();
@@ -523,6 +591,7 @@ function captureDiagnosticRenderSnapshot(){
     renderer.setSize(w,h,false);
     cam.aspect=w/h;
     cam.updateProjectionMatrix();
+    if(previewModelMaxDimension)setEnvironmentPreviewFraming(previewModelMaxDimension,true);
     requestViewerRender();
   }
   function applyPixelRatio(cap){
@@ -533,44 +602,11 @@ function captureDiagnosticRenderSnapshot(){
     renderer.setPixelRatio(nextPixelRatio);
     resizeRenderer(true);
   }
-  function beginInteractionQuality(){
-    if(!viewerInteractionUnlocked||!sectionVisible||document.hidden)return;
-    interactionActive=true;
-    interactionRenderActive=true;
-    requestViewerRender();
-    clearTimeout(interactionRestoreTimer);
-    interactionRestoreTimer=0;
-    applyPixelRatio(INTERACTION_DPR_CAP);
-  }
-  function scheduleNormalQuality(){
-    if(!viewerInteractionUnlocked){
-      interactionActive=false;
-      interactionRenderActive=false;
-      clearTimeout(interactionRestoreTimer);
-      interactionRestoreTimer=0;
-      applyPixelRatio(LOCKED_DPR_CAP);
-      requestViewerRender();
-      return;
-    }
-    interactionActive=false;
-    interactionRenderActive=true;
-    requestViewerRender();
-    clearTimeout(interactionRestoreTimer);
-    interactionRestoreTimer=window.setTimeout(()=>{
-      interactionRestoreTimer=0;
-      interactionRenderActive=false;
-      applyPixelRatio(NORMAL_DPR_CAP);
-      requestViewerRender();
-    },QUALITY_RESTORE_DELAY);
-  }
   function handleViewerResize(){
-    updateInteractionButtonPosition();
-    if(!interactionActive&&!interactionRestoreTimer){
-      applyPixelRatio(viewerInteractionUnlocked?NORMAL_DPR_CAP:LOCKED_DPR_CAP);
-    }
+    applyPixelRatio(PREVIEW_DPR_CAP);
     resizeRenderer();
   }
-  applyPixelRatio(viewerInteractionUnlocked?NORMAL_DPR_CAP:LOCKED_DPR_CAP);
+  applyPixelRatio(PREVIEW_DPR_CAP);
   new ResizeObserver(()=>resizeRenderer()).observe(canvas);
   window.addEventListener('resize',handleViewerResize);
 
@@ -603,52 +639,29 @@ function captureDiagnosticRenderSnapshot(){
     controls.autoRotate = true;
     controls.update();
     requestViewerRender();
-    scheduleNormalQuality();
   });
-
-  controls.addEventListener('start',beginInteractionQuality);
-  controls.addEventListener('end',scheduleNormalQuality);
-  canvas.addEventListener('wheel',()=>{
-    beginInteractionQuality();
-    scheduleNormalQuality();
-  },{passive:true});
-  canvas.addEventListener('pointerdown',()=>{
-    controls.autoRotate=false;
-    beginInteractionQuality();
-  });
-  canvas.addEventListener('pointerup',scheduleNormalQuality);
-  canvas.addEventListener('pointercancel',scheduleNormalQuality);
-  canvas.addEventListener('pointerleave',scheduleNormalQuality);
   new IntersectionObserver(entries=>{
     const entry=entries[0];
     sectionVisible=entry.isIntersecting&&entry.intersectionRatio>=0.1;
     updateControlsEnabled();
     if(sectionVisible){
       lastRenderTime=0;
-      applyPixelRatio(viewerInteractionUnlocked?NORMAL_DPR_CAP:LOCKED_DPR_CAP);
+      applyPixelRatio(PREVIEW_DPR_CAP);
       requestViewerRender();
     }else{
-      clearTimeout(interactionRestoreTimer);
-      interactionRestoreTimer=0;
-      interactionActive=false;
-      interactionRenderActive=false;
       renderTimestamps.length=0;
       stopRenderLoop();
     }
   },{rootMargin:'0px',threshold:[0,0.1]}).observe(canvas);
   document.addEventListener('visibilitychange',()=>{
     if(document.hidden){
-      clearTimeout(interactionRestoreTimer);
-      interactionRestoreTimer=0;
-      interactionActive=false;
-      interactionRenderActive=false;
       renderTimestamps.length=0;
       updateControlsEnabled();
       stopRenderLoop();
       return;
     }
     updateControlsEnabled();
-    applyPixelRatio(viewerInteractionUnlocked?NORMAL_DPR_CAP:LOCKED_DPR_CAP);
+    applyPixelRatio(PREVIEW_DPR_CAP);
     resizeRenderer();
     lastRenderTime=0;
     requestViewerRender();
