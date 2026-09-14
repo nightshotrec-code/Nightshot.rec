@@ -10,9 +10,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=Press+Start+2P&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/site.css">
-<script type="importmap">
-{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.158.0/examples/jsm/"}}
-</script>
 </head>
 <body>
 
@@ -37,8 +34,7 @@
   <a href="#hero" class="nav-logo">NIGHTSHOT.<span class="nav-logo-rec">REC</span></a>
   <ul class="nav-links" id="navLinks">
     <li class="nav-close-wrap"><button class="nav-close" id="navClose" aria-label="Cerrar menú">✕</button></li>
-    <li><a href="#environments" data-es="ENTORNOS" data-en="ENVIRONMENTS">ENTORNOS</a></li>
-    <li><a href="#installations-content" data-es="INSTALACIONES" data-en="INSTALLATIONS">INSTALACIONES</a></li>
+    <li><a href="#installations" data-es="INSTALACIONES" data-en="INSTALLATIONS">INSTALACIONES</a></li>
     <li><a href="#artworks" data-es="VISUALES" data-en="VISUALS">VISUALES</a></li>
     <li><a href="#camera" data-es="CÁMARA" data-en="CAMERA">CÁMARA</a></li>
     <li><a href="#about" data-es="SOBRE MÍ" data-en="ABOUT">SOBRE MÍ</a></li>
@@ -68,7 +64,7 @@
   <div class="hero-vids" aria-hidden="true">
     <div class="vid-panel">
       <div class="vid-pi">
-        <video muted loop playsinline preload="none"><source data-src="assets/media/video/shared/Mult-Overlay%20Screen%20Burn%20.webm" type="video/webm"><source data-src="assets/media/video/shared/Mult-Overlay%20Screen%20Burn%20.mp4" type="video/mp4"></video>
+        <canvas class="visuals-home-mirror" data-visuals-home-mirror></canvas>
         <span class="vid-lbl" data-es="_VISUALES" data-en="_VISUALS">_VISUALES</span>
       </div>
     </div>
@@ -80,7 +76,7 @@
     </div>
     <div class="vid-panel">
       <div class="vid-pi">
-        <video muted loop playsinline preload="none"><source data-src="assets/media/video/overlays/4%20File%20In%20Flash%20%20.webm" type="video/webm"><source data-src="assets/media/video/overlays/4%20File%20In%20Flash%20%20.mp4" type="video/mp4"></video>
+        <video muted loop playsinline preload="none"><source data-src="assets/media/video/hero/tecnica.webm" type="video/webm"></video>
         <span class="vid-lbl" data-es="_TECNICA" data-en="_TECHNICAL">_TECNICA</span>
       </div>
     </div>
@@ -102,7 +98,7 @@
     <span data-es="QUIERO GRABAR" data-en="WANT TO REC">QUIERO GRABAR</span>
   </a>
 
-  <a href="#environments" class="hero-down-arrow" aria-label="Ir a Entornos">
+  <a href="#environments" class="hero-down-arrow" aria-label="Ir a la siguiente sección">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 8 12 16 20 8"/></svg>
   </a>
 
@@ -133,86 +129,16 @@
       </p>
     </div>
 
-    <div class="env-word main-section-title-scale" data-es="ENTORNOS" data-en="ENVIRONMENTS">ENVIRONMENTS</div>
   </div>
 </section>
 
 <!-- 02 — INSTALLATIONS -->
-<section id="installations" class="is-preview">
-  <canvas id="inst-canvas"></canvas>
-  <div class="inst-loading" id="inst-loading">
-    <p data-es="CARGANDO ESPACIO" data-en="LOADING SPACE">CARGANDO ESPACIO</p>
-    <div class="inst-loading-bar"><div class="inst-loading-fill" id="inst-fill"></div></div>
-  </div>
-  <div class="inst-hud">
-    <div class="inst-hud-tl environment-project-intro">
-      <div class="inst-hud-num environment-project-preview-type" data-es="RE DISEÑANDO UN NUEVO ENTORNO VISUAL" data-en="REDESIGNING A NEW VISUAL ENVIRONMENT">RE DISEÑANDO UN NUEVO ENTORNO VISUAL</div>
-    </div>
-    <a href="spook.html" class="nightshot-button button-hover-animation hero-want-rec environment-project-intro__button">
-      <span data-es="VER PROYECTO COMPLETO" data-en="VIEW FULL PROJECT">VER PROYECTO COMPLETO</span>
-      <span class="environment-project-intro__arrow" aria-hidden="true">→</span>
-    </a>
-    <p class="environment-project-preview-description environment-project-preview-type"
-       data-es="Reconversión escénica y lumínica. Una nueva identidad espacial basada en arquitectura audiovisual. Iluminación por escenas y colorimetría propia."
-       data-en="Scenic and lighting reconversion. A new spatial identity based on audiovisual architecture. Scene-based lighting and a distinctive color palette.">
-      Reconversión escénica y lumínica. Una nueva identidad espacial basada en arquitectura audiovisual. Iluminación por escenas y colorimetría propia.
-    </p>
-    <div class="inst-hud-tr inst-project-detail">
-      <span class="inst-hud-meta" data-es="SPOOK.ISI — RECONVERSIÓN ESCÉNICA" data-en="SPOOK.ISI — SCENIC RECONVERSION">SPOOK.ISI — RECONVERSIÓN ESCÉNICA</span>
-      <span id="inst-tc">00:00:00</span>
-      <div class="inst-hud-btns">
-        <button class="inst-vbtn" id="inst-xray">X-RAY</button>
-        <button class="inst-vbtn" id="inst-reset">RESET</button>
-      </div>
-    </div>
-    <div class="inst-hud-l">
-      <div class="inst-proj-title inst-project-detail">SPOOK</div>
-      <p class="inst-proj-sub inst-project-detail" data-es="Las pantallas dejan de<br>ser pantallas. El techo<br>se convierte en instalación." data-en="Screens stop being<br>screens. The ceiling<br>becomes an installation.">Las pantallas dejan de<br>ser pantallas. El techo<br>se convierte en instalación.</p>
-      <div class="inst-palette inst-project-detail">
-        <div class="inst-swatch" style="background:#70d5e0" title="Cian Nebular"></div>
-        <div class="inst-swatch" style="background:#e06050" title="Coral Eléctrico"></div>
-        <div class="inst-swatch" style="background:#e0a860" title="Ámbar Difuso"></div>
-        <div class="inst-swatch" style="background:#50b888" title="Verde Esmeralda"></div>
-        <div class="inst-swatch" style="background:#c8b0e0" title="Lila Velado"></div>
-      </div>
-    </div>
-    <div class="inst-hud-r inst-project-detail">
-      <p class="inst-hud-desc"
-         data-es="Obras audiovisuales<br><strong>específicas para cada lugar</strong>,<br>creadas para espacios<br>culturales, eventos y<br>entornos inmersivos."
-         data-en="Site-specific<br><strong>audiovisual works</strong><br>developed for cultural<br>spaces, events and<br>immersive contexts.">
-        Obras audiovisuales<br>
-        <strong>específicas para cada lugar</strong>,<br>
-        creadas para espacios<br>
-        culturales, eventos y<br>
-        entornos inmersivos.
-      </p>
-    </div>
-    <div class="inst-hud-br inst-project-detail" data-es="DRAG · SCROLL · ROTAR" data-en="DRAG · SCROLL · ROTATE">DRAG · SCROLL · ROTAR</div>
-  </div>
-  <div class="inst-hint inst-project-detail" id="inst-hint" data-es="← ARRASTRÁ PARA EXPLORAR →" data-en="← DRAG TO EXPLORE →">← ARRASTRÁ PARA EXPLORAR →</div>
-</section>
-
-<div class="inst-hud-bottom" id="installations-content">
-  <div class="inst-bottom-title main-section-title-scale main-section-title-reduced" data-es="INSTALACIONES" data-en="INSTALLATIONS">INSTALACIONES</div>
-  <p class="sec-intro reveal"
+<section class="installations-content technical-grid-background" id="installations">
+  <div class="inst-bottom-title main-section-title-scale main-section-title-reduced" data-language-cipher data-es="INSTALACIONES" data-en="INSTALLATIONS">INSTALACIONES</div>
+  <p class="sec-intro reveal" data-language-cipher
      data-glitch-es="Obras físicas que nacen y mueren para un evento específico."
      data-glitch-en="Physical works created to exist and disappear within a specific event."></p>
   <div class="installations-projects" data-installations-projects></div>
-</div>
-
-<!-- 03 — VISUALS IN CONTEXT -->
-<section id="visuals">
-
-  <!-- Stacked gallery content -->
-  <div class="vis-comp">
-
-    <p class="vis-end-txt reveal"
-       data-es="Lo que sucede en escena no puede repetirse — y eso es exactamente lo que lo hace <strong>parte del evento.</strong>"
-       data-en="What happens on stage cannot be repeated — and that is exactly what makes it <strong>part of the event.</strong>">
-      Lo que sucede en escena no puede repetirse — y eso es exactamente lo que lo hace <strong>parte del evento.</strong>
-    </p>
-
-  </div><!-- /vis-comp -->
 </section>
 
 <!-- 03 — VISUALS -->
@@ -296,7 +222,7 @@
       <div class="hud-corner bl"></div>
       <div class="hud-corner br"></div>
       <div class="cam-copy">
-        <div class="cam-big main-section-title-scale main-section-title-reduced" data-es="CÁMARA<br>WORKS" data-en="CAMERA<br>WORKS">CAMERA<br>WORKS</div>
+        <div class="cam-big main-section-title-scale main-section-title-reduced" data-language-cipher data-es="CÁMARA<br>WORKS" data-en="CAMERA<br>WORKS">CAMERA<br>WORKS</div>
         <div class="cam-description">
           <p class="cam-desc"
              data-es="No se trata únicamente de registrar un evento o capturar una escena, sino de <strong>construir una mirada</strong>."
@@ -499,11 +425,6 @@
   <span class="ft-logo">NIGHTSHOT.REC</span>
   <span class="ft-copy" data-es="© 2025 — Todos los derechos reservados" data-en="© 2025 — All rights reserved">© 2025 — Todos los derechos reservados</span>
 </footer>
-
-
-
-
-<!-- ── INSTALLATIONS 3D VIEWER ────────────────────────────── -->
 
 
 

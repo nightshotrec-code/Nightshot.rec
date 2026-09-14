@@ -584,7 +584,7 @@ function applyLang(l){
   });
   try{localStorage.setItem('nightshot-lang',l)}catch(e){}
   document.querySelectorAll('[data-es]').forEach(el=>{
-    if(el.classList.contains('inst-title')||el.classList.contains('sec-title')||el.classList.contains('cam-big')||el.classList.contains('env-word')) return;
+    if(el.hasAttribute('data-language-cipher')||el.classList.contains('inst-title')||el.classList.contains('sec-title')) return;
     const val=el.dataset[l];
     if(!val) return;
     if(el instanceof HTMLImageElement){el.alt=val;return;}
@@ -592,8 +592,9 @@ function applyLang(l){
     el.innerHTML=val;
   });
   // cipher decode on section titles
-  document.querySelectorAll('.inst-title[data-es],.sec-title[data-es],.cam-big[data-es],.env-word[data-es]').forEach(el=>{
-    const val=el.dataset[l];
+  document.querySelectorAll('.inst-title[data-es],.sec-title[data-es],[data-language-cipher]').forEach(el=>{
+    const glitchKey='glitch'+l.charAt(0).toUpperCase()+l.slice(1);
+    const val=el.dataset[l]||el.dataset[glitchKey];
     if(val) cipherDecode(el,val);
   });
   // update cta-title glitch pseudo-element text
@@ -604,7 +605,7 @@ function applyLang(l){
     ctaTitle.textContent=t;
   }
   // update glitch intros and retrigger if visible
-  document.querySelectorAll('.sec-intro').forEach(el=>{
+  document.querySelectorAll('.sec-intro:not([data-language-cipher])').forEach(el=>{
     const key='glitch'+l.charAt(0).toUpperCase()+l.slice(1);
     if(el.dataset[key]){
       el.dataset.glitch=el.dataset[key];
@@ -641,10 +642,11 @@ document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
 // ── CIPHER DECODE (for titles on lang switch) ─
 const TCHARS='█▓▒░|/\\#@%ABCDEFGHIJKLMNOPQRSTUVWXYZ01';
 function cipherDecode(el,newHTML){
+  if(el._languageCipherTimer)clearInterval(el._languageCipherTimer);
   const plain=newHTML.replace(/<br\s*\/?>/gi,'\n');
   let frame=0;
   const total=plain.replace(/\n/g,'').length*1.6+6;
-  let iv=setInterval(function(){
+  const iv=setInterval(function(){
     frame++;
     let out='';
     let revealed=0;
@@ -658,8 +660,9 @@ function cipherDecode(el,newHTML){
       }
     }
     el.innerHTML=out;
-    if(frame>=total){el.innerHTML=newHTML;clearInterval(iv);}
+    if(frame>=total){el.innerHTML=newHTML;clearInterval(iv);delete el._languageCipherTimer;}
   },32);
+  el._languageCipherTimer=iv;
 }
 
 // ── GLITCH TYPE (once on scroll) ─────────────
@@ -678,14 +681,14 @@ function glitchType(el){
   },38);
 }
 
-document.querySelectorAll('.sec-intro').forEach(el=>{
+document.querySelectorAll('.sec-intro:not([data-language-cipher])').forEach(el=>{
   el.dataset.glitch=el.dataset.glitchEs||'';
 });
 
 const glitchObs=new IntersectionObserver(entries=>{
   entries.forEach(e=>{if(e.isIntersecting) glitchType(e.target)});
 },{threshold:.4});
-document.querySelectorAll('.sec-intro').forEach(el=>glitchObs.observe(el));
+document.querySelectorAll('.sec-intro:not([data-language-cipher])').forEach(el=>glitchObs.observe(el));
 
 // ── VISUALS CATEGORY PREVIEW ─────────────────────────────
 (function initVisualsCategoryPreview(){
@@ -727,13 +730,89 @@ document.querySelectorAll('.sec-intro').forEach(el=>glitchObs.observe(el));
   const section=document.getElementById('artworks');
   const cards=Array.from(document.querySelectorAll('#artworks .tec-card'));
   const preview=document.querySelector('[data-visuals-preview]');
+  const homeMirror=document.querySelector('[data-visuals-home-mirror]');
   if(!section||!cards.length||!preview||preview.dataset.autoplayInitialized==='1')return;
   preview.dataset.autoplayInitialized='1';
 
   const videos=Array.from(preview.querySelectorAll('.visuals-preview-video'));
+  const mirrorContext=homeMirror&&homeMirror.getContext('2d');
   let activeKey='';
   let sectionVisible=false;
+  let homeMirrorVisible=false;
   let rotationTimer=0;
+  let mirrorVideo=null;
+  let mirrorFrameCallback=0;
+  let mirrorAnimationFrame=0;
+  let mirrorWidth=0;
+  let mirrorHeight=0;
+  let lastMirrorDraw=0;
+
+  function playbackNeeded(){
+    return sectionVisible||homeMirrorVisible;
+  }
+
+  function resizeHomeMirror(){
+    if(!homeMirror||!mirrorContext)return;
+    const rect=homeMirror.getBoundingClientRect();
+    const dpr=Math.min(window.devicePixelRatio||1,1.5);
+    const width=Math.max(1,Math.round(rect.width*dpr));
+    const height=Math.max(1,Math.round(rect.height*dpr));
+    if(width===mirrorWidth&&height===mirrorHeight)return;
+    mirrorWidth=homeMirror.width=width;
+    mirrorHeight=homeMirror.height=height;
+    drawMirrorFrame();
+  }
+
+  function drawMirrorFrame(){
+    if(!mirrorContext||!mirrorVideo||!mirrorWidth||!mirrorHeight||mirrorVideo.readyState<HTMLMediaElement.HAVE_CURRENT_DATA)return;
+    const sourceWidth=mirrorVideo.videoWidth;
+    const sourceHeight=mirrorVideo.videoHeight;
+    if(!sourceWidth||!sourceHeight)return;
+    const scale=Math.max(mirrorWidth/sourceWidth,mirrorHeight/sourceHeight);
+    const cropWidth=mirrorWidth/scale;
+    const cropHeight=mirrorHeight/scale;
+    const cropX=(sourceWidth-cropWidth)/2;
+    const cropY=(sourceHeight-cropHeight)/2;
+    mirrorContext.clearRect(0,0,mirrorWidth,mirrorHeight);
+    mirrorContext.drawImage(mirrorVideo,cropX,cropY,cropWidth,cropHeight,0,0,mirrorWidth,mirrorHeight);
+  }
+
+  function cancelMirrorFrames(){
+    if(mirrorFrameCallback&&mirrorVideo&&typeof mirrorVideo.cancelVideoFrameCallback==='function'){
+      mirrorVideo.cancelVideoFrameCallback(mirrorFrameCallback);
+    }
+    if(mirrorAnimationFrame)cancelAnimationFrame(mirrorAnimationFrame);
+    mirrorFrameCallback=0;
+    mirrorAnimationFrame=0;
+  }
+
+  function queueMirrorFrame(){
+    if(!homeMirrorVisible||document.hidden||!mirrorVideo)return;
+    if(typeof mirrorVideo.requestVideoFrameCallback==='function'){
+      mirrorFrameCallback=mirrorVideo.requestVideoFrameCallback(()=>{
+        mirrorFrameCallback=0;
+        drawMirrorFrame();
+        queueMirrorFrame();
+      });
+      return;
+    }
+    mirrorAnimationFrame=requestAnimationFrame(timestamp=>{
+      mirrorAnimationFrame=0;
+      if(timestamp-lastMirrorDraw>=1000/30){
+        lastMirrorDraw=timestamp;
+        drawMirrorFrame();
+      }
+      queueMirrorFrame();
+    });
+  }
+
+  function syncMirrorVideo(video){
+    if(mirrorVideo===video&&mirrorFrameCallback+mirrorAnimationFrame>0)return;
+    cancelMirrorFrames();
+    mirrorVideo=video;
+    drawMirrorFrame();
+    queueMirrorFrame();
+  }
 
   function clearRotationTimer(){
     if(!rotationTimer)return;
@@ -756,6 +835,10 @@ document.querySelectorAll('.sec-intro').forEach(el=>glitchObs.observe(el));
     video.load();
   }
 
+  function getActiveVisualVideo(){
+    return activeKey?preview.querySelector(`[data-visual-media="${activeKey}"]`):null;
+  }
+
   function syncActiveMenu(key){
     cards.forEach(card=>{
       const active=card.dataset.visualPreview===key;
@@ -765,21 +848,22 @@ document.querySelectorAll('.sec-intro').forEach(el=>glitchObs.observe(el));
   }
 
   function playActiveVideo(){
-    if(!sectionVisible||document.hidden||!activeKey)return;
-    const video=preview.querySelector(`[data-visual-media="${activeKey}"]`);
+    if(!playbackNeeded()||document.hidden||!activeKey)return;
+    const video=getActiveVisualVideo();
     if(!video)return;
     ensureVideoSource(video,activeKey);
     video.hidden=false;
     video.muted=true;
     video.loop=true;
     video.playsInline=true;
+    syncMirrorVideo(video);
     const playPromise=video.play();
     if(playPromise&&typeof playPromise.catch==='function')playPromise.catch(()=>{});
   }
 
   function scheduleRotation(){
     clearRotationTimer();
-    if(!sectionVisible||document.hidden||!activeKey)return;
+    if(!playbackNeeded()||document.hidden||!activeKey)return;
     rotationTimer=window.setTimeout(()=>{
       rotationTimer=0;
       const currentIndex=visualRotationOrder.indexOf(activeKey);
@@ -797,6 +881,7 @@ document.querySelectorAll('.sec-intro').forEach(el=>glitchObs.observe(el));
     pauseVideos();
     videos.forEach(item=>{item.hidden=item!==video});
     activeKey=key;
+    syncMirrorVideo(video);
     syncActiveMenu(activeKey);
     playActiveVideo();
     scheduleRotation();
@@ -810,8 +895,10 @@ document.querySelectorAll('.sec-intro').forEach(el=>glitchObs.observe(el));
     const entry=entries[0];
     sectionVisible=Boolean(entry?.isIntersecting);
     if(!sectionVisible){
-      clearRotationTimer();
-      pauseVideos();
+      if(!homeMirrorVisible){
+        clearRotationTimer();
+        pauseVideos();
+      }
       return;
     }
     if(!activeKey)activateVideo(visualRotationOrder[0]);
@@ -822,13 +909,38 @@ document.querySelectorAll('.sec-intro').forEach(el=>glitchObs.observe(el));
   },{threshold:0});
   visibilityObserver.observe(section);
 
+  if(homeMirror&&mirrorContext){
+    const mirrorVisibilityObserver=new IntersectionObserver(entries=>{
+      homeMirrorVisible=Boolean(entries[0]?.isIntersecting);
+      if(!homeMirrorVisible){
+        cancelMirrorFrames();
+        if(!sectionVisible){
+          clearRotationTimer();
+          pauseVideos();
+        }
+        return;
+      }
+      if(!activeKey)activateVideo(visualRotationOrder[0]);
+      else{
+        playActiveVideo();
+        scheduleRotation();
+      }
+    },{threshold:0});
+    mirrorVisibilityObserver.observe(homeMirror);
+
+    const mirrorResizeObserver=new ResizeObserver(resizeHomeMirror);
+    mirrorResizeObserver.observe(homeMirror);
+    resizeHomeMirror();
+  }
+
   document.addEventListener('visibilitychange',()=>{
     if(document.hidden){
       clearRotationTimer();
       pauseVideos();
+      cancelMirrorFrames();
       return;
     }
-    if(sectionVisible){
+    if(playbackNeeded()){
       playActiveVideo();
       scheduleRotation();
     }
@@ -1130,98 +1242,4 @@ document.querySelectorAll('.sec-intro').forEach(el=>glitchObs.observe(el));
   document.addEventListener('visibilitychange',()=>{
     if(document.hidden)videos.forEach(pauseCameraVideo);
   });
-})();
-
-// ── STAGED INSTALLATIONS 3D MODULE ────────────────────────────
-(function stagedInstallationsViewerLoading(){
-  const section = document.getElementById('installations');
-  if(!section) return;
-
-  let installationsModulePromise = null;
-  let viewerInitializationRequested = false;
-  let viewerInitializationStarted = false;
-  let viewerLoadErrorShown = false;
-
-  function showViewerLoadError(error){
-    if(viewerLoadErrorShown) return;
-    viewerLoadErrorShown = true;
-    console.error('Installations viewer failed to load:', error);
-    const loading = document.getElementById('inst-loading');
-    const message = loading && loading.querySelector('p');
-    if(message) message.textContent = 'MODELO NO DISPONIBLE';
-    if(loading){
-      setTimeout(()=>{
-        loading.style.opacity='0';
-        setTimeout(()=>{ loading.style.display='none'; },700);
-      },2500);
-    }
-  }
-
-  function preloadInstallationsModule(){
-    if(installationsModulePromise) return installationsModulePromise;
-    installationsModulePromise = import('./installations-viewer.js');
-    return installationsModulePromise;
-  }
-
-  function runWhenIdle(callback){
-    if('requestIdleCallback' in window){
-      window.requestIdleCallback(callback,{timeout:500});
-    }else{
-      setTimeout(callback,0);
-    }
-  }
-
-  function initializeViewer(){
-    if(viewerInitializationRequested||viewerInitializationStarted) return;
-    viewerInitializationRequested = true;
-
-    preloadInstallationsModule()
-      .then(module=>{
-        runWhenIdle(()=>{
-          if(viewerInitializationStarted) return;
-          viewerInitializationStarted = true;
-          try{
-            if(typeof module.initInstallationsViewer !== 'function'){
-              throw new Error('Installations viewer initialization is unavailable');
-            }
-            module.initInstallationsViewer();
-          }catch(error){
-            showViewerLoadError(error);
-          }
-        });
-      })
-      .catch(showViewerLoadError);
-  }
-
-  const preloadObserver = new IntersectionObserver(entries=>{
-    if(!entries.some(entry=>entry.isIntersecting)) return;
-    preloadObserver.disconnect();
-    preloadInstallationsModule().catch(showViewerLoadError);
-  },{
-    rootMargin:'1800px 0px',
-    threshold:0
-  });
-
-  const initializationObserver = new IntersectionObserver(entries=>{
-    if(!entries.some(entry=>entry.isIntersecting)) return;
-    initializationObserver.disconnect();
-    initializeViewer();
-  },{
-    rootMargin:'850px 0px',
-    threshold:0
-  });
-
-  let proximityObserversStarted = false;
-  function startProximityObservers(){
-    if(proximityObserversStarted) return;
-    proximityObserversStarted = true;
-    preloadObserver.observe(section);
-    initializationObserver.observe(section);
-  }
-
-  if(window.scrollY>0){
-    startProximityObservers();
-  }else{
-    window.addEventListener('scroll',startProximityObservers,{once:true,passive:true});
-  }
 })();

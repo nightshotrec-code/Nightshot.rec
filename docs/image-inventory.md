@@ -15,7 +15,7 @@ Audit and organization date: 2026-07-13
 - Separately reported SVG/GIF/ICO files: **none found**
 - TIFF/BMP files: **none found**
 
-All active raster references were found in `index.html`. No raster references were found in `spook.html`, `assets/css/site.css`, or the JavaScript files under `assets/js/`.
+All active raster references were found in `index.html`. No raster references were found in `assets/css/site.css` or the JavaScript files under `assets/js/`.
 
 ## Raster inventory
 

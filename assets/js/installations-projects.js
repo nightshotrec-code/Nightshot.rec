@@ -181,7 +181,7 @@
         </div>
         <figcaption class="installation-process-caption">
           <span>${item.phase}</span>
-          ${item.label ? `<span ${localizedAttributes(item.label)}>${item.label.es}</span>` : ''}
+          ${item.label ? `<span data-language-cipher ${localizedAttributes(item.label)}>${item.label.es}</span>` : ''}
         </figcaption>
       </figure>`;
   }

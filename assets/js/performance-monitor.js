@@ -123,18 +123,13 @@ function getHeapMetrics(){
   };
 }
 
-function getThreeMetrics(){
-  try{return perfRoot.installations?.getMetrics?.()??null;}catch(error){return {error:String(error)};}
-}
-
 function collectResourceMetrics(){
   return {
     viewport:{width:innerWidth,height:innerHeight,dpr:devicePixelRatio||1},
     domElements:document.getElementsByTagName('*').length,
     canvases:getCanvasMetrics(),
     videos:getVideoMetrics(),
-    heap:getHeapMetrics(),
-    three:getThreeMetrics()
+    heap:getHeapMetrics()
   };
 }
 
@@ -235,7 +230,6 @@ function createExport(){
     marks:marks.slice(),
     currentVideoMetrics:current.videos,
     currentCanvasMetrics:current.canvases,
-    three:current.three,
     browserApiSupport:{
       performanceMemory:Boolean(performance.memory),
       longTasks:Boolean(longTaskObserver),
@@ -289,7 +283,6 @@ function renderPanel(){
   const heap=metrics.heap;
   const canvas=metrics.canvases;
   const video=metrics.videos;
-  const three=metrics.three;
   output.textContent=[
     `SESSION    ${sessionActive?'RUNNING':'STOPPED'}  samples ${samples.length}/${MAX_SAMPLES}`,
     `FPS        ${round(frame.fps)}  avg ${round(frame.averageFrameTime)} ms  p95 ${round(frame.p95FrameTime)} ms`,
@@ -302,8 +295,7 @@ function renderPanel(){
     `CANVAS     ${canvas.count} / ${canvas.totalInternalPixels.toLocaleString()} pixels`,
     `VIDEO      ${video.total} total / ${video.loaded} loaded / ${video.playing} playing / ${video.offscreenPlaying} offscreen`,
     `HEAP USED  ${bytes(heap.used)}  growth ${bytes(heap.growthSinceSessionStart)}`,
-    `HEAP TOTAL ${bytes(heap.total)}  limit ${bytes(heap.limit)}`,
-    three?`THREE      init ${three.initialized} visible ${three.visible} locked ${three.locked}\n           target ${round(three.targetFps)} fps actual ${round(three.actualRenderFps)} fps DPR ${round(three.pixelRatio,2)}\n           buffer ${three.drawingBufferWidth}x${three.drawingBufferHeight} calls ${three.drawCalls} tris ${three.triangles}\n           geometries ${three.geometries} textures ${three.textures} interaction ${three.interactionActive}`:'THREE      unavailable'
+    `HEAP TOTAL ${bytes(heap.total)}  limit ${bytes(heap.limit)}`
   ].join('\n');
   buttons.start.disabled=sessionActive;
   buttons.stop.disabled=!sessionActive;
