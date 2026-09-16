@@ -133,12 +133,26 @@
 </section>
 
 <!-- 02 — INSTALLATIONS -->
-<section class="installations-content technical-grid-background" id="installations">
-  <div class="inst-bottom-title main-section-title-scale main-section-title-reduced" data-language-cipher data-es="INSTALACIONES" data-en="INSTALLATIONS">INSTALACIONES</div>
+<section class="installations-content technical-grid-background" id="installations" aria-labelledby="installations-title">
+  <div class="installations-toolbar">
+    <span class="installations-section-index" aria-hidden="true">02 /</span>
+    <button class="nightshot-button button-hover-animation installations-view-all" type="button" data-installations-view-all aria-haspopup="dialog" aria-controls="installations-gallery">
+      <span data-es="VER TODO" data-en="VIEW ALL">VER TODO</span><span aria-hidden="true">↗</span>
+    </button>
+  </div>
+  <h2 id="installations-title" class="inst-bottom-title main-section-title-scale main-section-title-reduced" data-language-cipher data-es="INSTALACIONES" data-en="INSTALLATIONS">INSTALACIONES</h2>
   <p class="sec-intro reveal" data-language-cipher
      data-glitch-es="Obras físicas que nacen y mueren para un evento específico."
      data-glitch-en="Physical works created to exist and disappear within a specific event."></p>
-  <div class="installations-projects" data-installations-projects></div>
+  <div class="installations-projects installations-track" data-installations-projects></div>
+  <p class="installations-pagination" aria-live="polite" aria-atomic="true"><span data-installations-current>01</span> / <span data-installations-total>05</span></p>
+  <dialog class="installations-gallery" id="installations-gallery" aria-labelledby="installations-gallery-title">
+    <div class="installations-gallery-toolbar">
+      <h2 id="installations-gallery-title" data-es="INSTALACIONES" data-en="INSTALLATIONS">INSTALACIONES</h2>
+      <form method="dialog"><button class="nightshot-button button-hover-animation" autofocus><span data-es="CERRAR" data-en="CLOSE">CERRAR</span><span aria-hidden="true">×</span></button></form>
+    </div>
+    <div data-installations-gallery-content></div>
+  </dialog>
 </section>
 
 <!-- 03 — VISUALS -->
