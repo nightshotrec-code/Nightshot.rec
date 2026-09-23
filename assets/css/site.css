@@ -263,7 +263,7 @@ section{padding:8rem 3rem;position:relative}
 .installations-carousel-shell::before,.installations-carousel-shell::after{content:'';position:absolute;z-index:3;top:0;bottom:0;width:clamp(16px,2.5vw,36px);pointer-events:none;backdrop-filter:blur(1.25px);-webkit-backdrop-filter:blur(1.25px)}
 .installations-carousel-shell::before{left:0;background:linear-gradient(90deg,rgba(8,8,8,.16),rgba(8,8,8,0));-webkit-mask-image:linear-gradient(90deg,#000,transparent);mask-image:linear-gradient(90deg,#000,transparent)}
 .installations-carousel-shell::after{right:0;background:linear-gradient(270deg,rgba(8,8,8,.16),rgba(8,8,8,0));-webkit-mask-image:linear-gradient(270deg,#000,transparent);mask-image:linear-gradient(270deg,#000,transparent)}
-.installations-projects{--installation-gap:1.25rem;position:relative;z-index:1;display:flex;gap:var(--installation-gap);max-width:100%;overflow-x:auto;scroll-behavior:auto;overflow-anchor:none;cursor:grab;user-select:none;touch-action:auto}
+.installations-projects{--installation-gap:1.25rem;position:relative;z-index:1;display:flex;gap:var(--installation-gap);max-width:100%;overflow-x:auto;overflow-y:visible;scroll-behavior:auto;overflow-anchor:none;cursor:grab;user-select:none;touch-action:auto}
 .installations-projects.is-dragging,.installations-projects.is-dragging *{cursor:grabbing}
 .installations-projects:focus-visible{outline:1px solid var(--fg);outline-offset:3px}
 .installations-projects.is-looping{scrollbar-width:none;scroll-snap-type:none}
@@ -309,7 +309,7 @@ section{padding:8rem 3rem;position:relative}
   .installation-card-meta,.installation-card-tags{font-size:.75rem}
 }
 @media(max-width:1023px){
-  .installations-track{--installation-gap:.75rem;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  .installations-track{--installation-gap:.75rem;scroll-snap-type:x proximity;scrollbar-width:none;-webkit-overflow-scrolling:touch;touch-action:manipulation}
   .installations-track::-webkit-scrollbar{display:none}
   .installations-track .installation-card{flex:0 0 88%;scroll-snap-align:start}
   .installations-track::after{content:'';flex:0 0 calc(12% - .75rem)}
@@ -318,7 +318,7 @@ section{padding:8rem 3rem;position:relative}
 }
 @media(hover:none),(pointer:coarse){
   #installations .installation-media-nav{pointer-events:none}
-  #installations .installation-card-preview.has-gallery{touch-action:pan-x}
+  #installations .installation-card-preview.has-gallery{touch-action:manipulation}
 }
 @media(prefers-reduced-motion:reduce){
   #installations .reveal{opacity:1;transform:none;transition:none}
@@ -501,7 +501,7 @@ section{padding:8rem 3rem;position:relative}
 #art{border-top:1px solid rgba(255,255,255,.06)}
 #artworks{min-height:100vh;min-height:100svh;display:flex;flex-direction:column;justify-content:center;padding-top:clamp(7rem,12vh,9rem);padding-bottom:clamp(5rem,10vh,8rem)}
 
-.art-layout{width:100%;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(3.5rem,7vw,9rem);margin:0;align-items:center}
+.art-layout{width:100%;display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:clamp(2.5rem,4vw,5rem);margin:0;align-items:center}
 .art-text{width:100%;max-width:760px}
 @media(max-width:900px){#artworks{min-height:auto;display:block}.art-layout{grid-template-columns:1fr;gap:3rem}}
 
@@ -521,9 +521,10 @@ section{padding:8rem 3rem;position:relative}
 .tec-card.is-active .tec-card-num{color:var(--red)}
 .tec-card.is-active .tec-card-name{color:#fff}
 .tec-card:focus-visible{outline:1px solid #fff;outline-offset:-3px}
-.visuals-preview{position:relative;align-self:center;justify-self:center;width:min(80%,49.4rem);min-width:0;aspect-ratio:1 / 1;overflow:hidden;background:#000}
+.visuals-preview{position:relative;align-self:center;justify-self:center;width:85%;max-width:47.6rem;min-width:0;aspect-ratio:1 / 1;overflow:hidden;background:#000}
 .visuals-preview-video{position:absolute;inset:0;width:100%;height:100%;display:block;object-fit:cover;background:#000}
 .visuals-preview-video[hidden]{display:none}
+@media(max-width:640px){.visuals-preview{width:calc(85vw - 2.55rem);max-width:calc(85vw - 2.55rem)}}
 
 /* ── CAMERA REVEAL ──────────────────────────── */
 .cam-line{display:none}

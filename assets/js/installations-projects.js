@@ -149,8 +149,8 @@
   {
     "id": "otras-02",
     "title": {
-      "es": "NIGHTSHOT & DISFORIA",
-      "en": "NIGHTSHOT & DISFORIA"
+      "es": "Nightshot.rec & Disforia",
+      "en": "Nightshot.rec & Disforia"
     },
     "location": null,
     "year": null,
@@ -170,14 +170,26 @@
           "es": "Instalación Otras, imagen 02",
           "en": "Other installations, image 02"
         }
+      },
+      {
+        "type": "image",
+        "phase": "09",
+        "src": "assets/media/images/instalations/Niebla roja en la pista techno.webp",
+        "fallback": "assets/media/images/instalations/Niebla roja en la pista techno.webp",
+        "width": 941,
+        "height": 1672,
+        "alt": {
+          "es": "Niebla roja en la pista techno de Nightshot.rec & Disforia",
+          "en": "Red fog on the Nightshot.rec & Disforia techno dance floor"
+        }
       }
     ]
   },
   {
     "id": "otras-03",
     "title": {
-      "es": "Instalación y visuales para estotemarea",
-      "en": "Installation and visuals for estotemarea"
+      "es": "Estotemarea",
+      "en": "Estotemarea"
     },
     "location": null,
     "year": null,
@@ -223,6 +235,66 @@
         "alt": {
           "es": "Instalación Otras, imagen 04",
           "en": "Other installations, image 04"
+        }
+      },
+      {
+        "type": "image",
+        "phase": "10",
+        "src": "assets/media/images/instalations/ChatGPT Image 23 jul 2026, 23_15_34.webp",
+        "fallback": "assets/media/images/instalations/ChatGPT Image 23 jul 2026, 23_15_34.webp",
+        "width": 1024,
+        "height": 1536,
+        "alt": {
+          "es": "Imagen de Experimentación, 02",
+          "en": "Experimentation image, 02"
+        }
+      },
+      {
+        "type": "image",
+        "phase": "11",
+        "src": "assets/media/images/instalations/ChatGPT Image 23 jul 2026, 23_20_58.webp",
+        "fallback": "assets/media/images/instalations/ChatGPT Image 23 jul 2026, 23_20_58.webp",
+        "width": 941,
+        "height": 1527,
+        "alt": {
+          "es": "Imagen de Experimentación, 03",
+          "en": "Experimentation image, 03"
+        }
+      },
+      {
+        "type": "image",
+        "phase": "12",
+        "src": "assets/media/images/instalations/Instalación audiovisual entre niebla y neón.webp",
+        "fallback": "assets/media/images/instalations/Instalación audiovisual entre niebla y neón.webp",
+        "width": 941,
+        "height": 1672,
+        "alt": {
+          "es": "Instalación audiovisual entre niebla y neón",
+          "en": "Audiovisual installation amid fog and neon"
+        }
+      },
+      {
+        "type": "image",
+        "phase": "13",
+        "src": "assets/media/images/instalations/ChatGPT Image 23 sept 2026, 08_43_02.webp",
+        "fallback": "assets/media/images/instalations/ChatGPT Image 23 sept 2026, 08_43_02.webp",
+        "width": 941,
+        "height": 1672,
+        "alt": {
+          "es": "Imagen de Experimentación, 05",
+          "en": "Experimentation image, 05"
+        }
+      },
+      {
+        "type": "image",
+        "phase": "14",
+        "src": "assets/media/images/instalations/ChatGPT Image 23 sept 2026, 08_48_19.webp",
+        "fallback": "assets/media/images/instalations/ChatGPT Image 23 sept 2026, 08_48_19.webp",
+        "width": 941,
+        "height": 1672,
+        "alt": {
+          "es": "Imagen de Experimentación, 06",
+          "en": "Experimentation image, 06"
         }
       }
     ]
@@ -483,7 +555,6 @@
       lastTime:event.timeStamp,
       velocity:0,
       control,
-      manualVertical:Boolean(control&&event.pointerType==='touch'),
       axis:null,
       dragging:false
     };
@@ -498,8 +569,6 @@
       if(activePointer.axis==='horizontal'){
         activePointer.dragging=true;
         root.classList.add('is-dragging');
-      }else if(activePointer.manualVertical&&!root.hasPointerCapture(event.pointerId)){
-        root.setPointerCapture(event.pointerId);
       }
     }
     if(activePointer.axis==='horizontal'&&activePointer.pointerType!=='touch'){
@@ -510,9 +579,6 @@
       const instantVelocity=scrollDelta/elapsed;
       activePointer.velocity=activePointer.velocity*.55+instantVelocity*.45;
       normalizeLoopScroll();
-    }else if(activePointer.axis==='vertical'&&activePointer.manualVertical){
-      event.preventDefault();
-      window.scrollBy(0,activePointer.lastY-event.clientY);
     }
     activePointer.lastX=event.clientX;
     activePointer.lastY=event.clientY;
