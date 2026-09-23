@@ -258,70 +258,71 @@ section{padding:8rem 3rem;position:relative}
 .inst-bottom-title{font-family:var(--head);letter-spacing:.04em;color:#fff;white-space:nowrap;margin-bottom:1.2rem}
 .installations-toolbar{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:1.5rem}
 .installations-section-index{font-family:var(--head);font-size:2.8rem;line-height:1;color:rgba(255,255,255,.55)}
-.installations-view-all{padding:.85rem 1.2rem;font-size:.65rem;letter-spacing:.18em}
 #installations .inst-bottom-title{font-size:9.72vw;font-weight:400}
-.installations-projects{position:relative;z-index:1;display:grid;grid-template-columns:minmax(0,1fr);gap:1.25rem;margin-top:clamp(2rem,4vw,4rem)}
+.installations-carousel-shell{position:relative;z-index:1;margin-top:clamp(2rem,4vw,4rem)}
+.installations-carousel-shell::before,.installations-carousel-shell::after{content:'';position:absolute;z-index:3;top:0;bottom:0;width:clamp(16px,2.5vw,36px);pointer-events:none;backdrop-filter:blur(1.25px);-webkit-backdrop-filter:blur(1.25px)}
+.installations-carousel-shell::before{left:0;background:linear-gradient(90deg,rgba(8,8,8,.16),rgba(8,8,8,0));-webkit-mask-image:linear-gradient(90deg,#000,transparent);mask-image:linear-gradient(90deg,#000,transparent)}
+.installations-carousel-shell::after{right:0;background:linear-gradient(270deg,rgba(8,8,8,.16),rgba(8,8,8,0));-webkit-mask-image:linear-gradient(270deg,#000,transparent);mask-image:linear-gradient(270deg,#000,transparent)}
+.installations-projects{--installation-gap:1.25rem;position:relative;z-index:1;display:flex;gap:var(--installation-gap);max-width:100%;overflow-x:auto;scroll-behavior:auto;overflow-anchor:none;cursor:grab;user-select:none;touch-action:auto}
+.installations-projects.is-dragging,.installations-projects.is-dragging *{cursor:grabbing}
+.installations-projects:focus-visible{outline:1px solid var(--fg);outline-offset:3px}
+.installations-projects.is-looping{scrollbar-width:none;scroll-snap-type:none}
+.installations-projects.is-looping::-webkit-scrollbar{display:none}
+.installations-projects>.installation-card{flex:0 0 calc((100% - 4 * var(--installation-gap))/5)}
 .installations-pagination{display:none}
 .installation-card{min-width:0;display:flex;flex-direction:column}
-.installation-card-open{display:block;width:100%;padding:0;border:0;background:none;color:var(--fg);text-align:left;cursor:pointer}
-.installation-card-index{font-family:var(--head);font-size:clamp(3rem,4vw,4.5rem);font-weight:400;line-height:.9;letter-spacing:.02em;color:#fff}
-.installation-card-preview{display:block;aspect-ratio:3/4;overflow:hidden;background:#050505;border:1px solid rgba(255,255,255,.16)}
-.installation-card-preview picture,.installation-card-preview img{display:block;width:100%;height:100%}
-.installation-card-preview img{object-fit:cover;filter:grayscale(.55) contrast(1.05);transition:filter .45s ease,transform .7s cubic-bezier(.2,.75,.2,1)}
+.installation-card-preview{display:block;position:relative;aspect-ratio:3/4;overflow:hidden;background:#050505;border:1px solid rgba(255,255,255,.16)}
+.installation-card-media,.installation-card-preview picture,.installation-card-preview img{display:block;width:100%;height:100%}
+.installation-card-preview img{object-fit:cover;filter:grayscale(.55) contrast(1.05);transition:filter .45s ease,transform .7s cubic-bezier(.2,.75,.2,1);-webkit-user-drag:none}
+.installation-media-nav{position:absolute;z-index:1;top:0;bottom:0;width:50%;padding:0;border:0;background:transparent;color:var(--fg);cursor:inherit;touch-action:auto}
+.installation-media-nav::after{position:absolute;top:50%;font-family:var(--mono);font-size:1rem;opacity:0;transform:translateY(-50%);transition:opacity .2s ease;color:#fff;text-shadow:0 1px 4px #000}
+.installation-media-nav-prev{left:0}
+.installation-media-nav-next{right:0}
+.installation-media-nav-prev::after{content:'←';left:.65rem}
+.installation-media-nav-next::after{content:'→';right:.65rem}
+.installation-image-dots{position:absolute;z-index:2;right:0;bottom:6px;left:0;display:flex;justify-content:center;align-items:center;height:18px}
+.installation-image-dot{display:grid;place-items:center;width:18px;height:18px;padding:0;border:0;background:transparent;cursor:pointer;touch-action:manipulation}
+.installation-image-dot::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--red);opacity:.35;transition:opacity .2s ease}
+.installation-image-dot.is-active::before{opacity:1}
+.installation-image-dot:focus-visible{outline:1px solid var(--fg);outline-offset:-2px}
 .installation-card-heading{display:flex;align-items:center;justify-content:space-between;gap:.5rem;padding:1.1rem 0 .55rem}
-.installation-card-title{min-width:0;font-family:var(--head);font-size:clamp(1.5rem,2.2vw,2.5rem);line-height:1;letter-spacing:.03em;overflow-wrap:anywhere}
-.installation-card-arrow{font-family:var(--mono);font-size:1.5rem;transition:transform .3s,color .3s}
+.installation-card-title{min-width:0;font-family:var(--head);font-size:clamp(1.5rem,2.2vw,2.5rem);font-weight:400;line-height:1;letter-spacing:.03em;overflow-wrap:anywhere}
 .installation-card-info{padding:0 0 1.2rem}
 .installation-card-meta,.installation-card-tags{font-family:var(--mono);font-size:.65rem;line-height:1.9;letter-spacing:.03em;text-transform:uppercase;overflow-wrap:anywhere}
 .installation-card-meta{color:rgba(255,255,255,.6)}
 .installation-card-tags{color:rgba(255,255,255,.8)}
 .installation-card-meta + .installation-card-tags{margin-top:.5rem}
-.installation-card-open:focus-visible{outline:none}
-.installation-card-open:focus-visible .installation-card-preview{outline:2px solid var(--fg);outline-offset:-3px}
+.installation-media-nav:focus-visible{outline:2px solid var(--fg);outline-offset:-3px}
 .installation-card:focus-within .installation-card-preview{border-color:rgba(255,255,255,.55)}
-.installation-card-open:focus-visible .installation-card-preview img{filter:grayscale(0);transform:scale(1.025)}
+.installation-card:focus-within .installation-card-preview img{filter:grayscale(0);transform:scale(1.025)}
 @media(hover:hover){
   .installation-card:hover .installation-card-preview{border-color:rgba(255,255,255,.55)}
   .installation-card:hover .installation-card-preview img{filter:grayscale(0);transform:scale(1.025)}
-  .installation-card-open:hover .installation-card-arrow{transform:translateX(3px);color:var(--red)}
-}
-.installations-gallery{position:fixed;inset:0;width:min(1120px,calc(100% - 2rem));max-width:none;max-height:calc(100dvh - 2rem);margin:auto;padding:0 1.25rem 1.25rem;border:1px solid rgba(255,255,255,.28);background:var(--bg);color:var(--fg);overscroll-behavior:contain}
-.installations-gallery::backdrop{background:rgba(0,0,0,.9)}
-.installations-gallery-toolbar{position:sticky;top:0;z-index:2;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:1rem;padding:1rem 0;background:var(--bg);border-bottom:1px solid rgba(255,255,255,.18)}
-.installations-gallery-toolbar form{margin-left:auto}
-.installations-gallery-toolbar h2{font-family:var(--head);font-size:clamp(1.5rem,4vw,2.5rem);font-weight:400;letter-spacing:.04em}
-.installations-gallery-toolbar .nightshot-button{padding:.75rem;font-size:.6rem;letter-spacing:.1em;min-height:44px}
-.installation-gallery-project{padding-top:2rem}
-.installation-gallery-project[hidden]{display:none}
-.installation-gallery-heading{display:flex;align-items:flex-start;gap:1rem;margin-bottom:1.25rem}
-.installation-gallery-heading h3{font-family:var(--head);font-size:2rem;font-weight:400;letter-spacing:.04em}
-.installation-gallery-media{display:grid;grid-template-columns:minmax(0,1fr);gap:1rem}
-.installation-gallery-media figure{min-width:0;align-self:start;border:1px solid rgba(255,255,255,.16);background:#050505}
-.installation-gallery-visual{aspect-ratio:3/4}
-.installation-gallery-visual picture,.installation-gallery-visual img,.installation-gallery-visual video{display:block;width:100%;height:100%;object-fit:contain}
-.installation-gallery-media figcaption{display:flex;justify-content:space-between;gap:.75rem;padding:.75rem;font-family:var(--mono);font-size:.65rem;letter-spacing:.1em;border-top:1px solid rgba(255,255,255,.1)}
-@media(min-width:641px){
-  .installations-projects{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .installation-gallery-media{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .installation-media-nav:hover::after{opacity:.8}
 }
 @media(min-width:1024px){
-  .installations-projects{grid-template-columns:repeat(5,minmax(0,1fr));gap:clamp(.65rem,1.2vw,1.25rem)}
-  .installation-gallery-media{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .installations-projects{--installation-gap:clamp(.65rem,1.2vw,1.25rem)}
 }
 @media(max-width:900px){.installations-content{padding:3.2rem 2rem 4rem}}
 @media(max-width:640px){
   .installations-content{padding:2.4rem 1.5rem 3.2rem}
-  .installations-track{display:flex;gap:.75rem;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  .installation-card-meta,.installation-card-tags{font-size:.75rem}
+}
+@media(max-width:1023px){
+  .installations-track{--installation-gap:.75rem;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch}
   .installations-track::-webkit-scrollbar{display:none}
   .installations-track .installation-card{flex:0 0 88%;scroll-snap-align:start}
   .installations-track::after{content:'';flex:0 0 calc(12% - .75rem)}
   .installations-pagination{position:relative;z-index:1;display:block;margin-top:1rem;text-align:right;font-family:var(--mono);font-size:.65rem;line-height:1.5;letter-spacing:.18em;color:rgba(255,255,255,.55)}
   .installations-pagination [data-installations-current]{color:var(--fg)}
-  .installation-card-meta,.installation-card-tags{font-size:.75rem}
+}
+@media(hover:none),(pointer:coarse){
+  #installations .installation-media-nav{pointer-events:none}
+  #installations .installation-card-preview.has-gallery{touch-action:pan-x}
 }
 @media(prefers-reduced-motion:reduce){
   #installations .reveal{opacity:1;transform:none;transition:none}
-  #installations .installation-card-preview img,#installations .installation-card-arrow,#installations .nightshot-button{transition:none;transform:none}
+  #installations .installation-card-preview img,#installations .installation-media-nav::after{transition:none}
 }
 
 /* ── CAMERA WORKS ──────────────────────────── */

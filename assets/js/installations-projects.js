@@ -1,18 +1,20 @@
 (function renderInstallationsProjects(){
   const root=document.querySelector('[data-installations-projects]');
-  const dialog=document.getElementById('installations-gallery');
-  if(!root||!dialog)return;
+  if(!root)return;
 
   // Location and event year are undocumented; file export dates are not event dates.
   const projects=[
   {
     "id": "halloween",
-    "title": "HALLOWEEN",
+    "title": {
+      "es": "Halloween in Spook",
+      "en": "Halloween in Spook"
+    },
     "location": null,
     "year": null,
     "tags": {
-      "es": "VIDEOARTE / CRT / ESCENOGRAFÍA",
-      "en": "VIDEO ART / CRT / STAGE DESIGN"
+      "es": "CRUZ CON TELEVISORES Y PANELES LED",
+      "en": "CROSS WITH TELEVISIONS AND LED PANELS"
     },
     "media": [
       {
@@ -65,22 +67,6 @@
       },
       {
         "type": "image",
-        "phase": "04",
-        "label": {
-          "es": "MONTANDO",
-          "en": "ASSEMBLING"
-        },
-        "src": "assets/media/images/instalations/hallowen%20pantalla%201%20-%20montando.webp",
-        "fallback": "assets/media/images/instalations/hallowen%20pantalla%201%20-%20montando.png",
-        "width": 784,
-        "height": 918,
-        "alt": {
-          "es": "Montaje de los módulos visuales para la instalación Halloween",
-          "en": "Assembly of the visual modules for the Halloween installation"
-        }
-      },
-      {
-        "type": "image",
         "phase": "05",
         "label": {
           "es": "RESULTADO",
@@ -94,50 +80,92 @@
           "es": "Instalación Halloween — resultado final",
           "en": "Halloween installation — final result"
         }
+      },
+      {
+        "type": "image",
+        "phase": "06",
+        "src": "assets/media/images/instalations/halloween2.webp",
+        "fallback": "assets/media/images/instalations/halloween2.webp",
+        "width": 941,
+        "height": 1672,
+        "alt": {
+          "es": "Imagen adicional de la instalación Halloween en Spook, 01",
+          "en": "Additional image from the Halloween in Spook installation, 01"
+        }
       }
     ]
   },
   {
     "id": "otras-01",
-    "title": "OTRAS 01",
+    "title": {
+      "es": "EACC Museo contemporaneo",
+      "en": "EACC Museo contemporaneo"
+    },
     "location": null,
     "year": null,
     "tags": {
-      "es": "VIDEOARTE / CRT / MULTIPANTALLA",
-      "en": "VIDEO ART / CRT / MULTISCREEN"
+      "es": "Explorando al ser humano y la tecnología",
+      "en": "Exploring Humans and Technology"
     },
     "media": [
       {
         "type": "image",
         "phase": "01",
-        "src": "assets/media/images/instalations/ChatGPT Image 23 jul 2026, 23_20_58.webp",
-        "fallback": "assets/media/images/instalations/ChatGPT Image 23 jul 2026, 23_20_58.webp",
+        "src": "assets/media/images/instalations/castellon2.webp",
+        "fallback": "assets/media/images/instalations/castellon2.webp",
         "width": 941,
-        "height": 1527,
+        "height": 1672,
         "alt": {
           "es": "Instalación Otras, imagen 01",
           "en": "Other installations, image 01"
+        }
+      },
+      {
+        "type": "image",
+        "phase": "07",
+        "src": "assets/media/images/instalations/70A96F18-62B0-40B5-829D-69332027D5A5.webp",
+        "fallback": "assets/media/images/instalations/70A96F18-62B0-40B5-829D-69332027D5A5.webp",
+        "width": 828,
+        "height": 1242,
+        "alt": {
+          "es": "Imagen adicional del proyecto EACC Museo contemporaneo, 01",
+          "en": "Additional image from the EACC Museo contemporaneo project, 01"
+        }
+      },
+      {
+        "type": "image",
+        "phase": "08",
+        "src": "assets/media/images/instalations/ChatGPT Image 23 sept 2026, 05_20_04.webp",
+        "fallback": "assets/media/images/instalations/ChatGPT Image 23 sept 2026, 05_20_04.webp",
+        "width": 934,
+        "height": 1684,
+        "alt": {
+          "es": "Imagen adicional del proyecto EACC Museo contemporaneo, 02",
+          "en": "Additional image from the EACC Museo contemporaneo project, 02"
         }
       }
     ]
   },
   {
     "id": "otras-02",
-    "title": "OTRAS 02",
+    "title": {
+      "es": "NIGHTSHOT & DISFORIA",
+      "en": "NIGHTSHOT & DISFORIA"
+    },
     "location": null,
     "year": null,
     "tags": {
-      "es": "VIDEOARTE / CRT / MULTIPANTALLA",
-      "en": "VIDEO ART / CRT / MULTISCREEN"
+      "es": "Instalación de televisores montados en pared",
+      "en": "Installation of Wall-Mounted Televisions"
     },
     "media": [
       {
         "type": "image",
         "phase": "02",
-        "src": "assets/media/images/instalations/ChatGPT Image 23 jul 2026, 23_15_34.webp",
-        "fallback": "assets/media/images/instalations/ChatGPT Image 23 jul 2026, 23_15_34.webp",
-        "width": 1024,
-        "height": 1536,
+        "src": "assets/media/images/instalations/Instalaciones spook 1.webp",
+        "fallback": "assets/media/images/instalations/Instalaciones spook 1.webp",
+        "width": 941,
+        "height": 1672,
         "alt": {
           "es": "Instalación Otras, imagen 02",
           "en": "Other installations, image 02"
@@ -147,7 +175,10 @@
   },
   {
     "id": "otras-03",
-    "title": "OTRAS 03",
+    "title": {
+      "es": "Instalación y visuales para estotemarea",
+      "en": "Installation and visuals for estotemarea"
+    },
     "location": null,
     "year": null,
     "tags": {
@@ -171,12 +202,15 @@
   },
   {
     "id": "otras-04",
-    "title": "OTRAS 04",
+    "title": {
+      "es": "Experimentación",
+      "en": "Experimentation"
+    },
     "location": null,
     "year": null,
     "tags": {
-      "es": "VIDEOARTE / CRT / MULTIPANTALLA",
-      "en": "VIDEO ART / CRT / MULTISCREEN"
+      "es": "Prueba y error",
+      "en": "Trial and error"
     },
     "media": [
       {
@@ -199,12 +233,9 @@
     return `data-es="${content.es}" data-en="${content.en}"`;
   }
 
-  function renderVisual(item){
-    if(item.type==='video')return `<video width="${item.width}" height="${item.height}" controls muted loop playsinline preload="none" data-installation-video aria-label="${item.alt.es}" ${localizedAttributes(item.alt)}>
-      <source data-src="${item.src}" type="video/webm">
-      <source data-src="${item.fallback}" type="video/mp4">
-    </video>`;
-    const img=`<img src="${item.fallback}" width="${item.width}" height="${item.height}" loading="lazy" decoding="async" alt="${item.alt.es}" ${localizedAttributes(item.alt)}>`;
+  function renderVisual(item,imageIndex){
+    const language=document.documentElement.lang==='en'?'en':'es';
+    const img=`<img src="${item.fallback}" width="${item.width}" height="${item.height}" loading="lazy" decoding="async" draggable="false" alt="${item.alt[language]}" data-installation-image-index="${imageIndex}" ${localizedAttributes(item.alt)}>`;
     return item.src===item.fallback?img:`<picture><source srcset="${item.src}" type="image/webp">${img}</picture>`;
   }
 
@@ -215,25 +246,69 @@
   }
 
   const cardOrder=['halloween','otras-03','otras-04','otras-02','otras-01'];
-  root.innerHTML=cardOrder.map(id=>{
+  // Preserve the curated order and automatically append newly added projects.
+  const orderedIds=cardOrder.concat(projects.filter(project=>!cardOrder.includes(project.id)).map(project=>project.id));
+  const projectGalleries=new Map();
+  orderedIds.forEach(id=>{
+    const project=projects.find(candidate=>candidate.id===id);
+    const images=project.media.filter(item=>item.type==='image');
+    const preview=images.find(item=>item.label?.en==='RESULT')||images[0];
+    projectGalleries.set(id,{
+      images:preview?[preview,...images.filter(item=>item!==preview)]:[],
+      index:0,
+      invalid:new Set()
+    });
+  });
+
+  function renderImageNavigation(project){
+    const gallery=projectGalleries.get(project.id);
+    const item=gallery.images[gallery.index];
+    const controls=gallery.images.length>1?`<button class="installation-media-nav installation-media-nav-prev" type="button" data-installation-direction="-1" aria-label="Imagen anterior"></button>
+      <button class="installation-media-nav installation-media-nav-next" type="button" data-installation-direction="1" aria-label="Imagen siguiente"></button>`:'';
+    return `<span class="installation-card-preview${gallery.images.length>1?' has-gallery':''}" data-installation-preview>
+      <span class="installation-card-media" data-installation-media>${item?renderVisual(item,gallery.index):''}</span>
+      ${renderIndicators(project.id)}
+      ${controls}
+    </span>`;
+  }
+
+  function renderIndicators(projectId){
+    const gallery=projectGalleries.get(projectId);
+    const available=gallery.images
+      .map((item,index)=>({item,index}))
+      .filter(({index})=>!gallery.invalid.has(index));
+    return `<div class="installation-image-dots" data-installation-dots aria-label="Imágenes del proyecto">
+      ${available.map(({index},position)=>`<button class="installation-image-dot${index===gallery.index?' is-active':''}" type="button" data-installation-dot-index="${index}" aria-label="Imagen ${position+1} de ${available.length}"${index===gallery.index?' aria-current="true"':''}></button>`).join('')}
+    </div>`;
+  }
+
+  root.innerHTML=orderedIds.map(id=>{
     const project=projects.find(project=>project.id===id);
-    // Keep the numbered archive labels internally until project names are supplied.
-    const title=project.id.startsWith('otras-')?'OTRAS':project.title;
-    const preview=project.media.find(item=>item.label?.en==='RESULT')||project.media[0];
-    return `<article class="installation-card reveal" id="installation-${project.id}" aria-labelledby="installation-${project.id}-title">
-      <button class="installation-card-open" type="button" data-installation-open="${project.id}" aria-haspopup="dialog" aria-controls="installations-gallery" aria-labelledby="installation-${project.id}-title">
-        <span class="installation-card-preview">${renderVisual(preview)}</span>
-        <span class="installation-card-heading"><span class="installation-card-title" id="installation-${project.id}-title" role="heading" aria-level="3">${title}</span><span class="installation-card-arrow" aria-hidden="true">→</span></span>
-      </button>
+    return `<article class="installation-card reveal" id="installation-${project.id}" data-installation-project="${project.id}" aria-labelledby="installation-${project.id}-title">
+      ${renderImageNavigation(project)}
+      <div class="installation-card-heading"><h3 class="installation-card-title" id="installation-${project.id}-title" ${localizedAttributes(project.title)}>${project.title.es}</h3></div>
       <div class="installation-card-info">${renderMetadata(project)}</div>
     </article>`;
   }).join('');
 
-  // Native scrolling handles the carousel; JS only reflects its current position.
   const cards=Array.from(root.querySelectorAll('.installation-card'));
+  const desktop=matchMedia('(min-width:1024px) and (hover:hover) and (pointer:fine)');
+  const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)');
   const current=document.querySelector('[data-installations-current]');
   document.querySelector('[data-installations-total]').textContent=String(cards.length).padStart(2,'0');
+  root.tabIndex=0;
+  root.setAttribute('role','region');
+  root.setAttribute('aria-labelledby','installations-title');
+  const dragThreshold=7;
+  let looping=false;
+  let cycleWidth=0;
   let paginationFrame=0;
+  let activePointer=null;
+  let momentumFrame=0;
+  let momentumVelocity=0;
+  let momentumPreviousTime=0;
+  let momentumStartTime=0;
+
   function updatePagination(){
     paginationFrame=0;
     const closest=cards.reduce((best,card,index)=>
@@ -242,38 +317,253 @@
     if(current.textContent!==value)current.textContent=value;
   }
   function queuePagination(){
-    if(!paginationFrame)paginationFrame=requestAnimationFrame(updatePagination);
+    if(!looping&&!paginationFrame)paginationFrame=requestAnimationFrame(updatePagination);
   }
-  root.addEventListener('scroll',queuePagination,{passive:true});
-  new ResizeObserver(queuePagination).observe(root);
-
-  const gallery=dialog.querySelector('[data-installations-gallery-content]');
-  gallery.innerHTML=projects.map((project,index)=>`<article class="installation-gallery-project" data-gallery-project="${project.id}" aria-labelledby="gallery-${project.id}-title">
-    <header class="installation-gallery-heading"><span class="installation-card-index" aria-hidden="true">${String(index+1).padStart(2,'0')}</span><div><h3 id="gallery-${project.id}-title">${project.title}</h3>${renderMetadata(project)}</div></header>
-    <div class="installation-gallery-media">${project.media.map(item=>`<figure>
-      <div class="installation-gallery-visual">${renderVisual(item)}</div>
-      ${item.label?`<figcaption><span>${item.phase}</span><span ${localizedAttributes(item.label)}>${item.label.es}</span></figcaption>`:''}
-    </figure>`).join('')}</div>
-  </article>`).join('');
-
-  function openGallery(projectId){
-    gallery.querySelectorAll('[data-gallery-project]').forEach(project=>{
-      project.hidden=Boolean(projectId)&&project.dataset.galleryProject!==projectId;
+  function normalizeLoopScroll(){
+    if(!looping||!cycleWidth)return;
+    const position=root.scrollLeft;
+    if(position<cycleWidth*.5)root.scrollLeft=position+cycleWidth;
+    else if(position>cycleWidth*1.5)root.scrollLeft=position-cycleWidth;
+  }
+  function handleScroll(){
+    normalizeLoopScroll();
+    queuePagination();
+  }
+  function stopMomentum(){
+    if(momentumFrame)cancelAnimationFrame(momentumFrame);
+    momentumFrame=0;
+    momentumVelocity=0;
+    momentumPreviousTime=0;
+  }
+  function continueMomentum(time){
+    if(!momentumPreviousTime)momentumPreviousTime=time;
+    const elapsed=Math.min(time-momentumPreviousTime,32);
+    momentumPreviousTime=time;
+    root.scrollLeft+=momentumVelocity*elapsed;
+    normalizeLoopScroll();
+    momentumVelocity*=Math.pow(.93,elapsed/(1000/60));
+    if(Math.abs(momentumVelocity)<.01||time-momentumStartTime>900){
+      stopMomentum();
+      return;
+    }
+    momentumFrame=requestAnimationFrame(continueMomentum);
+  }
+  function startMomentum(velocity){
+    stopMomentum();
+    if(reducedMotion.matches||Math.abs(velocity)<.025)return;
+    momentumVelocity=Math.max(-1.1,Math.min(1.1,velocity));
+    momentumStartTime=performance.now();
+    momentumFrame=requestAnimationFrame(continueMomentum);
+  }
+  function copyCard(card){
+    const copy=card.cloneNode(true);
+    copy.dataset.installationCopy='';
+    copy.classList.remove('reveal');
+    copy.setAttribute('aria-hidden','true');
+    // Copies are pointer-operable, but only original projects appear in the
+    // accessibility tree and keyboard order. Never duplicate document IDs.
+    [copy,...copy.querySelectorAll('*')].forEach(element=>{
+      element.removeAttribute('id');
+      element.removeAttribute('aria-labelledby');
+      if(element.matches('a,button,input,select,textarea,[tabindex]'))element.tabIndex=-1;
     });
-    dialog.showModal();
-    dialog.scrollTop=0;
+    return copy;
   }
-
-  root.querySelectorAll('[data-installation-open]').forEach(button=>{
-    button.addEventListener('click',()=>openGallery(button.dataset.installationOpen));
+  function updateProjectIndicators(projectId){
+    root.querySelectorAll('.installation-card').forEach(card=>{
+      if(card.dataset.installationProject!==projectId)return;
+      const dots=card.querySelector('[data-installation-dots]');
+      if(!dots)return;
+      const replacement=document.createRange().createContextualFragment(renderIndicators(projectId)).firstElementChild;
+      if(card.hasAttribute('data-installation-copy'))replacement.querySelectorAll('button').forEach(button=>button.tabIndex=-1);
+      dots.replaceWith(replacement);
+    });
+  }
+  function updateProjectImage(projectId){
+    const gallery=projectGalleries.get(projectId);
+    const item=gallery?.images[gallery.index];
+    if(!item)return;
+    root.querySelectorAll('.installation-card').forEach(card=>{
+      if(card.dataset.installationProject!==projectId)return;
+      const media=card.querySelector('[data-installation-media]');
+      if(media)media.innerHTML=renderVisual(item,gallery.index);
+    });
+    updateProjectIndicators(projectId);
+  }
+  function setProjectImage(projectId,index){
+    const gallery=projectGalleries.get(projectId);
+    if(!gallery||!gallery.images[index]||gallery.invalid.has(index))return;
+    gallery.index=index;
+    updateProjectImage(projectId);
+  }
+  function changeProjectImage(projectId,direction){
+    const gallery=projectGalleries.get(projectId);
+    if(!gallery||gallery.images.length<2)return;
+    for(let step=0;step<gallery.images.length;step++){
+      gallery.index=(gallery.index+direction+gallery.images.length)%gallery.images.length;
+      if(!gallery.invalid.has(gallery.index))break;
+    }
+    updateProjectImage(projectId);
+  }
+  function markInvalidImage(projectId,index){
+    const gallery=projectGalleries.get(projectId);
+    if(!gallery||gallery.invalid.has(index))return;
+    gallery.invalid.add(index);
+    if(gallery.index===index)changeProjectImage(projectId,1);
+    else updateProjectIndicators(projectId);
+  }
+  function validateGalleryImages(projectId){
+    const gallery=projectGalleries.get(projectId);
+    gallery.images.forEach((item,index)=>{
+      const sources=item.src===item.fallback?[item.src]:[item.src,item.fallback];
+      const probe=new Image();
+      let sourceIndex=0;
+      probe.onload=()=>{};
+      probe.onerror=()=>{
+        sourceIndex++;
+        if(sourceIndex<sources.length)probe.src=sources[sourceIndex];
+        else markInvalidImage(projectId,index);
+      };
+      probe.src=sources[sourceIndex];
+    });
+  }
+  function configureCarousel(){
+    stopMomentum();
+    const shouldLoop=desktop.matches;
+    let progress=cycleWidth?((root.scrollLeft%cycleWidth)+cycleWidth)%cycleWidth/cycleWidth:0;
+    if(progress<.003||progress>.997)progress=0;
+    if(shouldLoop!==looping){
+      root.querySelectorAll('[data-installation-copy]').forEach(copy=>copy.remove());
+      if(shouldLoop){
+        root.prepend(...cards.map(copyCard));
+        root.append(...cards.map(copyCard));
+      }
+      looping=shouldLoop;
+      root.classList.toggle('is-looping',looping);
+    }
+    const gap=parseFloat(getComputedStyle(root).columnGap)||0;
+    const first=cards[0].getBoundingClientRect();
+    // Measure the actual rendered repeat, including fractional flex gaps.
+    cycleWidth=looping
+      ?first.left-root.firstElementChild.getBoundingClientRect().left
+      :cards[cards.length-1].getBoundingClientRect().right-first.left+gap;
+    root.scrollLeft=(looping?cycleWidth:0)+progress*cycleWidth;
+    queuePagination();
+  }
+  new ResizeObserver(configureCarousel).observe(root);
+  desktop.addEventListener('change',configureCarousel);
+  reducedMotion.addEventListener('change',stopMomentum);
+  root.addEventListener('scroll',handleScroll,{passive:true});
+  root.addEventListener('pointerdown',event=>{
+    if(!event.isPrimary||(event.pointerType==='mouse'&&event.button!==0))return;
+    stopMomentum();
+    const dot=event.target.closest('[data-installation-dot-index]');
+    if(dot){
+      event.stopPropagation();
+      return;
+    }
+    let control=event.target.closest('[data-installation-direction]');
+    if(!control){
+      const preview=event.target.closest('[data-installation-preview]');
+      const card=preview?.closest('.installation-card');
+      const gallery=card&&projectGalleries.get(card.dataset.installationProject);
+      if(preview&&gallery?.images.length>1){
+        const bounds=preview.getBoundingClientRect();
+        const direction=event.clientX<bounds.left+bounds.width/2?-1:1;
+        control=preview.querySelector(`[data-installation-direction="${direction}"]`);
+      }
+    }
+    activePointer={
+      id:event.pointerId,
+      pointerType:event.pointerType,
+      startX:event.clientX,
+      startY:event.clientY,
+      lastX:event.clientX,
+      lastY:event.clientY,
+      lastTime:event.timeStamp,
+      velocity:0,
+      control,
+      manualVertical:Boolean(control&&event.pointerType==='touch'),
+      axis:null,
+      dragging:false
+    };
+    if(event.pointerType!=='touch')root.setPointerCapture(event.pointerId);
   });
-  document.querySelector('[data-installations-view-all]').addEventListener('click',()=>openGallery());
-  dialog.addEventListener('close',()=>{
-    dialog.querySelectorAll('video').forEach(video=>video.pause());
+  root.addEventListener('pointermove',event=>{
+    if(!activePointer||event.pointerId!==activePointer.id)return;
+    const distanceX=event.clientX-activePointer.startX;
+    const distanceY=event.clientY-activePointer.startY;
+    if(!activePointer.axis&&Math.max(Math.abs(distanceX),Math.abs(distanceY))>dragThreshold){
+      activePointer.axis=Math.abs(distanceX)>=Math.abs(distanceY)?'horizontal':'vertical';
+      if(activePointer.axis==='horizontal'){
+        activePointer.dragging=true;
+        root.classList.add('is-dragging');
+      }else if(activePointer.manualVertical&&!root.hasPointerCapture(event.pointerId)){
+        root.setPointerCapture(event.pointerId);
+      }
+    }
+    if(activePointer.axis==='horizontal'&&activePointer.pointerType!=='touch'){
+      event.preventDefault();
+      const scrollDelta=activePointer.lastX-event.clientX;
+      const elapsed=Math.max(event.timeStamp-activePointer.lastTime,1);
+      root.scrollLeft+=scrollDelta;
+      const instantVelocity=scrollDelta/elapsed;
+      activePointer.velocity=activePointer.velocity*.55+instantVelocity*.45;
+      normalizeLoopScroll();
+    }else if(activePointer.axis==='vertical'&&activePointer.manualVertical){
+      event.preventDefault();
+      window.scrollBy(0,activePointer.lastY-event.clientY);
+    }
+    activePointer.lastX=event.clientX;
+    activePointer.lastY=event.clientY;
+    activePointer.lastTime=event.timeStamp;
   });
-  dialog.addEventListener('click',event=>{
-    if(event.target!==dialog)return;
-    const bounds=dialog.getBoundingClientRect();
-    if(event.clientX<bounds.left||event.clientX>bounds.right||event.clientY<bounds.top||event.clientY>bounds.bottom)dialog.close();
+  root.addEventListener('pointerup',event=>{
+    if(!activePointer||event.pointerId!==activePointer.id)return;
+    const pointer=activePointer;
+    const moved=Math.hypot(event.clientX-pointer.startX,event.clientY-pointer.startY);
+    if(!pointer.dragging&&moved<=dragThreshold&&pointer.control){
+      event.preventDefault();
+      const card=pointer.control.closest('.installation-card');
+      changeProjectImage(card.dataset.installationProject,Number(pointer.control.dataset.installationDirection));
+      if(document.activeElement===pointer.control)pointer.control.blur();
+    }
+    if(root.hasPointerCapture(event.pointerId))root.releasePointerCapture(event.pointerId);
+    root.classList.remove('is-dragging');
+    activePointer=null;
+    if(pointer.dragging&&pointer.pointerType!=='touch'){
+      const releaseFactor=Math.max(0,1-(event.timeStamp-pointer.lastTime)/120);
+      startMomentum(pointer.velocity*releaseFactor);
+    }
   });
+  root.addEventListener('pointercancel',event=>{
+    if(!activePointer||event.pointerId!==activePointer.id)return;
+    if(root.hasPointerCapture(event.pointerId))root.releasePointerCapture(event.pointerId);
+    root.classList.remove('is-dragging');
+    activePointer=null;
+  });
+  root.addEventListener('click',event=>{
+    const dot=event.target.closest('[data-installation-dot-index]');
+    if(dot){
+      event.preventDefault();
+      event.stopPropagation();
+      const card=dot.closest('.installation-card');
+      setProjectImage(card.dataset.installationProject,Number(dot.dataset.installationDotIndex));
+      return;
+    }
+    const control=event.target.closest('[data-installation-direction]');
+    if(!control||event.detail!==0)return;
+    const card=control.closest('.installation-card');
+    changeProjectImage(card.dataset.installationProject,Number(control.dataset.installationDirection));
+  });
+  root.addEventListener('error',event=>{
+    const media=event.target.closest?.('[data-installation-media]');
+    const card=media?.closest('.installation-card');
+    if(!card)return;
+    const failedIndex=Number(event.target.dataset.installationImageIndex);
+    markInvalidImage(card.dataset.installationProject,failedIndex);
+  },true);
+  root.addEventListener('dragstart',event=>event.preventDefault());
+  configureCarousel();
+  orderedIds.forEach(validateGalleryImages);
 })();
