@@ -72,10 +72,10 @@
           "es": "RESULTADO",
           "en": "RESULT"
         },
-        "src": "assets/media/images/instalations/ChatGPT Image 23 jul 2026, 23_59_02.webp",
-        "fallback": "assets/media/images/instalations/ChatGPT Image 23 jul 2026, 23_59_02.webp",
-        "width": 1448,
-        "height": 1086,
+        "src": "assets/media/images/instalations/halloween2.png",
+        "fallback": "assets/media/images/instalations/halloween2.png",
+        "width": 941,
+        "height": 1672,
         "alt": {
           "es": "Instalación Halloween — resultado final",
           "en": "Halloween installation — final result"
@@ -228,10 +228,10 @@
       {
         "type": "image",
         "phase": "04",
-        "src": "assets/media/images/instalations/vlcsnap-2026-07-17-04h43m24s889.webp",
-        "fallback": "assets/media/images/instalations/vlcsnap-2026-07-17-04h43m24s889.webp",
-        "width": 2160,
-        "height": 3840,
+        "src": "assets/media/images/instalations/Imagen de ChatGPT 26 sept 2026, 09_47_22.webp",
+        "fallback": "assets/media/images/instalations/Imagen de ChatGPT 26 sept 2026, 09_47_22.webp",
+        "width": 885,
+        "height": 1380,
         "alt": {
           "es": "Instalación Otras, imagen 04",
           "en": "Other installations, image 04"
@@ -298,6 +298,84 @@
         }
       }
     ]
+  },
+  {
+    "id": "montaje-para-rodaje",
+    "title": {
+      "es": "Montaje para rodaje",
+      "en": "Montaje para rodaje"
+    },
+    "location": null,
+    "year": null,
+    "tags": {
+      "es": "agregando señales dijitales a un montaje digital",
+      "en": "agregando señales dijitales a un montaje digital"
+    },
+    "media": [
+      {
+        "type": "image",
+        "phase": "01",
+        "src": "assets/media/images/instalations/ChatGPT Image 23 sept 2026, 08_43_02.webp",
+        "fallback": "assets/media/images/instalations/ChatGPT Image 23 sept 2026, 08_43_02.webp",
+        "width": 941,
+        "height": 1672,
+        "alt": {
+          "es": "Montaje para rodaje",
+          "en": "Montaje para rodaje"
+        }
+      }
+    ]
+  },
+  {
+    "id": "under-house",
+    "title": {
+      "es": "UNDER HOUSE",
+      "en": "UNDER HOUSE"
+    },
+    "location": null,
+    "year": null,
+    "tags": {
+      "es": "CRT COLGADOS, CRT MANEJANDO",
+      "en": "HANGING CRTS, CONTROLLING CRTS"
+    },
+    "media": [
+      {
+        "type": "image",
+        "phase": "01",
+        "src": "assets/media/images/instalations/ChatGPT Image 23 sept 2026, 08_48_19.webp",
+        "fallback": "assets/media/images/instalations/ChatGPT Image 23 sept 2026, 08_48_19.webp",
+        "width": 941,
+        "height": 1672,
+        "alt": {
+          "es": "UNDER HOUSE, imagen 01",
+          "en": "UNDER HOUSE, image 01"
+        }
+      },
+      {
+        "type": "image",
+        "phase": "02",
+        "src": "assets/media/images/instalations/ChatGPT Image 23 sept 2026, 08_56_13.webp",
+        "fallback": "assets/media/images/instalations/ChatGPT Image 23 sept 2026, 08_56_13.webp",
+        "width": 941,
+        "height": 1672,
+        "alt": {
+          "es": "UNDER HOUSE, imagen 02",
+          "en": "UNDER HOUSE, image 02"
+        }
+      },
+      {
+        "type": "image",
+        "phase": "03",
+        "src": "assets/media/images/instalations/vlcsnap-2026-07-17-02h36m33s642(1).webp",
+        "fallback": "assets/media/images/instalations/vlcsnap-2026-07-17-02h36m33s642(1).webp",
+        "width": 1080,
+        "height": 1920,
+        "alt": {
+          "es": "UNDER HOUSE, imagen 03",
+          "en": "UNDER HOUSE, image 03"
+        }
+      }
+    ]
   }
 ];
 
@@ -335,12 +413,15 @@
   function renderImageNavigation(project){
     const gallery=projectGalleries.get(project.id);
     const item=gallery.images[gallery.index];
-    const controls=gallery.images.length>1?`<button class="installation-media-nav installation-media-nav-prev" type="button" data-installation-direction="-1" aria-label="Imagen anterior"></button>
-      <button class="installation-media-nav installation-media-nav-next" type="button" data-installation-direction="1" aria-label="Imagen siguiente"></button>`:'';
+    const previousControl=gallery.images.length>1?`<button class="installation-media-nav installation-media-nav-prev" type="button" data-installation-direction="-1" aria-label="Imagen anterior"></button>`:'';
+    const nextControl=gallery.images.length>1?`<button class="installation-media-nav installation-media-nav-next" type="button" data-installation-direction="1" aria-label="Imagen siguiente"></button>`:'';
     return `<span class="installation-card-preview${gallery.images.length>1?' has-gallery':''}" data-installation-preview>
       <span class="installation-card-media" data-installation-media>${item?renderVisual(item,gallery.index):''}</span>
-      ${renderIndicators(project.id)}
-      ${controls}
+      <span class="installation-media-controls">
+        ${previousControl}
+        ${renderIndicators(project.id)}
+        ${nextControl}
+      </span>
     </span>`;
   }
 
@@ -349,9 +430,9 @@
     const available=gallery.images
       .map((item,index)=>({item,index}))
       .filter(({index})=>!gallery.invalid.has(index));
-    return `<div class="installation-image-dots" data-installation-dots aria-label="Imágenes del proyecto">
+    return `<span class="installation-image-dots" data-installation-dots aria-label="Imágenes del proyecto">
       ${available.map(({index},position)=>`<button class="installation-image-dot${index===gallery.index?' is-active':''}" type="button" data-installation-dot-index="${index}" aria-label="Imagen ${position+1} de ${available.length}"${index===gallery.index?' aria-current="true"':''}></button>`).join('')}
-    </div>`;
+    </span>`;
   }
 
   root.innerHTML=orderedIds.map(id=>{
@@ -426,6 +507,15 @@
     momentumVelocity=Math.max(-1.1,Math.min(1.1,velocity));
     momentumStartTime=performance.now();
     momentumFrame=requestAnimationFrame(continueMomentum);
+  }
+  function moveByProject(direction){
+    stopMomentum();
+    const renderedCards=Array.from(root.children).filter(element=>element.classList.contains('installation-card'));
+    const closest=renderedCards.reduce((best,card,index)=>
+      Math.abs(card.offsetLeft-root.scrollLeft)<Math.abs(renderedCards[best].offsetLeft-root.scrollLeft)?index:best,0);
+    const target=renderedCards[Math.max(0,Math.min(renderedCards.length-1,closest+direction))];
+    if(!target)return;
+    root.scrollTo({left:target.offsetLeft,behavior:reducedMotion.matches?'auto':'smooth'});
   }
   function copyCard(card){
     const copy=card.cloneNode(true);
@@ -526,6 +616,9 @@
   desktop.addEventListener('change',configureCarousel);
   reducedMotion.addEventListener('change',stopMomentum);
   root.addEventListener('scroll',handleScroll,{passive:true});
+  document.querySelectorAll('[data-installations-carousel-direction]').forEach(button=>{
+    button.addEventListener('click',()=>moveByProject(Number(button.dataset.installationsCarouselDirection)));
+  });
   root.addEventListener('pointerdown',event=>{
     if(!event.isPrimary||(event.pointerType==='mouse'&&event.button!==0))return;
     stopMomentum();
