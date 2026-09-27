@@ -376,6 +376,33 @@
         }
       }
     ]
+  },
+  {
+    "id": "night-with-richie-hawtin",
+    "title": {
+      "es": "Night with Richie Hawtin",
+      "en": "Night with Richie Hawtin"
+    },
+    "location": null,
+    "year": null,
+    "tags": {
+      "es": "Laser and Visual Sync",
+      "en": "Laser and Visual Sync"
+    },
+    "media": [
+      {
+        "type": "image",
+        "phase": "01",
+        "src": "assets/media/images/instalations/Noche techno entre luces rojas y humo.webp",
+        "fallback": "assets/media/images/instalations/Noche techno entre luces rojas y humo.webp",
+        "width": 941,
+        "height": 1672,
+        "alt": {
+          "es": "Night with Richie Hawtin",
+          "en": "Night with Richie Hawtin"
+        }
+      }
+    ]
   }
 ];
 
@@ -413,14 +440,10 @@
   function renderImageNavigation(project){
     const gallery=projectGalleries.get(project.id);
     const item=gallery.images[gallery.index];
-    const previousControl=gallery.images.length>1?`<button class="installation-media-nav installation-media-nav-prev" type="button" data-installation-direction="-1" aria-label="Imagen anterior"></button>`:'';
-    const nextControl=gallery.images.length>1?`<button class="installation-media-nav installation-media-nav-next" type="button" data-installation-direction="1" aria-label="Imagen siguiente"></button>`:'';
     return `<span class="installation-card-preview${gallery.images.length>1?' has-gallery':''}" data-installation-preview>
       <span class="installation-card-media" data-installation-media>${item?renderVisual(item,gallery.index):''}</span>
       <span class="installation-media-controls">
-        ${previousControl}
         ${renderIndicators(project.id)}
-        ${nextControl}
       </span>
     </span>`;
   }
@@ -446,13 +469,14 @@
 
   const cards=Array.from(root.querySelectorAll('.installation-card'));
   const desktop=matchMedia('(min-width:1024px) and (hover:hover) and (pointer:fine)');
+  const mobile=matchMedia('(max-width:1023px)');
   const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)');
   const current=document.querySelector('[data-installations-current]');
   document.querySelector('[data-installations-total]').textContent=String(cards.length).padStart(2,'0');
   root.tabIndex=0;
   root.setAttribute('role','region');
   root.setAttribute('aria-labelledby','installations-title');
-  const dragThreshold=7;
+  const dragThreshold=10;
   let looping=false;
   let cycleWidth=0;
   let paginationFrame=0;
@@ -461,6 +485,34 @@
   let momentumVelocity=0;
   let momentumPreviousTime=0;
   let momentumStartTime=0;
+  let activeProjectIndex=0;
+
+  function updateDeck(){
+    cards.forEach((card,index)=>{
+      const position=index-activeProjectIndex;
+      const deckPosition=position<0?'previous':position>3?'hidden':String(position);
+      const isActive=position===0;
+      card.dataset.deckPosition=deckPosition;
+      card.inert=!isActive;
+      if(isActive)card.removeAttribute('aria-hidden');
+      else card.setAttribute('aria-hidden','true');
+    });
+    current.textContent=String(activeProjectIndex+1).padStart(2,'0');
+  }
+  function clearDeck(){
+    cards.forEach(card=>{
+      delete card.dataset.deckPosition;
+      card.inert=false;
+      card.removeAttribute('aria-hidden');
+    });
+  }
+  function setActiveProject(index){
+    const nextIndex=Math.max(0,Math.min(cards.length-1,index));
+    if(nextIndex===activeProjectIndex)return;
+    if(document.activeElement&&root.contains(document.activeElement))document.activeElement.blur();
+    activeProjectIndex=nextIndex;
+    updateDeck();
+  }
 
   function updatePagination(){
     paginationFrame=0;
@@ -507,15 +559,6 @@
     momentumVelocity=Math.max(-1.1,Math.min(1.1,velocity));
     momentumStartTime=performance.now();
     momentumFrame=requestAnimationFrame(continueMomentum);
-  }
-  function moveByProject(direction){
-    stopMomentum();
-    const renderedCards=Array.from(root.children).filter(element=>element.classList.contains('installation-card'));
-    const closest=renderedCards.reduce((best,card,index)=>
-      Math.abs(card.offsetLeft-root.scrollLeft)<Math.abs(renderedCards[best].offsetLeft-root.scrollLeft)?index:best,0);
-    const target=renderedCards[Math.max(0,Math.min(renderedCards.length-1,closest+direction))];
-    if(!target)return;
-    root.scrollTo({left:target.offsetLeft,behavior:reducedMotion.matches?'auto':'smooth'});
   }
   function copyCard(card){
     const copy=card.cloneNode(true);
@@ -591,6 +634,16 @@
   }
   function configureCarousel(){
     stopMomentum();
+    if(mobile.matches){
+      root.querySelectorAll('[data-installation-copy]').forEach(copy=>copy.remove());
+      looping=false;
+      cycleWidth=0;
+      root.classList.remove('is-looping');
+      root.scrollLeft=0;
+      updateDeck();
+      return;
+    }
+    clearDeck();
     const shouldLoop=desktop.matches;
     let progress=cycleWidth?((root.scrollLeft%cycleWidth)+cycleWidth)%cycleWidth/cycleWidth:0;
     if(progress<.003||progress>.997)progress=0;
@@ -614,11 +667,9 @@
   }
   new ResizeObserver(configureCarousel).observe(root);
   desktop.addEventListener('change',configureCarousel);
+  mobile.addEventListener('change',configureCarousel);
   reducedMotion.addEventListener('change',stopMomentum);
   root.addEventListener('scroll',handleScroll,{passive:true});
-  document.querySelectorAll('[data-installations-carousel-direction]').forEach(button=>{
-    button.addEventListener('click',()=>moveByProject(Number(button.dataset.installationsCarouselDirection)));
-  });
   root.addEventListener('pointerdown',event=>{
     if(!event.isPrimary||(event.pointerType==='mouse'&&event.button!==0))return;
     stopMomentum();
@@ -626,17 +677,6 @@
     if(dot){
       event.stopPropagation();
       return;
-    }
-    let control=event.target.closest('[data-installation-direction]');
-    if(!control){
-      const preview=event.target.closest('[data-installation-preview]');
-      const card=preview?.closest('.installation-card');
-      const gallery=card&&projectGalleries.get(card.dataset.installationProject);
-      if(preview&&gallery?.images.length>1){
-        const bounds=preview.getBoundingClientRect();
-        const direction=event.clientX<bounds.left+bounds.width/2?-1:1;
-        control=preview.querySelector(`[data-installation-direction="${direction}"]`);
-      }
     }
     activePointer={
       id:event.pointerId,
@@ -647,25 +687,39 @@
       lastY:event.clientY,
       lastTime:event.timeStamp,
       velocity:0,
-      control,
       axis:null,
       dragging:false
     };
-    if(event.pointerType!=='touch')root.setPointerCapture(event.pointerId);
   });
   root.addEventListener('pointermove',event=>{
     if(!activePointer||event.pointerId!==activePointer.id)return;
     const distanceX=event.clientX-activePointer.startX;
     const distanceY=event.clientY-activePointer.startY;
+    if(mobile.matches){
+      if(!activePointer.axis&&Math.max(Math.abs(distanceX),Math.abs(distanceY))>dragThreshold){
+        activePointer.axis=Math.abs(distanceX)>Math.abs(distanceY)*1.35?'horizontal':'vertical';
+        if(activePointer.axis==='horizontal'){
+          activePointer.dragging=true;
+          root.classList.add('is-dragging');
+          if(activePointer.pointerType!=='touch'&&!root.hasPointerCapture(event.pointerId))root.setPointerCapture(event.pointerId);
+        }
+      }
+      activePointer.lastX=event.clientX;
+      activePointer.lastY=event.clientY;
+      activePointer.lastTime=event.timeStamp;
+      return;
+    }
     if(!activePointer.axis&&Math.max(Math.abs(distanceX),Math.abs(distanceY))>dragThreshold){
-      activePointer.axis=Math.abs(distanceX)>=Math.abs(distanceY)?'horizontal':'vertical';
+      if(Math.abs(distanceX)>Math.abs(distanceY))activePointer.axis='horizontal';
+      else if(Math.abs(distanceY)>Math.abs(distanceX))activePointer.axis='vertical';
       if(activePointer.axis==='horizontal'){
         activePointer.dragging=true;
         root.classList.add('is-dragging');
+        if(!root.hasPointerCapture(event.pointerId))root.setPointerCapture(event.pointerId);
       }
     }
-    if(activePointer.axis==='horizontal'&&activePointer.pointerType!=='touch'){
-      event.preventDefault();
+    if(activePointer.axis==='horizontal'){
+      if(activePointer.pointerType!=='touch')event.preventDefault();
       const scrollDelta=activePointer.lastX-event.clientX;
       const elapsed=Math.max(event.timeStamp-activePointer.lastTime,1);
       root.scrollLeft+=scrollDelta;
@@ -680,17 +734,17 @@
   root.addEventListener('pointerup',event=>{
     if(!activePointer||event.pointerId!==activePointer.id)return;
     const pointer=activePointer;
-    const moved=Math.hypot(event.clientX-pointer.startX,event.clientY-pointer.startY);
-    if(!pointer.dragging&&moved<=dragThreshold&&pointer.control){
-      event.preventDefault();
-      const card=pointer.control.closest('.installation-card');
-      changeProjectImage(card.dataset.installationProject,Number(pointer.control.dataset.installationDirection));
-      if(document.activeElement===pointer.control)pointer.control.blur();
-    }
+    const distanceX=event.clientX-pointer.startX;
+    const distanceY=event.clientY-pointer.startY;
     if(root.hasPointerCapture(event.pointerId))root.releasePointerCapture(event.pointerId);
     root.classList.remove('is-dragging');
     activePointer=null;
-    if(pointer.dragging&&pointer.pointerType!=='touch'){
+    if(mobile.matches){
+      const isClearSwipe=pointer.dragging&&Math.abs(distanceX)>=42&&Math.abs(distanceX)>Math.abs(distanceY)*1.35;
+      if(isClearSwipe)setActiveProject(activeProjectIndex+(distanceX<0?1:-1));
+      return;
+    }
+    if(pointer.dragging){
       const releaseFactor=Math.max(0,1-(event.timeStamp-pointer.lastTime)/120);
       startMomentum(pointer.velocity*releaseFactor);
     }
@@ -710,10 +764,13 @@
       setProjectImage(card.dataset.installationProject,Number(dot.dataset.installationDotIndex));
       return;
     }
-    const control=event.target.closest('[data-installation-direction]');
-    if(!control||event.detail!==0)return;
-    const card=control.closest('.installation-card');
-    changeProjectImage(card.dataset.installationProject,Number(control.dataset.installationDirection));
+  });
+  root.addEventListener('keydown',event=>{
+    if(!mobile.matches||event.altKey||event.ctrlKey||event.metaKey)return;
+    if(event.key==='ArrowLeft'||event.key==='ArrowRight'){
+      event.preventDefault();
+      setActiveProject(activeProjectIndex+(event.key==='ArrowRight'?1:-1));
+    }
   });
   root.addEventListener('error',event=>{
     const media=event.target.closest?.('[data-installation-media]');
