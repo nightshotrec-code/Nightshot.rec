@@ -300,17 +300,19 @@ section{padding:8rem 3rem;position:relative}
 @media(max-width:1023px){
   .installations-carousel-shell{margin-top:0}
   .installations-carousel-shell::before,.installations-carousel-shell::after{display:none}
-  .installations-track{display:grid;grid-template-columns:minmax(0,1fr);align-items:start;gap:0;padding-top:6rem;overflow:visible;perspective:1200px;transform-style:preserve-3d;touch-action:pan-y}
-  .installations-track .installation-card{grid-area:1/1;width:88%;min-width:0;justify-self:center;transform-origin:center top;transform-style:preserve-3d;backface-visibility:hidden;will-change:transform,opacity;transition:transform 560ms cubic-bezier(.22,.7,.2,1),opacity 500ms ease}
+  .installations-track{display:grid;grid-template-columns:minmax(0,1fr);align-items:start;gap:0;padding-top:3.5rem;overflow:visible;perspective:1200px;transform-style:preserve-3d;touch-action:pan-y}
+  .installations-track .installation-card{grid-area:1/1;width:min(76%,30rem);min-width:0;justify-self:center;transform-origin:center top;transform-style:preserve-3d;backface-visibility:hidden;will-change:transform,opacity;transition:transform 560ms cubic-bezier(.22,.7,.2,1),opacity 500ms ease}
   .installations-track .installation-card-heading,.installations-track .installation-card-info{transition:opacity 260ms ease}
   .installations-track .installation-card:not([data-deck-position="0"]) .installation-card-heading,.installations-track .installation-card:not([data-deck-position="0"]) .installation-card-info{opacity:0}
   .installations-track .installation-card:not([data-deck-position="0"]) .installation-card-preview{border-color:rgba(255,255,255,.28)}
   .installations-track .installation-card[data-deck-position="0"]{z-index:8;transform:translate3d(0,0,0) scale(1);opacity:1;pointer-events:auto}
-  .installations-track .installation-card[data-deck-position="1"]{z-index:7;transform:translate3d(0,-38px,-105px) scale(.97);opacity:.8;pointer-events:none}
-  .installations-track .installation-card[data-deck-position="2"]{z-index:6;transform:translate3d(0,-72px,-210px) scale(.94);opacity:.56;pointer-events:none}
-  .installations-track .installation-card[data-deck-position="3"]{z-index:5;transform:translate3d(0,-104px,-315px) scale(.91);opacity:.34;pointer-events:none}
-  .installations-track .installation-card[data-deck-position="hidden"]{z-index:4;transform:translate3d(0,-132px,-420px) scale(.88);opacity:0;pointer-events:none}
-  .installations-track .installation-card[data-deck-position="previous"]{z-index:9;transform:translate3d(0,-28px,70px) scale(1.025);opacity:0;pointer-events:none}
+  .installations-track .installation-card[data-deck-position="-1"]{z-index:7;transform:translate3d(-42%,4px,-125px) scale(.92);opacity:.76;pointer-events:none}
+  .installations-track .installation-card[data-deck-position="1"]{z-index:7;transform:translate3d(42%,4px,-125px) scale(.92);opacity:.76;pointer-events:none}
+  .installations-track .installation-card[data-deck-position="-2"]{z-index:6;transform:translate3d(-28%,-12px,-260px) scale(.84);opacity:.46;pointer-events:none}
+  .installations-track .installation-card[data-deck-position="2"]{z-index:6;transform:translate3d(28%,-12px,-260px) scale(.84);opacity:.46;pointer-events:none}
+  .installations-track .installation-card[data-deck-position="-3"]{z-index:5;transform:translate3d(-14%,-28px,-390px) scale(.78);opacity:.25;pointer-events:none}
+  .installations-track .installation-card[data-deck-position="3"]{z-index:5;transform:translate3d(14%,-28px,-390px) scale(.78);opacity:.25;pointer-events:none}
+  .installations-track .installation-card[data-deck-position="far"]{z-index:4;transform:translate3d(0,-40px,-520px) scale(.72);opacity:.12;pointer-events:none}
   .installations-pagination{position:relative;z-index:1;display:block;margin-top:1rem;text-align:right;font-family:var(--mono);font-size:.65rem;line-height:1.5;letter-spacing:.18em;color:rgba(255,255,255,.55)}
   .installations-pagination [data-installations-current]{color:var(--fg)}
 }

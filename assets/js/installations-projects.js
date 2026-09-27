@@ -489,8 +489,9 @@
 
   function updateDeck(){
     cards.forEach((card,index)=>{
-      const position=index-activeProjectIndex;
-      const deckPosition=position<0?'previous':position>3?'hidden':String(position);
+      let position=(index-activeProjectIndex+cards.length)%cards.length;
+      if(position>cards.length/2)position-=cards.length;
+      const deckPosition=Math.abs(position)>3?'far':String(position);
       const isActive=position===0;
       card.dataset.deckPosition=deckPosition;
       card.inert=!isActive;
@@ -507,7 +508,7 @@
     });
   }
   function setActiveProject(index){
-    const nextIndex=Math.max(0,Math.min(cards.length-1,index));
+    const nextIndex=((index%cards.length)+cards.length)%cards.length;
     if(nextIndex===activeProjectIndex)return;
     if(document.activeElement&&root.contains(document.activeElement))document.activeElement.blur();
     activeProjectIndex=nextIndex;
